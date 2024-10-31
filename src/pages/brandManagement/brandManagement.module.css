@@ -1,0 +1,13 @@
+.brandContainer {
+  background-color: #fff; 
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.brandSearch {
+  display: flex;
+  justify-content: space-between;
+  padding-right: 20px;
+  padding-bottom: 20px;
+}
+

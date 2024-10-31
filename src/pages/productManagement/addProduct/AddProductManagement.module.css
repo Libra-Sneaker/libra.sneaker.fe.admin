@@ -1,0 +1,13 @@
+.addProductContainer{
+  background: #fff;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.formProductContainer{
+  background-color: aliceblue;
+  margin: 10px;
+  padding: 10px;
+}

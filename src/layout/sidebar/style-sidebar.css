@@ -1,0 +1,92 @@
+.sidebar {
+  overflow-y: auto !important;
+  box-shadow: 0 10px 10px #14213d !important;
+}
+
+.ant-layout-sider {
+  margin: 0;
+  top: 50px;
+  padding-top: 15px;
+  height: 100%;
+  z-index: 100 !important;
+  background-color: #14213d;
+}
+
+.ant-menu {
+  background-color: #14213d;
+}
+
+.ant-layout-sider-children {
+  background-color: #14213d;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+
+.collapse-icon {
+  cursor: pointer;
+  width: 32px;
+  margin-left: 10px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #4297e3;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+  border-radius: 7px !important;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 7px !important;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 7px !important;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+  border-radius: 7px !important;
+}
+
+.logo__ {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sidebar .selected-menu-item {
+  background-color: #337ab7 !important;
+  color: #fff !important;
+  font-weight: bold !important;
+}
+
+.ant-menu-light .ant-menu-item-selected {
+  color: rgb(61, 61, 61);
+  font-weight: 700;
+  background-color: rgba(151, 151, 151, 0.633) !important;
+}
+
+.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: #595959;
+  font-weight: 700;
+}
+
+.logo-tct-fund {
+  cursor: pointer;
+  transition: 0.5s;
+}
+
+.logo-tct-fund:hover {
+  width: 50%;
+}
