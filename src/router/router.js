@@ -25,7 +25,7 @@ const generalRoutes = [
 ];
 
 const adminRoutes = [
-  { path: "/", element: <Navigate replace to={SCREEN.brandManagement.path} /> },
+  { path: "/", element: <Navigate replace to={SCREEN.productManagement.path} /> },
   {
     
     path: SCREEN.brandManagement.path,

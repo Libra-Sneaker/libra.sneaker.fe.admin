@@ -4,6 +4,7 @@ import { Space, Table, Button, Radio, Input } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
+import Search from "antd/es/transfer/search";
 
 const ProductManagement = () => {
   const [listProduct, setListProduct] = useState([]);
@@ -23,7 +24,12 @@ const ProductManagement = () => {
       render: (text) => moment(text).format("DD/MM/YYYY"),
     },
     { title: "Số lượng", dataIndex: "totalQuantity", key: "totalQuantity" },
-    { title: "Trạng thái", key: "status", dataIndex: "status" },
+    {
+      title: "Trạng thái",
+      key: "status",
+      dataIndex: "status",
+      render: (text, record) => (record.status === 1 ? "Đang bán" : "Dừng bán"),
+    },
     {
       title: "Action",
       key: "action",
@@ -63,15 +69,29 @@ const ProductManagement = () => {
   }, []);
 
   const handleSearch = async () => {
+    console.log(name);
+    console.log(status);
+  
     try {
-      const response = await ProductManagementApi.getProducts({
+      // Prepare the search parameters
+      const params = {
         name: name,
-        status: status,
-      });
+        // Include status only if it's not 'all' or null
+        status: status === "all" || status === "null" ? undefined : status,
+      };
+  
+      const response = await ProductManagementApi.getProducts(params);
       setListProduct(response.data.content);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
+  };
+  
+
+  const handleRefresh = () => {
+    setName(""); // Reset the name field
+    setStatus("null"); // Reset the status field to the default value
+    fetchData(); // Fetch the full product list again
   };
 
   const handleShowAddProduct = () => {
@@ -81,16 +101,17 @@ const ProductManagement = () => {
   return (
     <div className="productContainer">
       <div className="headerProductContainer">
-        <h1>Product Management</h1>
+        <h1>Sản Phẩm</h1>
 
         <div className="headerProduct">
           <div className="searchContainer">
-            <Input
+            <Search
+              
               className="inputSearch"
               placeholder="Tìm kiếm sản phẩm..."
               onChange={(e) => setName(e.target.value)}
               value={name}
-              onPressEnter={handleSearch} 
+              onPressEnter={handleSearch}
             />
 
             <div className="radioContainer">
@@ -100,19 +121,28 @@ const ProductManagement = () => {
                 value={status}
               >
                 <Radio value="all">Tất cả</Radio>
-                <Radio value="active">Còn hàng</Radio>
-                <Radio value="un-active">Hết hàng</Radio>
+                <Radio value="1">Đang bán</Radio>
+                <Radio value="2">Dừng bán</Radio>
               </Radio.Group>
             </div>
-
-            <Button
-              className="btnSearchProduct"
-              type="primary"
-              onClick={handleSearch}
-            >
-              Tìm kiếm
-            </Button>
           </div>
+        </div>
+        <div className="containerSearchReset">
+        <Button
+            className="btnRefreshProduct"
+            onClick={handleRefresh}
+            style={{ marginLeft: "8px" }} // Add some margin for spacing
+          >
+            Refresh
+          </Button>
+          <Button
+            className="btnSearchProduct"
+            type="primary"
+            onClick={handleSearch}
+          >
+            Tìm kiếm
+          </Button>
+          
         </div>
       </div>
 

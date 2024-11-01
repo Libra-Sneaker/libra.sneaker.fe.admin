@@ -6,7 +6,7 @@ export class TypeOfShoeManagementApi {
   static create = (data) => {
     return request({
       method: "POST",
-      url: `${baseUrl}`,
+      url: `${baseUrl}/create`,
       data: data,
     });
   };
@@ -15,6 +15,23 @@ export class TypeOfShoeManagementApi {
     return request({
       method: "GET",
       url: `${baseUrl}/get-all-type`,
+    });
+  };
+
+   // Phương thức cập nhật loại giày
+   static updateTypeOfShoe = (id, data) => {
+    return request({
+      method: "PUT",
+      url: `${baseUrl}/update`,
+      data: data,
+    });
+  };
+
+  // Phương thức xóa loại giày
+  static deleteTypeOfShoe = (id) => {
+    return request({
+      method: "DELETE",
+      url: `${baseUrl}/delete/${id}`, 
     });
   };
 }

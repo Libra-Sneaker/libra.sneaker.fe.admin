@@ -1,9 +1,9 @@
 export const SCREEN = {
-  brandManagement: {
-    path: "/brand-management",
-  },
   productManagement: {
     path: "/product-management",
+  },
+  brandManagement: {
+    path: "/brand-management",
   },
   productDetailManagement: {
     path: "/product-detail-management/:productId",

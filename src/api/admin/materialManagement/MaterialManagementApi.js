@@ -6,7 +6,7 @@ export class MaterialManagementApi {
   static create = (data) => {
     return request({
       method: "POST",
-      url: `${baseUrl}`,
+      url: `${baseUrl}/create`,
       data: data,
     });
   };
@@ -17,5 +17,21 @@ export class MaterialManagementApi {
       url: `${baseUrl}/get-all-materials`
     });
   };
+
+  static updateMaterial = (id, data) => {
+    return request({
+        method: "PUT",
+        url: `${baseUrl}/update`, 
+        data: data,
+    });
+};
+
+static deleteMaterial = (id) => {
+  return request({
+    method: "DELETE",
+    url: `${baseUrl}/delete/${id}`,
+  });
+};
+
 
 }
