@@ -4,10 +4,13 @@ import { useEffect, useState } from "react";
 import { BrandManagementApi } from "../../api/admin/brandManagement/BrandManagementApi";
 import moment from "moment";
 import ModalAddBrand from "./ModalAddBrand"; // Import your ModalAddBrand component
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const BrandManagement = () => {
   const [editingKey, setEditingKey] = useState(""); // Track which row is being edited
   const [newName, setNewName] = useState(""); // Track new name input
+  const [statusCurrent, setStatusCurrent] = useState("");
 
   const [listBrand, setListBrand] = useState([]); // Full list of brands
   const [id, setId] = useState(null);
@@ -24,17 +27,33 @@ const BrandManagement = () => {
     console.log(id);
   };
 
-  const handleDeleteBrand = async (id) => {
-    console.log(id);
+  const handleDeleteBrand = async (id, currentStatus) => {
+    console.log("Function triggered");
+    console.log("ID:", id);
+    console.log("Current Status:", currentStatus);
+
+    const deleteFlagData = {
+      id,
+      deleteFlag: currentStatus === 1 ? 1 : 0,
+    };
 
     try {
-      await BrandManagementApi.deleteBrands(id);
-      const updatedList = listBrand.filter((item) => item.id !== id);
-      setListBrand(updatedList);
-      setFilteredBrands(updatedList);
-      setPagination({ ...pagination, total: updatedList.length });
+      if (currentStatus === 1) {
+        await BrandManagementApi.updateStatus(id, 0);
+        await BrandManagementApi.updateDeleteFlag(deleteFlagData);
+        console.log("Status set to inactive and deleteFlag set to 1.");
+      } else {
+        await BrandManagementApi.updateStatus(id, 1);
+        await BrandManagementApi.updateDeleteFlag(deleteFlagData);
+        console.log("Status set to active and deleteFlag set to 0.");
+      }
+
+      // Optional: Refresh the data after updating
+      fetchData(); // Make sure fetchData is defined and fetches the updated brand list
+      message.success("Cập nhật trạng thái thành công!");
     } catch (error) {
-      console.error("Error deleting brand:", error);
+      console.error("Error updating brand:", error);
+      message.error("Có lỗi xảy ra khi cập nhật thương hiệu.");
     }
   };
 
@@ -65,6 +84,14 @@ const BrandManagement = () => {
       render: (text) => moment(text).format("DD/MM/YYYY"),
     },
     {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (text) => (
+        <span>{text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}</span>
+      ),
+    },
+    {
       title: "Action",
       key: "action",
       render: (text, record) => (
@@ -77,20 +104,25 @@ const BrandManagement = () => {
               <Button onClick={() => setEditingKey("")}>Cancel</Button>
             </>
           ) : (
-            <Button type="primary" onClick={() => handleEdit(record)}>
-              Edit
+            <Button onClick={() => handleEdit(record)}>
+              <FontAwesomeIcon icon={faEye} />
             </Button>
           )}
           <Popconfirm
-            title="Bạn có chắc chắn muốn xóa thương hiệu này?"
-            onConfirm={() => handleDeleteBrand(record.id)} // Confirm deletion
-            onCancel={() => console.log("Delete canceled")} // Optional: Handle cancellation
+            title={
+              record.status === 1
+                ? "Bạn chắc muốn dừng hoạt động thương hiệu này chứ?"
+                : "Bạn có chắc chắn muốn kích hoạt lại thương hiệu này chứ?"
+            }
+            onConfirm={() => handleDeleteBrand(record.id, record.status)}
+            onCancel={() => console.log("Delete canceled")}
             okText="Có"
             cancelText="Không"
           >
-            <Button type="primary" danger>
-              Delete
-            </Button>
+            {/* Replace the Delete button with the Font Awesome icon */}
+            <Button
+              icon={<FontAwesomeIcon icon={faTrash} style={{ color: "red" }} />}
+            ></Button>
           </Popconfirm>
         </Space>
       ),
@@ -157,35 +189,49 @@ const BrandManagement = () => {
   };
 
   const handleEdit = (record) => {
+    console.log(record.id);
+    console.log(record.name);
+    console.log(record.status);
+
     setEditingKey(record.id);
     setNewName(record.name);
+    setStatusCurrent(record.status);
   };
 
   const handleSave = async (id) => {
+    // Construct the brandData object with the necessary fields
     const brandData = {
-      id: id,
-      name: newName,
-      status: 1, // Gán giá trị status mặc định là 1
+      id: id, // Pass the id of the brand to be updated
+      name: newName, // Use the updated name from the input
+      status: statusCurrent, // Include the current status if needed
+    };
+
+    console.log(brandData);
+
+    try {
+      // Call the updateBrands API with the brandData object
+      await BrandManagementApi.updateBrands(brandData); // Gọi API với brandData
+
+      // Update the local state to reflect the change
+      const updatedList = listBrand.map(
+        (item) =>
+          item.id === id
+            ? { ...item, name: newName, status: statusCurrent }
+            : item // Update both name and status if necessary
+      );
+
+      // Update the state with the new brand list
+      setListBrand(updatedList);
+      setFilteredBrands(updatedList);
+      setEditingKey(""); // Reset editing state
+
+      // Show a success message to the user
+      message.success("Thương hiệu đã được cập nhật thành công!");
+    } catch (error) {
+      console.error("Error updating brand:", error);
+      message.error("Có lỗi xảy ra khi cập nhật thương hiệu!"); // Show error message
+    }
   };
-
-  console.log(brandData);
-  
-    
-  try {
-    await BrandManagementApi.updateBrands(id, brandData); // Gọi API với id và data
-    const updatedList = listBrand.map((item) =>
-        item.id === id ? { ...item, name: newName, status: 1 } : item // Cập nhật cả status nếu cần
-    );
-    setListBrand(updatedList);
-    setFilteredBrands(updatedList);
-    setEditingKey(""); // Reset editing state
-    message.success("Thương hiệu đã được cập nhật thành công!"); // Show success message
-} catch (error) {
-    console.error("Error updating brand:", error);
-    message.error("Có lỗi xảy ra khi cập nhật thương hiệu!"); // Show error message
-}
-};
-
 
   return (
     <div className={styles.brandContainer}>

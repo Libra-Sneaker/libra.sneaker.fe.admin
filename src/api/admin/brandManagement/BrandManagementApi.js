@@ -25,12 +25,28 @@ export class BrandManagementApi {
     });
   };
 
-  static updateBrands = (id, data) => {
+  static updateBrands = (data) => {
     return request({
         method: "PUT",
         url: `${baseUrl}/update`, 
         data: data,
     });
+};
+
+static updateDeleteFlag = (data) => {
+  return request({
+    method: "PUT",
+    url: `${baseUrl}/updateDeleteFlag`,
+    data: data,  
+  });
+};
+
+static updateStatus = (id, status) => {
+  return request({
+      method: "PUT",
+      url: `${baseUrl}/updateStatus`, 
+      params: { id, status },
+  });
 };
 
 }

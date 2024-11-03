@@ -38,17 +38,15 @@
   justify-content: space-between;
 }
 
-.status-label {
+.statusLabel {
   margin-right: 10px;
   font-weight: bold;
 }
 
 .radioContainer{
   display: flex;
-  /* padding: 10px; */
   margin-right: 10px;
   border-radius: 10px;
-  /* border: 1px solid #ccc; */
   width: 50%;
   justify-content: space-evenly;
   padding-bottom: 0px;

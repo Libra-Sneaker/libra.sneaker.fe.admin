@@ -1,6 +1,6 @@
-import "./productManagement.css";
+import styles from "./ProductManagement.module.css";
 import { ProductManagementApi } from "../../api/admin/productManagement/ProductManagementApi";
-import { Space, Table, Button, Radio, Input } from "antd";
+import { Space, Table, Button, Radio } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
@@ -35,17 +35,11 @@ const ProductManagement = () => {
       key: "action",
       render: (text, record) => (
         <Space size="middle">
-          <Button type="primary" link>
-            Update
-          </Button>
           <Button
             type="primary"
             onClick={() => navigate(`/product-detail-management/${record.id}`)}
           >
             Detail
-          </Button>
-          <Button type="primary" danger>
-            Delete
           </Button>
         </Space>
       ),
@@ -71,7 +65,7 @@ const ProductManagement = () => {
   const handleSearch = async () => {
     console.log(name);
     console.log(status);
-  
+
     try {
       // Prepare the search parameters
       const params = {
@@ -79,14 +73,14 @@ const ProductManagement = () => {
         // Include status only if it's not 'all' or null
         status: status === "all" || status === "null" ? undefined : status,
       };
-  
+
       const response = await ProductManagementApi.getProducts(params);
+
       setListProduct(response.data.content);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
   };
-  
 
   const handleRefresh = () => {
     setName(""); // Reset the name field
@@ -99,23 +93,22 @@ const ProductManagement = () => {
   };
 
   return (
-    <div className="productContainer">
+    <div className={styles.productContainer}>
       <div className="headerProductContainer">
         <h1>Sản Phẩm</h1>
 
-        <div className="headerProduct">
-          <div className="searchContainer">
+        <div className={styles.headerProduct}>
+          <div className={styles.searchContainer}>
             <Search
-              
-              className="inputSearch"
+              className={styles.inputSearch}
               placeholder="Tìm kiếm sản phẩm..."
               onChange={(e) => setName(e.target.value)}
               value={name}
               onPressEnter={handleSearch}
             />
 
-            <div className="radioContainer">
-              <span className="status-label">Trạng thái: </span>
+            <div className={styles.radioContainer}>
+              <span className={styles.statusLabel}>Trạng thái: </span>
               <Radio.Group
                 onChange={(e) => setStatus(e.target.value)}
                 value={status}
@@ -127,37 +120,36 @@ const ProductManagement = () => {
             </div>
           </div>
         </div>
-        <div className="containerSearchReset">
-        <Button
-            className="btnRefreshProduct"
+        <div className={styles.containerSearchReset}>
+          <Button
+            className={styles.btnRefreshProduct}
             onClick={handleRefresh}
             style={{ marginLeft: "8px" }} // Add some margin for spacing
           >
             Refresh
           </Button>
           <Button
-            className="btnSearchProduct"
+            className={styles.btnSearchProduct}
             type="primary"
             onClick={handleSearch}
           >
             Tìm kiếm
           </Button>
-          
         </div>
       </div>
 
-      <div className="containerTable">
-        <div className="contanerAddProduct">
+      <div className={styles.containerTable}>
+        <div className={styles.contanerAddProduct}>
           <Button
             type="primary"
-            className="btnAddProduct"
+            className={styles.btnAddProduct}
             onClick={handleShowAddProduct}
           >
             Add Product
           </Button>
         </div>
         <Table
-          className="tableProduct"
+          className={styles.tableProduct}
           columns={columns}
           dataSource={listProduct}
           loading={loading}

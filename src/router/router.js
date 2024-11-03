@@ -10,10 +10,10 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { SCREEN } from "./screen";
 import ProductManagement from "../pages/productManagement/ProductManagement";
-import ProductDetailManagement from "../pages/productManagement/productDetailManagement";
 import MaterialManagement from "../pages/materialManagement/MaterialManagement";
 import TypeOfShoeManagement from "../pages/typeOfShoeManagement/TypeOfShoeManagement";
 import AddProductManagement from "../pages/productManagement/addProduct/AddProductManagement";
+import ProductDetailManagement from "../pages/productManagement/ProductDetailManagement";
 
 const generalRoutes = [
   { path: "*", element: <NotFound /> },
@@ -55,7 +55,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <ProductDetailManagement />
+          <ProductDetailManagement/>
         </DefaultLayout>
       </MiddlewareRouter>
     ),
