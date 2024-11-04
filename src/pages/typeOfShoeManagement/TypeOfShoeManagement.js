@@ -1,9 +1,11 @@
 import { Button, Input, message, Popconfirm, Space, Table } from "antd/es";
 import styles from "./TypeOfShoeManagement.module.css"; // Adjust the styles accordingly
 import { useEffect, useState } from "react";
-import {TypeOfShoeManagementApi} from "../../api/admin/typeOfShoeManagement/TypeOfShoeManagementApi"
+import { TypeOfShoeManagementApi } from "../../api/admin/typeOfShoeManagement/TypeOfShoeManagementApi";
 import moment from "moment";
 import ModalAddTypeOfShoe from "./ModalAddTypeOfShoe"; // Import your ModalAddTypeOfShoe component
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const TypeOfShoeManagement = () => {
   const [editingKey, setEditingKey] = useState(""); // Track which row is being edited
@@ -82,21 +84,26 @@ const TypeOfShoeManagement = () => {
   };
 
   // Handle delete function
-const handleDeleteType = async (id) => {
-  console.log(id);
-  
-  try {
-    await TypeOfShoeManagementApi.deleteTypeOfShoe(id);
-    const updatedList = listTypeOfShoe.filter((item) => item.id !== id);
-    setListTypeOfShoe(updatedList);
-    setFilteredTypes(updatedList);
-    setPagination({ ...pagination, total: updatedList.length });
-    message.success("Loại giày đã được xóa thành công!"); // Feedback on success
-  } catch (error) {
-    console.error("Error deleting type of shoe:", error);
-    message.error("Có lỗi xảy ra khi xóa loại giày!"); // Feedback on error
-  }
-};
+  const handleDeleteType = async (id, status) => {
+    console.log(id);
+    console.log(status);
+
+    try {
+      if (status === 1) {
+        await TypeOfShoeManagementApi.updateStatusTypeOfShoe(id, 0);
+        console.log("Status set to 0.");
+      } else {
+        await TypeOfShoeManagementApi.updateStatusTypeOfShoe(id, 1);
+        console.log("Status set to 1.");
+      }
+
+      fetchData();
+      message.success("Cập nhật trạng thái thành công!");
+    } catch (error) {
+      console.error("Error updating type:", error);
+      message.error("Có lỗi xảy ra khi cập nhật thương hiệu.");
+    }
+  };
 
   const columns = [
     { title: "STT", dataIndex: "rowNum", key: "row" },
@@ -124,6 +131,14 @@ const handleDeleteType = async (id) => {
       render: (text) => moment(text).format("DD/MM/YYYY"),
     },
     {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (text) => (
+        <span>{text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}</span>
+      ),
+    },
+    {
       title: "Action",
       key: "action",
       render: (text, record) => (
@@ -136,19 +151,23 @@ const handleDeleteType = async (id) => {
               <Button onClick={() => setEditingKey("")}>Cancel</Button>
             </>
           ) : (
-            <Button type="primary" onClick={() => handleEdit(record)}>
-              Edit
+            <Button onClick={() => handleEdit(record)}>
+              <FontAwesomeIcon icon={faEye} />
             </Button>
           )}
           <Popconfirm
-            title="Bạn có chắc chắn muốn xóa loại giày này?"
-            onConfirm={() => handleDeleteType(record.id)} // Confirm deletion
+            title={
+              record.status === 1
+                ? "Bạn chắc muốn dừng hoạt động thương hiệu này chứ?"
+                : "Bạn có chắc chắn muốn kích hoạt lại thương hiệu này chứ?"
+            }
+            onConfirm={() => handleDeleteType(record.id, record.status)} // Confirm deletion
             okText="Có"
             cancelText="Không"
           >
-            <Button type="primary" danger>
-              Delete
-            </Button>
+            <Button
+              icon={<FontAwesomeIcon icon={faTrash} style={{ color: "red" }} />}
+            ></Button>
           </Popconfirm>
         </Space>
       ),

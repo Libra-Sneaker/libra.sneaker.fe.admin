@@ -18,8 +18,8 @@ export class TypeOfShoeManagementApi {
     });
   };
 
-   // Phương thức cập nhật loại giày
-   static updateTypeOfShoe = (id, data) => {
+  // Phương thức cập nhật loại giày
+  static updateTypeOfShoe = (id, data) => {
     return request({
       method: "PUT",
       url: `${baseUrl}/update`,
@@ -27,11 +27,20 @@ export class TypeOfShoeManagementApi {
     });
   };
 
+  // Phương thức cập nhật loại giày
+  static updateStatusTypeOfShoe = (id, status) => {
+    return request({
+      method: "PUT",
+      url: `${baseUrl}/updateStatus`,
+      params: {id,status},
+    });
+  };
+
   // Phương thức xóa loại giày
   static deleteTypeOfShoe = (id) => {
     return request({
       method: "DELETE",
-      url: `${baseUrl}/delete/${id}`, 
+      url: `${baseUrl}/delete/${id}`,
     });
   };
 }

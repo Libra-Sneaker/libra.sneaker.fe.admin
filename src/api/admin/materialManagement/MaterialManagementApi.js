@@ -14,24 +14,31 @@ export class MaterialManagementApi {
   static getMaterial = () => {
     return request({
       method: "GET",
-      url: `${baseUrl}/get-all-materials`
+      url: `${baseUrl}/get-all-materials`,
     });
   };
 
   static updateMaterial = (id, data) => {
     return request({
-        method: "PUT",
-        url: `${baseUrl}/update`, 
-        data: data,
+      method: "PUT",
+      url: `${baseUrl}/update`,
+      data: data,
     });
-};
+  };
 
-static deleteMaterial = (id) => {
-  return request({
-    method: "DELETE",
-    url: `${baseUrl}/delete/${id}`,
-  });
-};
+  static updateStatusMaterial = (id, status) => {
+    return request({
+      method: "PUT",
+      url: `${baseUrl}/updateStatus`,
+      params: { id, status },
+    });
+  };
+  
 
-
+  static deleteMaterial = (id) => {
+    return request({
+      method: "DELETE",
+      url: `${baseUrl}/delete/${id}`,
+    });
+  };
 }

@@ -13,7 +13,7 @@ import ProductManagement from "../pages/productManagement/ProductManagement";
 import MaterialManagement from "../pages/materialManagement/MaterialManagement";
 import TypeOfShoeManagement from "../pages/typeOfShoeManagement/TypeOfShoeManagement";
 import AddProductManagement from "../pages/productManagement/addProduct/AddProductManagement";
-import ProductDetailManagement from "../pages/productManagement/ProductDetailManagement";
+import ProductDetailManagement from "../pages/productManagement/productDetailManagement/ProductDetailManagement";
 
 const generalRoutes = [
   { path: "*", element: <NotFound /> },

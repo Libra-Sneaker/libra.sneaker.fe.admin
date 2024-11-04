@@ -13,7 +13,6 @@ const BrandManagement = () => {
   const [statusCurrent, setStatusCurrent] = useState("");
 
   const [listBrand, setListBrand] = useState([]); // Full list of brands
-  const [id, setId] = useState(null);
   const [filteredBrands, setFilteredBrands] = useState([]); // Filtered list for display
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState(""); // Track search input
@@ -23,9 +22,7 @@ const BrandManagement = () => {
     total: 0,
   });
 
-  const handleUpdateBrand = async (id) => {
-    console.log(id);
-  };
+  
 
   const handleDeleteBrand = async (id, currentStatus) => {
     console.log("Function triggered");

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import Search from "antd/es/transfer/search";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
 
 const ProductManagement = () => {
   const [listProduct, setListProduct] = useState([]);
@@ -36,10 +38,9 @@ const ProductManagement = () => {
       render: (text, record) => (
         <Space size="middle">
           <Button
-            type="primary"
             onClick={() => navigate(`/product-detail-management/${record.id}`)}
           >
-            Detail
+            <FontAwesomeIcon icon={faEye} />
           </Button>
         </Space>
       ),

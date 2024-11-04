@@ -21,17 +21,16 @@ import { BrandManagementApi } from "../../../api/admin/brandManagement/BrandMana
 import { TypeOfShoeManagementApi } from "../../../api/admin/typeOfShoeManagement/TypeOfShoeManagementApi";
 import { MaterialManagementApi } from "../../../api/admin/materialManagement/MaterialManagementApi";
 import { ProductManagementApi } from "../../../api/admin/productManagement/ProductManagementApi";
-import { render } from "@testing-library/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const AddProductManagement = () => {
   const [productName, setProductName] = useState("");
-  const [productNameOptions, setProductNameOptions] = useState([]);
   const [brandOptions, setBrandOptions] = useState([]);
   const [typeOfShoeOptions, setTypeOfShoeOptions] = useState([]);
   const [materialOptions, setMaterialOptions] = useState([]);
   const [description, setDescription] = useState("");
 
-  const [listProduct, setListProduct] = useState([]);
 
   const navigate = useNavigate();
 
@@ -58,7 +57,7 @@ const AddProductManagement = () => {
   const [form] = Form.useForm();
 
   const handleBack = () => {
-    navigate("/product-management"); 
+    navigate("/product-management");
   };
 
   const [listColorSelected, setListColorSelected] = useState([]);
@@ -89,13 +88,12 @@ const AddProductManagement = () => {
   const handleDelete = (record) => {
     setListProductDetail((prevDetails) =>
       prevDetails.filter(
-        (detail) => detail.colorId !== record.colorId || detail.sizeId !== record.sizeId
+        (detail) =>
+          detail.colorId !== record.colorId || detail.sizeId !== record.sizeId
       )
-      
     );
-    
   };
-    console.log(listProductDetail);
+  console.log(listProductDetail);
 
   useEffect(() => {
     console.log("listProductDetail:");
@@ -196,13 +194,13 @@ const AddProductManagement = () => {
     setCheckedRows((prev) => ({
       ...prev,
       [record.colorId + record.sizeId]: !prev[record.colorId + record.sizeId],
-    }));  
+    }));
   };
 
   const handleSelectAllChange = (e) => {
     const isChecked = e.target.checked;
     setSelectAllChecked(isChecked);
-    
+
     // Update checkedRows to reflect the selectAllChecked state
     const newCheckedRows = {};
     listProductDetail.forEach((item) => {
@@ -226,10 +224,7 @@ const AddProductManagement = () => {
   const columns = [
     {
       title: (
-        <Checkbox
-          onChange={handleSelectAllChange}
-          checked={selectAllChecked}
-        />
+        <Checkbox onChange={handleSelectAllChange} checked={selectAllChecked} />
       ),
       key: "checkBox",
       render: (_, record) => (
@@ -249,6 +244,11 @@ const AddProductManagement = () => {
       title: "Size",
       dataIndex: "sizeName",
       key: "size",
+    },
+    {
+      title: "Màu sắc",
+      dataIndex: "colorName",
+      key: "color",
     },
     {
       title: "Giá",
@@ -286,7 +286,12 @@ const AddProductManagement = () => {
       key: "action",
       render: (_, record) => (
         <Space size="middle">
-          <a onClick={() => handleDelete(record)}>Delete</a>
+          <a onClick={() => handleDelete(record)}>
+            <Button>
+
+            {<FontAwesomeIcon icon={faTrash} style={{ color: "red" }} />}
+            </Button>
+          </a>
         </Space>
       ),
     },
@@ -300,43 +305,37 @@ const AddProductManagement = () => {
       materialId: form.getFieldValue("material"),
       typeId: form.getFieldValue("category"),
       description: description,
-      details: listProductDetail.map(detail => ({
+      details: listProductDetail.map((detail) => ({
         sizeId: detail.sizeId,
         colorId: detail.colorId,
         price: detail.price,
         quantity: detail.quantity,
-      }))
+      })),
     };
-  
+
     console.log("Thông tin sản phẩm:", productData);
 
     ProductManagementApi.create(productData)
-    .then(response => {
-      console.log("Sản phẩm đã được thêm thành công:", response);
+      .then((response) => {
+        console.log("Sản phẩm đã được thêm thành công:", response);
 
+        message.success("Sản phẩm được thêm thành công!");
 
-      message.success("Sản phẩm được thêm thành công!")
+        // Clear form and reset states after successful addition
+        form.resetFields();
+        setProductName("");
+        setDescription("");
+        setListProductDetail([]);
 
-      // Clear form and reset states after successful addition
-      form.resetFields();
-      setProductName("");
-      setDescription("");
-      setListProductDetail([]);
-
-      // Quay lại trang trước đó
-      navigate("/product-management");
-
-    })
-    .catch(error => {
-      console.error("Lỗi khi thêm sản phẩm:", error);
-    });
-
+        // Quay lại trang trước đó
+        navigate("/product-management");
+      })
+      .catch((error) => {
+        console.error("Lỗi khi thêm sản phẩm:", error);
+      });
   };
 
-  useEffect(()=>{
-
-  },[])
-  
+  useEffect(() => {}, []);
 
   return (
     <div className={styles.addProductContainer}>
@@ -528,13 +527,10 @@ const AddProductManagement = () => {
           dataSource={listProductDetail}
           rowKey={(record) => record.colorId + record.sizeId}
         />
-
-        
       </div>
 
       <div className={styles.btnAddProduct}>
-
-      <Button onClick={handleAddProduct}>Thêm mới</Button>
+        <Button onClick={handleAddProduct}>Thêm mới</Button>
       </div>
     </div>
   );

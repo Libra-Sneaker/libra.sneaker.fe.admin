@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import moment from 'moment';
-import { Button, Input, Space, Table, message, Popconfirm } from 'antd';
+import React, { useEffect, useState } from "react";
+import moment from "moment";
+import { Button, Input, Space, Table, message, Popconfirm } from "antd";
 import styles from "./MaterialManagement.module.css";
 import { MaterialManagementApi } from "../../api/admin/materialManagement/MaterialManagementApi";
-import ModalAddMaterial from './ModalAddMaterial';
+import ModalAddMaterial from "./ModalAddMaterial";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 const MaterialManagement = () => {
   const [listMaterial, setListMaterial] = useState([]); // Full list of Materials
@@ -18,6 +20,7 @@ const MaterialManagement = () => {
   const [editingKey, setEditingKey] = useState(""); // Track which row is being edited
   const [newName, setNewName] = useState(""); // Track new name input
   const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -76,18 +79,24 @@ const MaterialManagement = () => {
   };
 
   // Handle Delete Material
-  const handleDeleteMaterial = async (id) => {
-    
+  const handleDeleteMaterial = async (id, statusCurrent) => {
+    console.log(id);
+    console.log(statusCurrent);
+
     try {
-      await MaterialManagementApi.deleteMaterial(id); // Call API to delete material
-      const updatedList = listMaterial.filter((item) => item.id !== id);
-      setListMaterial(updatedList);
-      setFilteredMaterials(updatedList);
-      setPagination({ ...pagination, total: updatedList.length });
-      message.success("Chất liệu đã được xóa thành công!"); // Success message
+      if (statusCurrent === 1) {
+        await MaterialManagementApi.updateStatusMaterial(id, 0);
+        console.log("Status set to inactive and deleteFlag set to 1.");
+      } else {
+        await MaterialManagementApi.updateStatusMaterial(id, 1);
+        console.log("Status set to active and deleteFlag set to 0.");
+      }
+
+      fetchData();
+      message.success("Cập nhật trạng thái thành công!");
     } catch (error) {
-      console.error("Error deleting material:", error);
-      message.error("Có lỗi xảy ra khi xóa chất liệu!"); // Error message
+      console.error("Error updating brand:", error);
+      message.error("Có lỗi xảy ra khi cập nhật thương hiệu.");
     }
   };
 
@@ -106,8 +115,8 @@ const MaterialManagement = () => {
 
     try {
       await MaterialManagementApi.updateMaterial(id, materialData); // Call API to update material
-      const updatedList = listMaterial.map((item) =>
-        item.id === id ? { ...item, name: newName } : item // Update the list with new name
+      const updatedList = listMaterial.map(
+        (item) => (item.id === id ? { ...item, name: newName } : item) // Update the list with new name
       );
       setListMaterial(updatedList);
       setFilteredMaterials(updatedList);
@@ -121,7 +130,11 @@ const MaterialManagement = () => {
 
   const columns = [
     { title: "STT", dataIndex: "rowNum", key: "row" },
-    { title: "Tên chất liệu", dataIndex: "name", key: "name", render: (text, record) => {
+    {
+      title: "Tên chất liệu",
+      dataIndex: "name",
+      key: "name",
+      render: (text, record) => {
         const editable = editingKey === record.id; // Check if the current row is being edited
         return editable ? (
           <Input
@@ -132,13 +145,21 @@ const MaterialManagement = () => {
         ) : (
           <span>{text}</span>
         );
-      }
+      },
     },
-    { 
-      title: "Ngày thêm", 
-      dataIndex: "createdDate", 
-      key: "createdDate", 
-      render: (text) => moment(text).format("DD/MM/YYYY"), 
+    {
+      title: "Ngày thêm",
+      dataIndex: "createdDate",
+      key: "createdDate",
+      render: (text) => moment(text).format("DD/MM/YYYY"),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (text) => (
+        <span>{text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}</span>
+      ),
     },
     {
       title: "Action",
@@ -147,22 +168,30 @@ const MaterialManagement = () => {
         <Space size="middle">
           {editingKey === record.id ? (
             <>
-              <Button type="primary" onClick={() => handleSave(record.id)}>Save</Button>
+              <Button type="primary" onClick={() => handleSave(record.id)}>
+                Save
+              </Button>
               <Button onClick={() => setEditingKey("")}>Cancel</Button>
             </>
           ) : (
-            <Button type="primary" onClick={() => handleEdit(record)}>Edit</Button>
+            <Button onClick={() => handleEdit(record)}>
+              <FontAwesomeIcon icon={faEye} />
+            </Button>
           )}
           <Popconfirm
-            title="Bạn có chắc chắn muốn xóa chất liệu này?"
-            onConfirm={() => handleDeleteMaterial(record.id)} // Confirm deletion
+            title={
+              record.status === 1
+                ? "Bạn chắc muốn dừng hoạt động thương hiệu này chứ?"
+                : "Bạn có chắc chắn muốn kích hoạt lại thương hiệu này chứ?"
+            }
+            onConfirm={() => handleDeleteMaterial(record.id, record.status)} // Confirm deletion
             onCancel={() => console.log("Delete canceled")}
             okText="Có"
             cancelText="Không"
           >
-            <Button type="primary" danger>
-              Delete
-            </Button>
+            <Button
+              icon={<FontAwesomeIcon icon={faTrash} style={{ color: "red" }} />}
+            ></Button>
           </Popconfirm>
         </Space>
       ),
@@ -181,7 +210,9 @@ const MaterialManagement = () => {
           className={styles.inputSearch}
           style={{ width: "50%" }}
         />
-        <Button type="primary" onClick={handleOpenModal}>Thêm chất liệu</Button>
+        <Button type="primary" onClick={handleOpenModal}>
+          Thêm chất liệu
+        </Button>
       </div>
       <Table
         columns={columns}
