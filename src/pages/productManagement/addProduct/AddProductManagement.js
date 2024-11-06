@@ -7,10 +7,12 @@ import {
   Form,
   Input,
   message,
+  Popconfirm,
   Row,
   Select,
   Space,
   Table,
+  Upload,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
@@ -23,6 +25,7 @@ import { MaterialManagementApi } from "../../../api/admin/materialManagement/Mat
 import { ProductManagementApi } from "../../../api/admin/productManagement/ProductManagementApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FileUploadApi } from "../../../api/admin/fileUpload/FileUploadApi";
 
 const AddProductManagement = () => {
   const [productName, setProductName] = useState("");
@@ -30,7 +33,6 @@ const AddProductManagement = () => {
   const [typeOfShoeOptions, setTypeOfShoeOptions] = useState([]);
   const [materialOptions, setMaterialOptions] = useState([]);
   const [description, setDescription] = useState("");
-
 
   const navigate = useNavigate();
 
@@ -235,6 +237,34 @@ const AddProductManagement = () => {
       ),
     },
     {
+      title: "Ảnh",
+      dataIndex: "urlImg",
+      key: "urlImg",
+      render: (value, record) => (
+        <Upload
+          name="avatar"
+          listType="picture-card"
+          className="avatar-uploader"
+          action="/upload" // Your upload URL
+          maxCount={1}
+          onChange={({ file }) => handleFileChange(file, record)}
+        >
+          {value ? (
+            <img
+              src={value} // Hiển thị ảnh đã tải lên nếu có
+              alt="avatar"
+              style={{ width: "100%", height: "100%" }}
+            />
+          ) : (
+            <div>
+              <PlusOutlined />
+              <div style={{ marginTop: 8 }}>Upload</div>
+            </div>
+          )}
+        </Upload>
+      ),
+    },
+    {
       title: "Tên sản phẩm",
       dataIndex: "productName",
       key: "productName",
@@ -288,8 +318,7 @@ const AddProductManagement = () => {
         <Space size="middle">
           <a onClick={() => handleDelete(record)}>
             <Button>
-
-            {<FontAwesomeIcon icon={faTrash} style={{ color: "red" }} />}
+              {<FontAwesomeIcon icon={faTrash} style={{ color: "red" }} />}
             </Button>
           </a>
         </Space>
@@ -297,43 +326,79 @@ const AddProductManagement = () => {
     },
   ];
 
-  const handleAddProduct = () => {
-    // Lấy thông tin sản phẩm chính
-    const productData = {
-      name: productName,
-      brandId: form.getFieldValue("brand"),
-      materialId: form.getFieldValue("material"),
-      typeId: form.getFieldValue("category"),
-      description: description,
-      details: listProductDetail.map((detail) => ({
-        sizeId: detail.sizeId,
-        colorId: detail.colorId,
-        price: detail.price,
-        quantity: detail.quantity,
-      })),
-    };
-
-    console.log("Thông tin sản phẩm:", productData);
-
-    ProductManagementApi.create(productData)
-      .then((response) => {
-        console.log("Sản phẩm đã được thêm thành công:", response);
-
-        message.success("Sản phẩm được thêm thành công!");
-
-        // Clear form and reset states after successful addition
-        form.resetFields();
-        setProductName("");
-        setDescription("");
-        setListProductDetail([]);
-
-        // Quay lại trang trước đó
-        navigate("/product-management");
-      })
-      .catch((error) => {
-        console.error("Lỗi khi thêm sản phẩm:", error);
-      });
+  const handleFileChange = (file, record) => {
+    setListProductDetail((prevList) =>
+      prevList.map((item) =>
+        item.colorId === record.colorId && item.sizeId === record.sizeId
+          ? { ...item, file: file.originFileObj }
+          : item
+      )
+    );
   };
+
+  const handleUpload = async (file) => {
+    const formData = new FormData();
+    formData.append("multipartFile", file);
+  
+    try {
+      const response = await FileUploadApi.uploadFileImage(formData);
+      return response.data; // Return image URL directly from response data
+    } catch (error) {
+      console.error("Upload failed:", error);
+      throw error; // Rethrow error to handle in handleAddProduct
+    }
+  };
+  
+  const handleAddProduct = async () => {
+    try {
+      // Wait for all file uploads to complete and update `urlImg`
+      const updatedDetails = await Promise.all(
+        listProductDetail.map(async (product) => {
+          if (product.file) {
+            const urlImg = await handleUpload(product.file); // Upload and get URL
+            return { ...product, urlImg: urlImg }; // Set `urlImg` in product details
+          }
+          return product; // No file, return unchanged
+        })
+      );
+  
+      // Prepare product data after all uploads are done
+      const productData = {
+        name: productName,
+        brandId: form.getFieldValue("brand"),
+        materialId: form.getFieldValue("material"),
+        typeId: form.getFieldValue("category"),
+        description: description,
+        details: updatedDetails.map((detail) => ({
+          sizeId: detail.sizeId,
+          colorId: detail.colorId,
+          price: detail.price,
+          quantity: detail.quantity,
+          urlImg: detail.urlImg, // Use updated urlImg
+        })),
+      };
+  
+      console.log("Thông tin sản phẩm:", productData);
+  
+      // Create product after uploads are complete
+      await ProductManagementApi.create(productData);
+  
+      message.success("Sản phẩm được thêm thành công!");
+  
+      // Clear form and reset states after success
+      form.resetFields();
+      setProductName("");
+      setDescription("");
+      setListProductDetail([]);
+  
+      // Navigate back to the product management page
+      navigate("/product-management");
+    } catch (error) {
+      console.error("Error adding product:", error);
+      message.error("Có lỗi xảy ra khi thêm sản phẩm.");
+    }
+  };
+  
 
   useEffect(() => {}, []);
 
@@ -530,8 +595,16 @@ const AddProductManagement = () => {
       </div>
 
       <div className={styles.btnAddProduct}>
-        <Button onClick={handleAddProduct}>Thêm mới</Button>
-      </div>
+      <Popconfirm
+        title="Bạn có chắc muốn thêm sản phẩm mới?"
+        onConfirm={handleAddProduct}
+        onCancel={() => console.log("Thêm sản phẩm bị hủy")}
+        okText="Đúng"
+        cancelText="Hủy"
+      >
+        <Button type="primary">Thêm mới</Button>
+      </Popconfirm>
+    </div>
     </div>
   );
 };

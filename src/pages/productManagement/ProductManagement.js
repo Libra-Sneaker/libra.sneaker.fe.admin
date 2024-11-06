@@ -1,6 +1,6 @@
 import styles from "./ProductManagement.module.css";
 import { ProductManagementApi } from "../../api/admin/productManagement/ProductManagementApi";
-import { Space, Table, Button, Radio } from "antd";
+import { Space, Table, Button, Radio, Pagination } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
@@ -12,6 +12,10 @@ const ProductManagement = () => {
   const [listProduct, setListProduct] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   const [name, setName] = useState("");
   const [status, setStatus] = useState("null");
@@ -47,11 +51,21 @@ const ProductManagement = () => {
     },
   ];
 
-  const fetchData = async () => {
+  const fetchData = async (page = 1, size = 10) => {
+    console.log(`Fetching page: ${page}, size: ${size}`);
     setLoading(true);
+    const params = {
+      name: name,
+      status: status === "all" || status === "null" ? undefined : status,
+      page: page - 1, // Backend thường bắt đầu từ trang 0
+      size: size,
+    };
+
     try {
-      const response = await ProductManagementApi.getProducts();
+      const response = await ProductManagementApi.getProducts(params);
+      console.log("Response data:", response.data);
       setListProduct(response.data.content);
+      setTotalItems(response.data.totalElements);
     } catch (error) {
       console.error("Error fetching data: ", error);
     } finally {
@@ -60,8 +74,14 @@ const ProductManagement = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(currentPage, pageSize);
+  }, [currentPage, pageSize]);
+
+  // Xử lý khi người dùng thay đổi trang hoặc số lượng sản phẩm mỗi trang
+  const handlePageChange = (page, size) => {
+    setCurrentPage(page); // Cập nhật trang hiện tại
+    setPageSize(size); // Cập nhật kích thước trang
+  };
 
   const handleSearch = async () => {
     console.log(name);
@@ -155,6 +175,24 @@ const ProductManagement = () => {
           dataSource={listProduct}
           loading={loading}
           rowKey="id"
+          pagination={false}
+        />
+
+        <Pagination
+          style={{
+            padding: "20px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "10px",
+          }}
+          simple
+          current={currentPage}
+          pageSize={pageSize}
+          total={totalItems}
+          onChange={handlePageChange}
+          showSizeChanger
+          pageSizeOptions={["10", "20", "50", "100"]}
         />
       </div>
     </div>
