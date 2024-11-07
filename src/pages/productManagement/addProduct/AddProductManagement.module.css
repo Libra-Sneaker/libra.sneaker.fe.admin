@@ -25,8 +25,10 @@
 }
 
 .tableProductDetail{
-  background-color: aliceblue;
-
+  /* background-color: aliceblue; */
+  margin: 10px;
+  padding-top: 10px;
+  /* padding: 10px; */
   border-radius: 10px;
   border: 1 px solid #ccc;
 }

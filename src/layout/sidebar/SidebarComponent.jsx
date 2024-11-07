@@ -82,14 +82,14 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
             <img src="" alt="" width="60%" />
           </div>
         )}
-        {/* <Menu.Item
-          key="/brand-management"
+        <Menu.Item
+          // key="/brand-management"
           className="menu_custom"
           style={{ color: "white" }}
           icon={<FontAwesomeIcon icon={faCarTunnel} />}
         >
           <Link to="">Báo cáo hoạt động</Link>
-        </Menu.Item> */}
+        </Menu.Item>
 
         <Menu.SubMenu
           key="/product-management-options"

@@ -11,3 +11,8 @@
   padding-bottom: 20px;
 }
 
+.largeTag{
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 8px; 
+}

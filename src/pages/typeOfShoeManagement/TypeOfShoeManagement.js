@@ -1,4 +1,4 @@
-import { Button, Input, message, Popconfirm, Space, Table } from "antd/es";
+import { Button, Input, message, Popconfirm, Space, Table, Tag } from "antd/es";
 import styles from "./TypeOfShoeManagement.module.css"; // Adjust the styles accordingly
 import { useEffect, useState } from "react";
 import { TypeOfShoeManagementApi } from "../../api/admin/typeOfShoeManagement/TypeOfShoeManagementApi";
@@ -135,7 +135,9 @@ const TypeOfShoeManagement = () => {
       dataIndex: "status",
       key: "status",
       render: (text) => (
-        <span>{text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}</span>
+        <Tag color={text === 1 ? "green" : "red"} className={styles.largeTag}>
+      {text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}
+    </Tag>
       ),
     },
     {

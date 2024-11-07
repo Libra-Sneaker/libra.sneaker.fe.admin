@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { Button, Input, Space, Table, message, Popconfirm } from "antd";
+import { Button, Input, Space, Table, message, Popconfirm, Tag } from "antd";
 import styles from "./MaterialManagement.module.css";
 import { MaterialManagementApi } from "../../api/admin/materialManagement/MaterialManagementApi";
 import ModalAddMaterial from "./ModalAddMaterial";
@@ -158,7 +158,9 @@ const MaterialManagement = () => {
       dataIndex: "status",
       key: "status",
       render: (text) => (
-        <span>{text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}</span>
+        <Tag color={text === 1 ? "green" : "red"} className={styles.largeTag}>
+      {text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}
+    </Tag>
       ),
     },
     {

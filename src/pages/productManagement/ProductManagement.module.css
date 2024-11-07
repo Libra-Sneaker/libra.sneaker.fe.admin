@@ -88,3 +88,9 @@
   margin-bottom: 25px;
   margin-top: 10px;
 }
+
+.largeTag{
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 8px; 
+}

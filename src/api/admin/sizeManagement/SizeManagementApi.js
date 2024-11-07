@@ -14,24 +14,22 @@ export class SizeManagementApi {
   static getSize = () => {
     return request({
       method: "GET",
-      url: `${baseUrl}/get-all-size`
+      url: `${baseUrl}/get-all-size`,
     });
   };
 
   static updateSizer = (id, data) => {
     return request({
-        method: "PUT",
-        url: `${baseUrl}/update`, 
-        data: data,
+      method: "PUT",
+      url: `${baseUrl}/update`,
+      data: data,
     });
-};
+  };
 
-static deleteSize = (id) => {
-  return request({
-    method: "DELETE",
-    url: `${baseUrl}/delete/${id}`,
-  });
-};
-
-
+  static deleteSize = (id) => {
+    return request({
+      method: "DELETE",
+      url: `${baseUrl}/delete/${id}`,
+    });
+  };
 }

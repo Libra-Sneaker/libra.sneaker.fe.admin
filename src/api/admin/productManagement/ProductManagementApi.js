@@ -19,6 +19,12 @@ export class ProductManagementApi {
     });
   };
 
+  static updateStatusProduct = (id, status) => {
+    return request({
+      method: "PUT",
+      url: `${baseUrl}/updateStatus?id=${id}&status=${status}`,
+    });
+  };
   
 
 }

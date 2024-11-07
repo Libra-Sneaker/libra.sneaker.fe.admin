@@ -351,6 +351,27 @@ const AddProductManagement = () => {
   
   const handleAddProduct = async () => {
     try {
+       // Check if essential fields are filled
+       if (!productName || !form.getFieldValue("brand") || !form.getFieldValue("material") || !form.getFieldValue("category") || !description) {
+        message.error("Vui lòng điền đầy đủ thông tin sản phẩm.");
+        return;
+      }
+
+      // Check if any color and size details are selected
+      if (listProductDetail.length === 0) {
+        message.error("Vui lòng chọn ít nhất một màu sắc và kích cỡ cho sản phẩm.");
+        return;
+      }
+
+      // Check if each product detail has necessary fields
+      const incompleteDetails = listProductDetail.some(detail => 
+        !detail.sizeId || !detail.colorId || detail.price === undefined || detail.quantity === undefined
+      );
+
+      if (incompleteDetails) {
+        message.error("Vui lòng điền đầy đủ thông tin chi tiết sản phẩm.");
+        return;
+      }
       // Wait for all file uploads to complete and update `urlImg`
       const updatedDetails = await Promise.all(
         listProductDetail.map(async (product) => {
