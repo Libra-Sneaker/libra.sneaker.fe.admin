@@ -8,7 +8,7 @@ import {
   Pagination,
   Select,
   message,
-  Popconfirm,
+  Input,
   Tag,
 } from "antd";
 import { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import Search from "antd/es/transfer/search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faEye } from "@fortawesome/free-solid-svg-icons";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
 
 const ProductManagement = () => {
   const [listProduct, setListProduct] = useState([]);
@@ -30,51 +30,26 @@ const ProductManagement = () => {
   const [name, setName] = useState("");
   const [status, setStatus] = useState("null");
 
-  // State to track edited row ID and status
-  const [editingStatusId, setEditingStatusId] = useState(null);
-  const [statusValue, setStatusValue] = useState(null);
-
-  const handleStatusChange = (newStatus, record) => {
-    // Display Popconfirm when a new status is selected
-    setStatusValue(newStatus); // Update with the new status temporarily
-  };
-
-  const confirmStatusChange = async (record) => {
-    console.log("status change:");
-
-    console.log(statusValue);
-    console.log(record.id);
-
-    try {
-      // Make an API call to update the status in the backend if needed
-      await ProductManagementApi.updateStatusProduct(record.id, statusValue);
-
-      // Update the local state to reflect the change
-      setListProduct((prevList) =>
-        prevList.map((item) =>
-          item.id === record.id ? { ...item, status: statusValue } : item
-        )
-      );
-
-      // Success message
-      message.success("Trạng thái đã được cập nhật!");
-    } catch (error) {
-      console.error("Failed to update status:", error);
-      message.error("Không thể cập nhật trạng thái.");
-    } finally {
-      setEditingStatusId(null);
-    }
-  };
-
-  const cancelStatusChange = () => {
-    // Revert the status to the previous value if canceled
-    setStatusValue(null);
-    setEditingStatusId(null);
-  };
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [editingName, setEditingName] = useState("");
+  const [editingStatus, setEditingStatus] = useState(null);
 
   const columns = [
     { title: "STT", dataIndex: "rowNum", key: "row" },
-    { title: "Tên sản phẩm", dataIndex: "productName", key: "productName" },
+    {
+      title: "Tên sản phẩm",
+      dataIndex: "productName",
+      key: "productName",
+      render: (text, record) =>
+        editingProductId === record.id ? (
+          <Input
+            value={editingName}
+            onChange={(e) => setEditingName(e.target.value)}
+          />
+        ) : (
+          text
+        ),
+    },
     {
       title: "Ngày thêm",
       dataIndex: "createdDate",
@@ -86,39 +61,54 @@ const ProductManagement = () => {
       title: "Trạng thái",
       key: "status",
       dataIndex: "status",
-      render: (text, record) => {
-        if (editingStatusId === record.id) {
-          return (
-            <Popconfirm
-              title="Xác nhận thay đổi trạng thái?"
-              onConfirm={() => confirmStatusChange(record)}
-              onCancel={cancelStatusChange}
-              okText="Có"
-              cancelText="Không"
-            >
-              <Select
-                value={statusValue ?? record.status}
-                onChange={(value) => {
-                  setStatusValue(value);
-                  handleStatusChange(value, record);
-                }}
-                options={[
-                  { label: "Đang bán", value: 1 },
-                  { label: "Dừng bán", value: 0 },
-                ]}
-                style={{ width: 120 }}
-              />
-            </Popconfirm>
-          );
-        }
-        return (
-          <Tag size="large" color={record.status === 1 ? "green" : "red"}
-          style={{ fontSize: '14px', padding: '4px' }}
+      render: (status, record) =>
+        editingProductId === record.id ? (
+          <Select
+            value={editingStatus}
+            onChange={(value) => setEditingStatus(value)}
+            style={{ width: "100%" }}
           >
-            {record.status === 1 ? "Đang bán" : "Dừng bán"}
+            <Select.Option value={1}>Đang bán</Select.Option>
+            <Select.Option value={0}>Dừng bán</Select.Option>
+          </Select>
+        ) : status === 1 ? (
+          <Tag
+            style={{
+              display: "flex",
+              width: "80px",
+              height: "32px",
+              lineHeight: "32px",
+              borderRadius: "5px",
+              fontSize: "13px",
+              cursor: "pointer",
+              marginBottom: "5px",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            color="green"
+          >
+            Đang bán
           </Tag>
-        );
-      },
+        ) : (
+          <Tag
+            style={{
+              display: "flex",
+              width: "80px",
+              height: "32px",
+              lineHeight: "32px",
+              borderRadius: "5px",
+              fontSize: "13px",
+              cursor: "pointer",
+              marginBottom: "5px",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            size="large"
+            color="red"
+          >
+            Dừng bán
+          </Tag>
+        ),
     },
     {
       title: "Action",
@@ -131,18 +121,48 @@ const ProductManagement = () => {
             <FontAwesomeIcon icon={faEye} />
           </Button>
 
-          <Button
-            onClick={() => {
-              setEditingStatusId(record.id);
-              setStatusValue(record.status); // Initialize with the current status
-            }}
-          >
-            <FontAwesomeIcon icon={faEdit} />
-          </Button>
+          {editingProductId === record.id ? (
+            <>
+              <Button onClick={() => handleSave(record.id)}>Save</Button>
+              <Button onClick={handleCancelEdit}>Cancel</Button>
+            </>
+          ) : (
+            <Button onClick={() => handleEdit(record)}>Edit</Button>
+          )}
         </Space>
       ),
     },
   ];
+  const handleEdit = (record) => {
+    console.log(record.productName);
+
+    setEditingProductId(record.id);
+    setEditingName(record.productName);
+    setEditingStatus(record.status);
+  };
+
+  const handleSave = async (id) => {
+    console.log(editingName);
+    console.log(editingStatus);
+
+    try {
+      await ProductManagementApi.updateNameAndStatusProduct(
+        id,
+        editingName,
+        editingStatus
+      );
+      setEditingProductId(null);
+      fetchData(currentPage, pageSize);
+      message.success("Cập nhật sản phẩm thành công!");
+    } catch (error) {
+      message.error("Có lỗi khi cập nhật sản phẩm!");
+      console.error(error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProductId(null);
+  };
 
   const fetchData = async (page = 1, size = 10) => {
     console.log(`Fetching page: ${page}, size: ${size}`);

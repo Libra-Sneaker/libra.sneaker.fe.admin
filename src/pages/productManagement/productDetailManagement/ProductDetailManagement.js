@@ -4,9 +4,11 @@ import {
   Button,
   Checkbox,
   Input,
+  message,
   Pagination,
   Select,
   Slider,
+  Spin,
   Table,
   Upload,
 } from "antd";
@@ -16,8 +18,11 @@ import { TypeOfShoeManagementApi } from "../../../api/admin/typeOfShoeManagement
 import { ColorManagementApi } from "../../../api/admin/colorManagemnet/ColorManagementApi";
 import { MaterialManagementApi } from "../../../api/admin/materialManagement/MaterialManagementApi";
 import { SizeManagementApi } from "../../../api/admin/sizeManagement/SizeManagementApi";
-import { SearchOutlined } from "@ant-design/icons";
 import { ProductDetailManagementApi } from "../../../api/admin/productDetailManagement/productDetailManagementApi";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
+import ModalProductDetail from "./ModalProductDetail";
+import { FileUploadApi } from "../../../api/admin/fileUpload/FileUploadApi";
 
 const ProductDetailManagement = () => {
   const navigate = useNavigate();
@@ -38,10 +43,17 @@ const ProductDetailManagement = () => {
   const [materialOptions, setMaterialOptions] = useState([]);
   const [sizeOptions, setSizeOptions] = useState([]);
 
+  // Thêm useState để lưu các lựa chọn option
+  const [searchText, setSearchText] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState(null);
+  const [selectedType, setSelectedType] = useState(null);
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [listProductDetails, setListProductDetails] = useState([]);
-  const [searchProductDetails, setSearchProductDetails] = useState([]);
-  const [selectedValues, setSelectedValues] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -130,72 +142,218 @@ const ProductDetailManagement = () => {
     getSize();
   }, []);
 
-  const ListDropDown = [
-    {
-      name: "Danh mục",
-      options: typeOptions,
-    },
-    {
-      name: "Hãng Giày",
-      options: brandOptions,
-    },
-    {
-      name: "Màu sắc",
-      options: colorOptions,
-    },
-    {
-      name: "Chất liệu",
-      options: materialOptions,
-    },
-    {
-      name: "Size",
-      options: sizeOptions,
-    },
-    {
-      name: "Trạng thái",
-      options: [
-        {
-          value: "1",
-          label: "Còn hàng",
-        },
-        {
-          value: "0",
-          label: "Hết hàng",
-        },
-      ],
-    },
-  ];
+  const handleInputChange = (event) => {
+    setSearchText(event.target.value);
+    console.log("Input value:", event.target.value);
+  };
+
+  // Hàm để log ra ID khi thay đổi lựa chọn
+  const handleSelectChange = (type, value) => {
+    switch (type) {
+      case "brand":
+        setSelectedBrand(value);
+        console.log("Selected Brand ID:", value);
+        break;
+      case "type":
+        setSelectedType(value);
+        console.log("Selected Type ID:", value);
+        break;
+      case "material":
+        setSelectedMaterial(value);
+        console.log("Selected Material ID:", value);
+        break;
+      case "color":
+        setSelectedColor(value);
+        console.log("Selected Color ID:", value);
+        break;
+      case "size":
+        setSelectedSize(value);
+        console.log("Selected Size ID:", value);
+        break;
+      case "status":
+        setSelectedStatus(value);
+        console.log("Selected Status ID:", value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const [listSelectRow, setListSelectRow] = useState([]); // Track selected rows as an array of productDetailId
+  const [selectAllChecked, setSelectAllChecked] = useState(false);
+
+  const handleSelectAllChange = (e) => {
+    const isChecked = e.target.checked;
+    setSelectAllChecked(isChecked);
+
+    // Update listSelectRow based on whether select all is checked
+    if (isChecked) {
+      setListSelectRow(listProductDetails.map((item) => item.productDetailId)); // Select all
+    } else {
+      setListSelectRow([]); // Deselect all
+    }
+  };
+
+  const handleCheckboxChange = (record) => {
+    const productDetailId = record.productDetailId;
+    setListSelectRow(
+      (prev) =>
+        prev.includes(productDetailId)
+          ? prev.filter((id) => id !== productDetailId) // Deselect if already selected
+          : [...prev, productDetailId] // Select if not already selected
+    );
+  };
+
+  const handleEditInputChange = (value, record, field) => {
+    setListProductDetails((prev) =>
+      prev.map((item) =>
+        item.productDetailId === record.productDetailId
+          ? { ...item, [field]: value } // Cập nhật giá trị trường
+          : item
+      )
+    );
+  };
+
+  // save list
+  const handleSaveListProductDetails = async () => {
+    // Upload files and attach the URLs
+    const updatedDetails = await Promise.all(
+      listProductDetails.map(async (product) => {
+        if (product.file) {
+          const urlImg = await handleUpload(product.file);
+          return { ...product, urlImg }; // Attach the uploaded image URL
+        }
+        return product;
+      })
+    );
+
+    // Prepare the data to send to the API
+    const productDetailsToSave = updatedDetails.map((item) => ({
+      id: item.productDetailId,
+      price: item.price,
+      quantity: item.quantity,
+      status: item.status,
+      urlImg: item.urlImg, // Updated image URL
+    }));
+
+    // Check if there is data to update
+    if (productDetailsToSave.length === 0) {
+      message.warning("Không có dữ liệu để cập nhật!");
+      return;
+    }
+
+    // Send the updated list to the API
+    try {
+      const response = await ProductDetailManagementApi.saveListProductDetail(
+        productDetailsToSave
+      );
+      if (response && response.data) {
+        // Update the state with the new details
+        setListProductDetails(updatedDetails);
+        message.success("Cập nhật thành công!");
+
+        window.location.reload();
+      }
+    } catch (error) {
+      message.error("Lỗi cập nhật!");
+      console.error("Failed to save list", error);
+    }
+  };
+
+  const handleEditChange = (e, record, field) => {
+    let value = e.target.value;
+
+    // Ensure that the value is the correct type
+    if (field === "quantity" || field === "price") {
+      value = value === "" ? 0 : Number(value);
+      if (isNaN(value)) {
+        value = 0;
+      }
+    }
+
+    // Update the product details in state
+    setListProductDetails((prev) =>
+      prev.map((item) =>
+        item.productDetailId === record.productDetailId && item[field] !== value
+          ? { ...item, [field]: value } // Update field value
+          : item
+      )
+    );
+  };
+
+  const handleFileChange = (file, record) => {
+    setListProductDetails((prevList) =>
+      prevList.map((item) =>
+        item.productDetailId === record.productDetailId
+          ? { ...item, file: file.originFileObj }
+          : item
+      )
+    );
+  };
+
+  const handleUpload = async (file) => {
+    const formData = new FormData();
+    formData.append("multipartFile", file);
+
+    // Bắt đầu quá trình upload
+    setLoading(true);
+
+    try {
+      const response = await FileUploadApi.uploadFileImage(formData);
+      setLoading(false);
+      return response.data; // Return image URL directly from response data
+    } catch (error) {
+      setLoading(false);
+      console.error("Upload failed:", error);
+      throw error; // Rethrow error to handle in handleAddProduct
+    }
+  };
 
   const columns = [
     {
-      title: <Checkbox />,
+      title: (
+        <Checkbox onChange={handleSelectAllChange} checked={selectAllChecked} />
+      ),
       key: "checkBox",
-      render: (_, record) => <Checkbox />,
+      render: (_, record) => (
+        <Checkbox
+          onChange={() => handleCheckboxChange(record)}
+          checked={listSelectRow.includes(record.productDetailId)}
+        />
+      ),
     },
     {
       title: "Ảnh",
       dataIndex: "urlImg",
       key: "urlImg",
-      render: (value, record) => (
-        <Upload
-          name="avatar"
-          listType="picture-card"
-          className="avatar-uploader"
-          showUploadList={false} // Hide the upload button if only displaying the image
-        >
-          {value ? (
-            <img
-              src={value}
-              alt="product-img"
-              style={{ width: "100%", height: "100%" }}
-            />
-          ) : (
-            <div>Upload</div> // Placeholder if no image URL is available
-          )}
-        </Upload>
-      ),
+      render: (value, record) =>
+        listSelectRow.includes(record.productDetailId) ? (
+          <Upload
+            name="avatar"
+            listType="picture-card"
+            className="avatar-uploader"
+            action="/upload" // URL upload của bạn
+            maxCount={1}
+            onChange={({ file }) => handleFileChange(file, record)}
+          >
+            {loading ? ( // Kiểm tra trạng thái loading
+              <div>
+                <Spin /> {/* Biểu tượng loading */}
+              </div>
+            ) : value ? (
+              <img
+                src={value}
+                alt="product-img"
+                style={{ width: "100%", height: "100%" }}
+              />
+            ) : (
+              <div>Upload</div>
+            )}
+          </Upload>
+        ) : (
+          <img src={value} width={150} />
+        ),
     },
-
     {
       title: "Mã SP",
       dataIndex: "productCode",
@@ -230,17 +388,52 @@ const ProductDetailManagement = () => {
       title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
+      render: (text, record) =>
+        listSelectRow.includes(record.productDetailId) ? (
+          <Input
+            key={`quantity-${record.productDetailId}`} // Thêm key duy nhất
+            value={record.quantity}
+            onChange={(e) => handleEditChange(e, record, "quantity")}
+            type="number"
+          />
+        ) : (
+          <span>{record.quantity}</span>
+        ),
     },
     {
       title: "Giá sản phẩm",
       dataIndex: "price",
       key: "price",
+      render: (text, record) =>
+        listSelectRow.includes(record.productDetailId) ? (
+          <Input
+            key={`price-${record.productDetailId}`} // Thêm key duy nhất
+            value={record.price}
+            onChange={(e) => handleEditChange(e, record, "price")}
+            type="number"
+          />
+        ) : (
+          <span>{record.price}</span>
+        ),
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status) => (status === 1 ? "Đang bán" : "Ngừng bán"),
+      render: (text, record) =>
+        listSelectRow.includes(record.productDetailId) ? (
+          <Select
+            key={`status-${record.productDetailId}`} // Thêm key duy nhất
+            value={record.status}
+            onChange={(value) => handleEditInputChange(value, record, "status")} // Gọi hàm khi thay đổi giá trị
+            style={{ width: 120 }}
+          >
+            <Select.Option value={1}>Đang bán</Select.Option>
+            <Select.Option value={0}>Ngừng bán</Select.Option>
+          </Select>
+        ) : (
+          <span>{record.status === 1 ? "Đang bán" : "Ngừng bán"}</span>
+        ),
     },
 
     {
@@ -249,16 +442,25 @@ const ProductDetailManagement = () => {
       key: "action",
       render: (_, record) => (
         <div>
-          <Button type="primary" size="small">
-            Xem chi tiết
+          <Button size="small" onClick={() => handleOpenModal(record)}>
+            <FontAwesomeIcon icon={faEye} />
           </Button>
         </div>
       ),
     },
   ];
 
-  // dataListProduct
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  // dataListProduct
   const fetchData = async (productId, page = 1, size = 10) => {
     console.log("productId::::", productId);
 
@@ -267,7 +469,7 @@ const ProductDetailManagement = () => {
     try {
       const params = {
         id: productId,
-        page: page - 1, // Backend thường bắt đầu từ trang 0
+        page: page - 1,
         size: size,
       };
       const response = await ProductDetailManagementApi.getProductDetails(
@@ -294,39 +496,70 @@ const ProductDetailManagement = () => {
     }
   }, [productId, currentPage, pageSize]); // Run this effect whenever productId changes
 
-  const handleSelect = (value, field) => {
-    console.log(value);
+  const handleSearchData = async () => {
+    console.log("Search text:", searchText);
+    console.log("Brand id:", selectedBrand);
+    console.log("Type id:", selectedType);
+    console.log("Material id:", selectedMaterial);
+    console.log("Color id:", selectedColor);
+    console.log("Size id", selectedSize);
+    console.log("State id:", selectedStatus);
 
-    setSelectedValues((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSearch = async () => {
-    console.log("Selected values:", selectedValues);
     try {
+      // Prepare the search parameters
       const params = {
         id: productId,
+        page: 0,
+        size: 10,
+        brandId: selectedBrand,
+        typeId: selectedType,
+        materialId: selectedMaterial,
+        colorId: selectedColor,
+        sizeId: selectedSize,
+        status: selectedStatus,
+        productCode: searchText,
+        minPrice: priceRange[0],
+        maxPrice: priceRange[1],
       };
+
       const response = await ProductDetailManagementApi.getProductDetails(
         params
       );
-      console.log(response.data.content);
-
-      // log(response.data.content);
+      setListProductDetails(response.data.content);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
   };
 
-  const [priceRange, setPriceRange] = useState([20, 50]);
+  const handleRefresh = () => {
+    setSearchText("");
+    setSelectedBrand(null);
+    setSelectedType(null);
+    setSelectedMaterial(null);
+    setSelectedColor(null);
+    setSelectedSize(null);
+    setSelectedStatus(null);
+    setCurrentPage(1);
+    fetchData(productId, 1, pageSize);
+  };
+
+  // search price
+  const [priceRange, setPriceRange] = useState([0, 100000000]);
 
   const handleSliderChange = (value) => {
     setPriceRange(value);
   };
 
-  const handleInputChange = (value, index) => {
-    const newRange = [...priceRange];
-    newRange[index] = value ? parseInt(value) : 0;
-    setPriceRange(newRange);
+  // Handle manual input change for minimum price
+  const handleMinInputChange = (e) => {
+    const newMin = Number(e.target.value);
+    setPriceRange([Math.min(newMin, priceRange[1]), priceRange[1]]);
+  };
+
+  // Handle manual input change for maximum price
+  const handleMaxInputChange = (e) => {
+    const newMax = Number(e.target.value);
+    setPriceRange([priceRange[0], Math.max(newMax, priceRange[0])]);
   };
 
   return (
@@ -341,104 +574,162 @@ const ProductDetailManagement = () => {
       </Button>
 
       <div className={styles.containerSearch}>
-        <div className={styles.InputSearch}></div>
-        <div className={styles.selectSearch}>
+        <div className={styles.inputSearch}>
+          <Input
+            placeholder="Nhập mã sản phẩm ..."
+            value={searchText}
+            onChange={handleInputChange}
+          ></Input>
           <div
             style={{
+              width: "1000px",
               display: "flex",
-              flexDirection: "column",
-              alignItems: "start",
-              gap: "10px",
+              alignItems: "center",
+              marginBottom: "16px",
             }}
           >
-            <label>Tên sản phẩm</label>
+            {/* Minimum price input */}
             <Input
-              placeholder="Tìm tên sản phẩm..."
-              prefix={<SearchOutlined />}
+              type="number"
+              value={priceRange[0]}
+              onChange={handleMinInputChange}
+              style={{ width: "120px", marginRight: "8px" }}
+              min={0}
+              max={100000000}
+            />
+
+            {/* Slider */}
+            <Slider
+              range
+              min={0}
+              max={100000000}
+              value={priceRange}
+              onChange={handleSliderChange}
+              style={{ flex: 1, marginRight: "8px" }}
+            />
+
+            {/* Maximum price input */}
+            <Input
+              type="number"
+              value={priceRange[1]}
+              onChange={handleMaxInputChange}
+              style={{ width: "120px" }}
+              min={0}
+              max={100000000}
             />
           </div>
-
-          {ListDropDown.map((dropDown) => (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "start",
-                gap: "10px",
-              }}
-            >
-              <label>{dropDown.name}</label>
-              <Select
-                onChange={(value) => handleSelect(value, dropDown.name)}
-                defaultValue={{
-                  value: dropDown.id,
-                  label: dropDown.name,
-                }}
-                style={{
-                  width: 120,
-                }}
-                options={dropDown.options}
-              />
-            </div>
-          ))}
         </div>
 
-        <div className={styles.btnSearch}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Input
-              value={priceRange[0]}
-              onChange={(e) => handleInputChange(e.target.value, 0)}
-              style={{ width: "80px" }}
-              type="number"
-            />
-            <div style={{ width: "400px" }}>
-              <Slider
-                range
-                min={0}
-                max={100}
-                value={priceRange}
-                onChange={handleSliderChange}
-              />
-            </div>
-            <Input
-              value={priceRange[1]}
-              onChange={(e) => handleInputChange(e.target.value, 1)}
-              style={{ width: "80px" }}
-              type="number"
+        <div className={styles.selectSearch}>
+          <div>
+            <label>Brand: </label>
+            <Select
+              placeholder="Thương hiệu..."
+              options={brandOptions}
+              onChange={(value) => handleSelectChange("brand", value)}
+              value={selectedBrand}
+              allowClear
+            ></Select>
+          </div>
+          <div>
+            <label>Danh mục: </label>
+            <Select
+              placeholder="Loại giày..."
+              options={typeOptions}
+              onChange={(value) => handleSelectChange("type", value)}
+              value={selectedType}
+              allowClear
             />
           </div>
           <div>
-            <Button
-              style={{
-                marginRight: "25px",
-              }}
-            >
-              Làm mới
-            </Button>
-            <Button type="primary" onClick={handleSearch}>
-              Tìm kiếm
-            </Button>
+            <label>Chất liệu: </label>
+            <Select
+              placeholder="Chất liệu..."
+              options={materialOptions}
+              onChange={(value) => handleSelectChange("material", value)}
+              value={selectedMaterial}
+              allowClear
+            ></Select>
           </div>
+          <div>
+            <label>Màu sắc: </label>
+            <Select
+              placeholder="Màu sắc..."
+              options={colorOptions}
+              onChange={(value) => handleSelectChange("color", value)}
+              value={selectedColor}
+              allowClear
+            ></Select>
+          </div>
+        </div>
+        <div className={styles.selectSearch}>
+          <div>
+            <label>Kích cỡ: </label>
+            <Select
+              placeholder="Kích cỡ..."
+              options={sizeOptions}
+              onChange={(value) => handleSelectChange("size", value)}
+              value={selectedSize}
+              allowClear
+            ></Select>
+          </div>
+          <div>
+            <label>Trạng thái: </label>
+            <Select
+              placeholder="Trạng thái..."
+              options={[
+                { value: 1, label: "Đang bán" },
+                { value: 0, label: "Dừng bán" },
+              ]}
+              onChange={(value) => handleSelectChange("status", value)}
+              value={selectedStatus}
+              allowClear
+            ></Select>
+          </div>
+        </div>
+
+        <div className={styles.ButtonSearch}>
+          <Button type="primary" onClick={handleSearchData}>
+            Tìm kiếm
+          </Button>
+          <Button onClick={handleRefresh}>Làm mới</Button>
         </div>
       </div>
 
       <div className={styles.containerTable}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: "20px",
+          }}
+        >
+          <Button
+            type="primary"
+            onClick={() => {
+              handleSaveListProductDetails();
+            }}
+          >
+            Lưu thay đổi
+          </Button>
+        </div>
+
         <Table
           columns={columns}
           dataSource={listProductDetails}
           loading={loading}
-          rowKey="id"
+          rowKey="productDetailId"
           pagination={false}
         />
 
         <Pagination
-        style={{
-          padding:"20px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "10px",
-        }}
+          style={{
+            padding: "20px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "10px",
+          }}
           simple
           current={currentPage}
           pageSize={pageSize}
@@ -448,6 +739,12 @@ const ProductDetailManagement = () => {
           pageSizeOptions={["10", "20", "50", "100"]}
         />
       </div>
+
+      <ModalProductDetail
+        isModalOpen={isModalOpen}
+        handleCancel={handleModalClose}
+        onModalProductDetail={fetchData}
+      />
     </div>
   );
 };

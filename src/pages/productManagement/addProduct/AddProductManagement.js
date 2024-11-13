@@ -182,11 +182,11 @@ const AddProductManagement = () => {
     console.log("description:", e.target.value);
   };
 
-  const handleListProduct = () => {
-    const newProduct = {
-      name: productName,
-    };
-  };
+  // const handleListProduct = () => {
+  //   const newProduct = {
+  //     name: productName,
+  //   };
+  // };
 
   const [checkedRows, setCheckedRows] = useState({}); // Track which rows are checked
   const [selectAllChecked, setSelectAllChecked] = useState(false);

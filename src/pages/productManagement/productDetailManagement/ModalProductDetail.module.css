@@ -1,0 +1,30 @@
+.modalDetailContainer {
+  display: flex;
+  flex-wrap: nowrap; /* Prevent wrapping */
+  justify-content: space-between; /* Ensure items are evenly distributed */
+  gap: 20px; /* Add some space between the containers */
+  width: 100%; /* Ensure full width */
+}
+
+.imgContainer {
+  width: 250px; /* Fix the width */
+  height: 250px; /* Set the height */
+  background-color: lightgray; /* For visualization */
+  flex-shrink: 0; /* Prevent shrinking */
+  margin-right: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.selectContainerLeft,
+.selectContainerRight {
+  display: flex;
+  flex-direction: column; /* Stack the selects vertically */
+  gap: 10px; /* Space between selects */
+  flex: 1; /* Allow these to grow and take up available space */
+  max-width: 40%; /* Ensure each container takes up no more than 45% of the width */
+}
+
+.selectContainer{
+  width: 100%; /* Ensure full width */
+}

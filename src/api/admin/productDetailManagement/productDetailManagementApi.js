@@ -26,6 +26,14 @@ export class ProductDetailManagementApi {
     });
   };
 
+  static saveListProductDetail = (data) => {
+    return request({
+      method: "PUT",
+      url: `${baseUrl}/saveList`,
+      data: data
+    });
+  }
+
   
 
 }

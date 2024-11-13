@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import "./style-footer.css";
 import { useEffect, useState } from "react";
+import logo from "../../assets/img/logo.png"
 
 const FooterComponent = () => {
   const scrollToTop = () => {
@@ -47,7 +48,7 @@ const FooterComponent = () => {
         aria-label="Scroll to top"
       >
         <img
-          src=""
+          src={logo}
           alt="To Top"
           width={45}
           style={{ borderRadius: "50%" }}
@@ -63,7 +64,7 @@ const FooterComponent = () => {
         }}
       >
         <img
-          src=""
+          src={logo}
           alt=""
           style={{
             width: 45,
