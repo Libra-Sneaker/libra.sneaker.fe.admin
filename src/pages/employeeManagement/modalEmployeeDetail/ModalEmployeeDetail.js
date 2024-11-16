@@ -1,4 +1,13 @@
-import { Button, DatePicker, Input, message, Modal, Select } from "antd";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Input,
+  message,
+  Modal,
+  Row,
+  Select,
+} from "antd";
 import React, { useEffect, useState } from "react";
 import styles from "./ModalEmployeeDetail.module.css";
 import dayjs from "dayjs";
@@ -109,8 +118,7 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
 
   return (
     <Modal
-      title="Thông tin chi tiết nhân viên"
-      width={1000}
+      width={600}
       open={isModalOpen}
       onCancel={handleCancel}
       footer={[
@@ -123,20 +131,40 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
         </Button>,
       ]}
     >
-      <div className={styles.modalDetailContainer}>
+       {/* Ảnh */}
+       <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <div className={styles.imgContainer}>Img</div>
+      </div>
 
-        <div className={styles.selectContainerLeft}>
-          <div>
-            <label>Họ và tên:</label>
-            <Input
-              className={styles.selectContainer}
-              placeholder="Nhập họ và tên"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            ></Input>
-          </div>
-          <div>
+      {/* Họ và tên */}
+      <Row gutter={[16, 24]}>
+        <Col style={{
+          marginBottom: "10px",
+          marginTop: '10px'
+        }} span={24}>
+          <label>Họ và tên:</label>
+          <Input
+            className={styles.selectContainer}
+            placeholder="Nhập họ và tên"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </Col>
+      </Row>
+
+      {/* Thông tin chi tiết */}
+      <Row gutter={[16, 24]}>
+        {/* Cột bên trái */}
+        <Col span={12}>
+          <div style={{
+          marginBottom: "5px",
+          marginTop: '5px'
+        }}>
             <label>Giới tính:</label>
             <Select
               placeholder="Chọn giới tính"
@@ -148,46 +176,50 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
               <Select.Option value="0">Nữ</Select.Option>
             </Select>
           </div>
-          <div>
+          <div style={{
+          marginBottom: "5px",
+          marginTop: '5px'
+        }}>
             <label>Số điện thoại:</label>
             <Input
               className={styles.selectContainer}
               placeholder="Nhập số điện thoại"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-            ></Input>
+            />
           </div>
-          <div>
-            <label>Email: </label>
+          <div style={{
+          marginBottom: "5px",
+          marginTop: '5px'
+        }}>
+            <label>Email:</label>
             <Input
               className={styles.selectContainer}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-            ></Input>
+            />
           </div>
-        </div>
+        </Col>
 
-        <div className={styles.selectContainerRight}>
-          <div>
-            <label>Địa chỉ:</label>
-            <Input
-              className={styles.selectContainer}
-              placeholder="Nhập địa chỉ"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            ></Input>
-          </div>
-          <div>
-            <label>Ngày sinh: </label>
+        {/* Cột bên phải */}
+        <Col  span={12}>
+          <div style={{
+          marginBottom: "5px",
+          marginTop: '5px'
+        }}>
+            <label>Ngày sinh:</label>
             <DatePicker
               style={{ width: "100%" }}
               format="YYYY-MM-DD"
-              value={dateOfBirth ? dayjs(dateOfBirth, "YYYY-MM-DD") : null} // Chuyển đổi thành dayjs object
+              value={dateOfBirth ? dayjs(dateOfBirth, "YYYY-MM-DD") : null}
               onChange={handleDateChange}
             />
           </div>
-          <div>
-            <label>Chức vụ: </label>
+          <div style={{
+          marginBottom: "5px",
+          marginTop: '5px'
+        }}>
+            <label>Chức vụ:</label>
             <Select
               placeholder="Chọn chức vụ"
               className={styles.selectContainer}
@@ -198,11 +230,13 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
               <Select.Option value="1">Nhân viên</Select.Option>
             </Select>
           </div>
-          <div>
-            <label>Trạng thái: </label>
-            
+          <div style={{
+          marginBottom: "5px",
+          marginTop: '5px'
+        }}>
+            <label>Trạng thái:</label>
             <Select
-              placeholder="Chọn chức vụ"
+              placeholder="Chọn trạng thái"
               className={styles.selectContainer}
               value={deleteFlag !== "" ? String(deleteFlag) : undefined}
               onChange={(value) => setDeleteFlag(value)}
@@ -211,8 +245,24 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
               <Select.Option value="1">Ngừng hoạt động</Select.Option>
             </Select>
           </div>
-        </div>
-      </div>
+        </Col>
+      </Row>
+
+      {/* Địa chỉ */}
+      <Row gutter={[16, 24]}>
+        <Col style={{
+          marginBottom: "5px",
+          marginTop: '10px'
+        }} span={24}>
+          <label>Địa chỉ:</label>
+          <Input
+            className={styles.selectContainer}
+            placeholder="Nhập địa chỉ"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+        </Col>
+      </Row>
     </Modal>
   );
 };

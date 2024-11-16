@@ -7,13 +7,13 @@
 }
 
 .imgContainer {
-  width: 250px; /* Fix the width */
-  height: 250px; /* Set the height */
+  width: 150px; /* Fix the width */
+  height: 150px; /* Set the height */
   background-color: lightgray; /* For visualization */
-  flex-shrink: 0; /* Prevent shrinking */
-  margin-right: 20px;
   justify-content: center;
   align-items: center;
+  display: flex;
+  border-radius: 50% ;
 }
 
 .selectContainerLeft,
@@ -23,6 +23,8 @@
   gap: 10px; /* Space between selects */
   flex: 1; /* Allow these to grow and take up available space */
   max-width: 40%; /* Ensure each container takes up no more than 45% of the width */
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .selectContainer{

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import styles from "./EmployeeManagement.module.css";
+import styles from "./CustomerManagement.module.css";
 import {
   Button,
   Input,
@@ -10,25 +10,23 @@ import {
   Table,
   Tag,
 } from "antd";
-import { EmployeeManagementApi } from "../../api/admin/employeeManagement/EmployeeManagementApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router";
-import ModalEmployeeDetail from "./modalEmployeeDetail/ModalEmployeeDetail";
-import { Search } from "@mui/icons-material";
+import { CustomerManagementApi } from "../../api/admin/customerManagement/CustomerManagementApi";
+import ModalCustomerDetail from "./addCustomer/modalCustomerDetail/ModalCustomerDetail";
 
-const EmployeeManagement = () => {
-  const [listEmployees, setListEmployees] = useState([]);
+const CustomerManagement = () => {
+  const [listCustomer, setListCustomer] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedCustomer, setSelectCustomer] = useState(null);
   const [deleteFlag, setDeleteFlag] = useState(null);
   const [sex, setSex] = useState(null);
-  const [role, setRole] = useState(null);
 
-  const [searchEmployee, setSearchEmployee] = useState({
+  const [searchCustomer, setSearchCustomer] = useState({
     page: 0,
     size: 10,
     searchTerm: "",
@@ -45,9 +43,9 @@ const EmployeeManagement = () => {
     };
 
     try {
-      const response = await EmployeeManagementApi.searchByData(params);
+      const response = await CustomerManagementApi.search(params);
       console.log("Response data:", response.data);
-      setListEmployees(response.data.content);
+      setListCustomer(response.data.content);
       setTotalItems(response.data.totalElements);
     } catch (error) {
       console.error("Error fetching data: ", error);
@@ -67,9 +65,10 @@ const EmployeeManagement = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleOpenModal = (employee) => {
-    setSelectedEmployee(employee); // Cập nhật nhân viên được chọn
-    console.log("Selected Employee Data:", employee);
+  const handleOpenModal = (customer) => {
+    console.log(customer);
+
+    setSelectCustomer(customer); // Cập nhật nhân viên được chọn
     setIsModalOpen(true); // Mở modal
   };
 
@@ -89,8 +88,8 @@ const EmployeeManagement = () => {
     },
     {
       title: "Mã nhân viên",
-      dataIndex: "employeeCode",
-      key: "employeeCode",
+      dataIndex: "customerCode",
+      key: "customerCode",
     },
     {
       title: "Số điện thoại",
@@ -103,12 +102,7 @@ const EmployeeManagement = () => {
       key: "sex",
       render: (sex) => (sex === 1 ? "Nam" : "Nữ"),
     },
-    {
-      title: "Chức vụ",
-      dataIndex: "role",
-      key: "role",
-      render: (role) => (role === 1 ? "Nhân viên" : "Quản lý"),
-    },
+
     {
       title: "Trạng thái",
       dataIndex: "deleteFlag",
@@ -141,10 +135,10 @@ const EmployeeManagement = () => {
           <Popconfirm
             title={
               record.deleteFlag === 0
-                ? "Bạn chắc muốn dừng hoạt động nhân sự này chứ?"
-                : "Bạn có chắc chắn muốn kích hoạt lại nhân sự này chứ?"
+                ? "Bạn chắc muốn dừng hoạt động khách hàng này chứ?"
+                : "Bạn có chắc chắn muốn kích hoạt lại khách hàng này chứ?"
             }
-            onConfirm={() => handleDeleteEmployee(record.id, record.deleteFlag)} // Confirm deletion
+            onConfirm={() => handleDeleteCustomer(record.id, record.deleteFlag)} // Confirm deletion
             okText="Có"
             cancelText="Không"
           >
@@ -158,16 +152,16 @@ const EmployeeManagement = () => {
   ];
 
   // Handle delete function
-  const handleDeleteEmployee = async (id, deleteFlag) => {
+  const handleDeleteCustomer = async (id, deleteFlag) => {
     console.log(id);
     console.log(deleteFlag);
 
     try {
       if (deleteFlag === 1) {
-        await EmployeeManagementApi.updateDeleteFlagEmployee(id, 0);
+        await CustomerManagementApi.updateDeleteFlagCustomer(id, 0);
         console.log("Status set to 0.");
       } else {
-        await EmployeeManagementApi.updateDeleteFlagEmployee(id, 1);
+        await CustomerManagementApi.updateDeleteFlagCustomer(id, 1);
         console.log("Status set to 1.");
       }
 
@@ -179,20 +173,20 @@ const EmployeeManagement = () => {
     }
   };
 
-  const handleAddEmployee = () => {
-    navigate("/add-employee-management");
+  const handleAddCustomer = () => {
+    navigate("/add-customer-management");
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target; // Lấy name và value của input
-    setSearchEmployee((prevState) => ({
+    setSearchCustomer((prevState) => ({
       ...prevState,
       [name]: value, // Cập nhật giá trị tương ứng với name của input
     }));
   };
 
   const handleSearch = async () => {
-    console.log(searchEmployee);
+    console.log(searchCustomer);
 
     // Ép kiểu deleteFlag sang số, nếu deleteFlag là rỗng hoặc null thì để undefined
     const parsedDeleteFlag =
@@ -205,24 +199,19 @@ const EmployeeManagement = () => {
     const parsedSex = sex !== null ? parseInt(sex, 10) : undefined;
     console.log("sex: " + parsedSex);
 
-    // Ép kiểu role sang số, nếu role là null thì để undefined
-    const parsedRole = role !== null ? parseInt(role, 10) : undefined;
-    console.log("role: " + parsedRole);
-
     const params = {
-      searchTerm: searchEmployee.searchTerm,
+      searchTerm: searchCustomer.searchTerm,
       deleteFlag: parsedDeleteFlag,
       sex: parsedSex,
-      role: parsedRole,
-      page: searchEmployee.page,
-      size: searchEmployee.size,
+      page: searchCustomer.page,
+      size: searchCustomer.size,
     };
 
     console.log(params);
 
     try {
-      const response = await EmployeeManagementApi.searchByData(params);
-      setListEmployees(response.data.content);
+      const response = await CustomerManagementApi.search(params);
+      setListCustomer(response.data.content);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
@@ -230,16 +219,15 @@ const EmployeeManagement = () => {
 
   const handleRefresh = () => {
     // Reset các state về giá trị mặc định
-    setSearchEmployee({ searchTerm: "", page: 0, size: 10 });
+    setSearchCustomer({ searchTerm: "", page: 0, size: 10 });
     setDeleteFlag(null);
     setSex(null);
-    setRole(null);
     fetchData(); // Fetch the full product list again
   };
 
   return (
     <div>
-      <h1>Danh sách nhân viên</h1>
+      <h1>Danh sách khách hàng</h1>
 
       <div
         style={{
@@ -257,7 +245,7 @@ const EmployeeManagement = () => {
               className={styles.inputSearch}
               placeholder="Tìm kiếm ..."
               name="searchTerm" // Đặt name cho input
-              value={searchEmployee.searchTerm}
+              value={searchCustomer.searchTerm}
               onChange={handleInputChange}
             />
 
@@ -291,37 +279,24 @@ const EmployeeManagement = () => {
                 allowClear
               ></Select>
             </div>
-            <div>
-              <label>Chức vụ: </label>
-              <Select
-                placeholder="Trạng thái..."
-                options={[
-                  { value: 1, label: "Nhân viên" },
-                  { value: 0, label: "Quản lý" },
-                ]}
-                onChange={(value) => setRole(value)}
-                value={role}
-                allowClear
-              ></Select>
+
+            <div className={styles.containerSearchReset}>
+              <Button
+                className={styles.btnRefreshProduct}
+                onClick={handleRefresh}
+                style={{ marginLeft: "8px" }} // Add some margin for spacing
+              >
+                Refresh
+              </Button>
+              <Button
+                className={styles.btnSearchProduct}
+                type="primary"
+                onClick={handleSearch}
+              >
+                Tìm kiếm
+              </Button>
             </div>
           </div>
-        </div>
-
-        <div className={styles.containerSearchReset}>
-          <Button
-            className={styles.btnRefreshProduct}
-            onClick={handleRefresh}
-            style={{ marginLeft: "8px" }} // Add some margin for spacing
-          >
-            Refresh
-          </Button>
-          <Button
-            className={styles.btnSearchProduct}
-            type="primary"
-            onClick={handleSearch}
-          >
-            Tìm kiếm
-          </Button>
         </div>
       </div>
 
@@ -336,14 +311,14 @@ const EmployeeManagement = () => {
       >
         <div className={styles.employeeContainer}>
           <div className={styles.AddEmployeeBtnContainer}>
-            <Button type="primary" onClick={handleAddEmployee}>
-              Thêm nhân viên
+            <Button type="primary" onClick={handleAddCustomer}>
+              Thêm khách hàng
             </Button>
           </div>
           <Table
             loading={loading}
             columns={columns}
-            dataSource={listEmployees}
+            dataSource={listCustomer}
             rowKey="id"
             pagination={{
               current: currentPage,
@@ -355,13 +330,13 @@ const EmployeeManagement = () => {
         </div>
       </div>
 
-      <ModalEmployeeDetail
+      <ModalCustomerDetail
         isModalOpen={isModalOpen}
         handleCancel={handleModalClose}
-        employeeDetail={selectedEmployee} // Truyền thông tin chi tiết nhân viên vào modal
+        customerDetail={selectedCustomer} // Truyền thông tin chi tiết nhân viên vào modal
       />
     </div>
   );
 };
 
-export default EmployeeManagement;
+export default CustomerManagement;

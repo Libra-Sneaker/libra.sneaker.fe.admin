@@ -9,19 +9,20 @@
 .imgContainer {
   width: 150px; /* Fix the width */
   height: 150px; /* Set the height */
-  background-color: lightgray; /* For visualization */
+  background-color: lightgray; /* For visualization */  
+  margin-right: 20px;
   justify-content: center;
   align-items: center;
   display: flex;
   border-radius: 50%;
-
+  margin-bottom: 10px;
 }
 
 .selectContainerLeft,
 .selectContainerRight {
   display: flex;
   flex-direction: column; /* Stack the selects vertically */
-  gap: 10px; /* Space between selects */
+  
   flex: 1; /* Allow these to grow and take up available space */
   max-width: 40%; /* Ensure each container takes up no more than 45% of the width */
 }

@@ -259,48 +259,66 @@ const ProductManagement = () => {
       <div className="headerProductContainer">
         <h1>Sản Phẩm</h1>
 
-        <div className={styles.headerProduct}>
-          <div className={styles.searchContainer}>
-            <Search
-              className={styles.inputSearch}
-              placeholder="Tìm kiếm sản phẩm..."
-              onChange={(e) => setName(e.target.value)}
-              value={name}
-              onPressEnter={handleSearch}
-            />
+        <div
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: "10px",
+            padding: "10px",
+            marginBottom: "20px",
+            boxShadow: "0px 0px 5px 0px #ccc",
+          }}
+        >
+          <div className={styles.headerProduct}>
+            <div className={styles.searchContainer}>
+              <Search
+                className={styles.inputSearch}
+                placeholder="Tìm kiếm sản phẩm..."
+                onChange={(e) => setName(e.target.value)}
+                value={name}
+                onPressEnter={handleSearch}
+              />
 
-            <div className={styles.radioContainer}>
-              <span className={styles.statusLabel}>Trạng thái: </span>
-              <Radio.Group
-                onChange={(e) => setStatus(e.target.value)}
-                value={status}
-              >
-                <Radio value="all">Tất cả</Radio>
-                <Radio value="1">Đang bán</Radio>
-                <Radio value="2">Dừng bán</Radio>
-              </Radio.Group>
+              <div className={styles.radioContainer}>
+                <span className={styles.statusLabel}>Trạng thái: </span>
+                <Radio.Group
+                  onChange={(e) => setStatus(e.target.value)}
+                  value={status}
+                >
+                  <Radio value="all">Tất cả</Radio>
+                  <Radio value="1">Đang bán</Radio>
+                  <Radio value="2">Dừng bán</Radio>
+                </Radio.Group>
+              </div>
             </div>
           </div>
-        </div>
-        <div className={styles.containerSearchReset}>
-          <Button
-            className={styles.btnRefreshProduct}
-            onClick={handleRefresh}
-            style={{ marginLeft: "8px" }} // Add some margin for spacing
-          >
-            Refresh
-          </Button>
-          <Button
-            className={styles.btnSearchProduct}
-            type="primary"
-            onClick={handleSearch}
-          >
-            Tìm kiếm
-          </Button>
+          <div className={styles.containerSearchReset}>
+            <Button
+              className={styles.btnRefreshProduct}
+              onClick={handleRefresh}
+              style={{ marginLeft: "8px" }} // Add some margin for spacing
+            >
+              Refresh
+            </Button>
+            <Button
+              className={styles.btnSearchProduct}
+              type="primary"
+              onClick={handleSearch}
+            >
+              Tìm kiếm
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className={styles.containerTable}>
+      <div
+        style={{
+          backgroundColor: "#fff",
+          borderRadius: "10px",
+          padding: "10px",
+          marginBottom: "20px",
+          boxShadow: "0px 0px 5px 0px #ccc",
+        }}
+      >
         <div className={styles.contanerAddProduct}>
           <Button
             type="primary"

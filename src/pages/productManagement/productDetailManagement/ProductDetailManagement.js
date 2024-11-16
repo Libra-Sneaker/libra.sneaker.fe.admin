@@ -594,6 +594,14 @@ const ProductDetailManagement = () => {
         Quay lại
       </Button>
 
+<div style={{
+          backgroundColor: "#fff",
+          borderRadius: "10px",
+          padding: "10px",
+          marginBottom: "20px",
+          boxShadow: "0px 0px 5px 0px #ccc",
+        }}>
+
       <div className={styles.containerSearch}>
         <div className={styles.inputSearch}>
           <Input
@@ -716,6 +724,15 @@ const ProductDetailManagement = () => {
           <Button onClick={handleRefresh}>Làm mới</Button>
         </div>
       </div>
+</div>
+
+<div style={{
+          backgroundColor: "#fff",
+          borderRadius: "10px",
+          padding: "10px",
+          marginBottom: "20px",
+          boxShadow: "0px 0px 5px 0px #ccc",
+        }}>
 
       <div className={styles.containerTable}>
         <div
@@ -760,6 +777,8 @@ const ProductDetailManagement = () => {
           pageSizeOptions={["10", "20", "50", "100"]}
         />
       </div>
+        </div>
+
 
       <ModalProductDetail
         isModalOpen={isModalOpen}

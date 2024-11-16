@@ -21,12 +21,15 @@ function ModalProductDetail({
         </Button>,
       ]}
     >
-      <div className={styles.modalDetailContainer}>
-        
-
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <div className={styles.imgContainer}>Img</div>
-
-        
+      </div>
+      <div className={styles.modalDetailContainer}>
         <div className={styles.selectContainerLeft}>
           <div>
             <label>Thương hiệu: </label>
@@ -61,12 +64,13 @@ function ModalProductDetail({
           </div>
           <div>
             <label>Giá: </label>
-            <Input style={{
-              width: "100%",
-            }}/>
+            <Input
+              style={{
+                width: "100%",
+              }}
+            />
           </div>
         </div>
-        
       </div>
     </Modal>
   );

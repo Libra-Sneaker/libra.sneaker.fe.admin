@@ -96,7 +96,7 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
           style={{ color: "white" }}
           icon={<FontAwesomeIcon icon={faCarTunnel} />}
         >
-          <Link to="">Báo cáo hoạt động</Link>
+          <Link to="/bill-management">Quản lý hóa đơn</Link>
         </Menu.Item>
 
         <Menu.SubMenu
@@ -152,19 +152,19 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
             key="/employee-management"
             className="menu_custom"
             style={{ color: "white" }}
-            // icon={<FontAwesomeIcon icon={faUser} />}
+            icon={<FontAwesomeIcon icon={faUser} />}
           >
             <Link to="/employee-management">Quản lý nhân viên</Link>
           </Menu.Item>
 
-          {/* <Menu.Item
+          <Menu.Item
             key="/customer-management"
             className="menu_custom"
             style={{ color: "white" }}
-            // icon={<FontAwesomeIcon icon={faUser} />}
+            icon={<FontAwesomeIcon icon={faUser} />}
           >
-            <Link to="/employee-management">Quản lý khách hàng</Link>
-          </Menu.Item> */}
+            <Link to="/customer-management">Quản lý khách hàng</Link>
+          </Menu.Item>
         </Menu.SubMenu>
       </Menu>
     </Sider>

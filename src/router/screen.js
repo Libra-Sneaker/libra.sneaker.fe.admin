@@ -23,5 +23,13 @@ export const SCREEN = {
   addEmployee:{
     path: "/add-employee-management",
   },
-  
+  customerManagement:{
+    path: "/customer-management",
+  },
+  addCustomer:{
+    path: "/add-customer-management",
+  },
+  billManagement:{
+    path: "/bill-management",
+  },
 };
