@@ -2,7 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Layout, Menu } from "antd";
 import { Link, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCarTunnel } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBox,
+  faCarTunnel,
+  faCogs,
+  faShoePrints,
+  faShop,
+  faTrademark,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 import { MenuUnfoldOutlined } from "@ant-design/icons";
 import "./style-sidebar.css";
 import { useAppDispatch } from "../../app/hook";
@@ -12,7 +20,7 @@ const { Sider } = Layout;
 const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
   const location = useLocation();
   const dispatch = useAppDispatch();
-  
+
   const [selectedKey, setSelectedKey] = useState("");
 
   useEffect(() => {
@@ -94,14 +102,14 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
         <Menu.SubMenu
           key="/product-management-options"
           title="Quản lý sản phẩm"
-          icon={<FontAwesomeIcon icon={faCarTunnel} />}
+          icon={<FontAwesomeIcon icon={faShop} />}
           style={{ color: "white" }}
         >
           <Menu.Item
             key="/product-management" // Đảm bảo rằng key này là duy nhất cho sản phẩm
             className="menu_custom"
             style={{ color: "white" }}
-            icon={<FontAwesomeIcon icon={faCarTunnel} />}
+            icon={<FontAwesomeIcon icon={faShop} />}
           >
             <Link to="/product-management">Sản phẩm</Link>
           </Menu.Item>
@@ -110,7 +118,7 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
             key="/brand-management" // Chọn một key khác cho mục thứ hai
             className="menu_custom"
             style={{ color: "white" }}
-            icon={<FontAwesomeIcon icon={faCarTunnel} />}
+            icon={<FontAwesomeIcon icon={faTrademark} />}
           >
             <Link to="/brand-management">Thương hiệu</Link>
           </Menu.Item>
@@ -119,21 +127,44 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
             key="/material-management" // Chọn một key khác cho mục thứ hai
             className="menu_custom"
             style={{ color: "white" }}
-            icon={<FontAwesomeIcon icon={faCarTunnel} />}
+            icon={<FontAwesomeIcon icon={faCogs} />}
           >
             <Link to="/material-management">Chất liệu</Link>
           </Menu.Item>
 
           <Menu.Item
-            key="/type-of-shoe-management" // Chọn một key khác cho mục thứ hai
+            key="/type-of-shoe-management" 
             className="menu_custom"
             style={{ color: "white" }}
-            icon={<FontAwesomeIcon icon={faCarTunnel} />}
+            icon={<FontAwesomeIcon icon={faBox} />}
           >
             <Link to="/type-of-shoe-management">Loại giày</Link>
           </Menu.Item>
+        </Menu.SubMenu>
 
-          
+        <Menu.SubMenu
+          key="/account-management-options"
+          title="Tài khoản"
+          icon={<FontAwesomeIcon icon={faUser} />}
+          style={{ color: "white" }}
+        >
+          <Menu.Item
+            key="/employee-management"
+            className="menu_custom"
+            style={{ color: "white" }}
+            // icon={<FontAwesomeIcon icon={faUser} />}
+          >
+            <Link to="/employee-management">Quản lý nhân viên</Link>
+          </Menu.Item>
+
+          {/* <Menu.Item
+            key="/customer-management"
+            className="menu_custom"
+            style={{ color: "white" }}
+            // icon={<FontAwesomeIcon icon={faUser} />}
+          >
+            <Link to="/employee-management">Quản lý khách hàng</Link>
+          </Menu.Item> */}
         </Menu.SubMenu>
       </Menu>
     </Sider>

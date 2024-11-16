@@ -1,0 +1,12 @@
+.employeeContainer {
+}
+
+.AddEmployeeBtnContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin: 20px;
+}
+
+.SearchContainer{
+  
+}

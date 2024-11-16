@@ -16,5 +16,12 @@ export const SCREEN = {
   },
   addProductManagement: {
     path: "/add-product-management",
-  }
+  },
+  employeeManagement:{
+    path: "/employee-management",
+  },
+  addEmployee:{
+    path: "/add-employee-management",
+  },
+  
 };

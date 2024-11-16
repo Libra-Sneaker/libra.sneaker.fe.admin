@@ -413,7 +413,7 @@ const ProductDetailManagement = () => {
             type="number"
           />
         ) : (
-          <span>{record.price}</span>
+          <span>{new Intl.NumberFormat("vi-VN").format(record.price)} VND</span>
         ),
     },
     {
@@ -450,6 +450,7 @@ const ProductDetailManagement = () => {
     },
   ];
 
+  // Modal product detail
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpenModal = () => {
@@ -544,22 +545,42 @@ const ProductDetailManagement = () => {
   };
 
   // search price
-  const [priceRange, setPriceRange] = useState([0, 100000000]);
+  const [priceRange, setPriceRange] = useState([0, 10000000]);
+  const [displayPriceRange, setDisplayPriceRange] = useState([
+    "0 VND",
+    "100,000,000 VND",
+  ]);
+
+  // Format number to currency with "VND"
+  const formatCurrency = (value) => {
+    return `${new Intl.NumberFormat("vi-VN").format(value)} VND`;
+  };
 
   const handleSliderChange = (value) => {
     setPriceRange(value);
+    setDisplayPriceRange([formatCurrency(value[0]), formatCurrency(value[1])]);
   };
 
-  // Handle manual input change for minimum price
+  // Handle input change without formatting immediately
   const handleMinInputChange = (e) => {
-    const newMin = Number(e.target.value);
-    setPriceRange([Math.min(newMin, priceRange[1]), priceRange[1]]);
+    const newMin = Number(e.target.value.replace(/[^0-9]/g, ""));
+    setPriceRange([newMin, priceRange[1]]);
+    setDisplayPriceRange([e.target.value, displayPriceRange[1]]);
   };
 
-  // Handle manual input change for maximum price
   const handleMaxInputChange = (e) => {
-    const newMax = Number(e.target.value);
-    setPriceRange([priceRange[0], Math.max(newMax, priceRange[0])]);
+    const newMax = Number(e.target.value.replace(/[^0-9]/g, ""));
+    setPriceRange([priceRange[0], newMax]);
+    setDisplayPriceRange([displayPriceRange[0], e.target.value]);
+  };
+
+  // Format the value on blur
+  const handleMinInputBlur = () => {
+    setDisplayPriceRange([formatCurrency(priceRange[0]), displayPriceRange[1]]);
+  };
+
+  const handleMaxInputBlur = () => {
+    setDisplayPriceRange([displayPriceRange[0], formatCurrency(priceRange[1])]);
   };
 
   return (
@@ -590,32 +611,32 @@ const ProductDetailManagement = () => {
           >
             {/* Minimum price input */}
             <Input
-              type="number"
-              value={priceRange[0]}
+              type="text"
+              value={displayPriceRange[0]}
               onChange={handleMinInputChange}
+              onBlur={handleMinInputBlur}
               style={{ width: "120px", marginRight: "8px" }}
-              min={0}
-              max={100000000}
             />
 
             {/* Slider */}
             <Slider
               range
               min={0}
-              max={100000000}
+              max={10000000}
+              step={1000}
               value={priceRange}
               onChange={handleSliderChange}
+              tooltip={{ formatter: formatCurrency }}
               style={{ flex: 1, marginRight: "8px" }}
             />
 
             {/* Maximum price input */}
             <Input
-              type="number"
-              value={priceRange[1]}
+              type="text"
+              value={displayPriceRange[1]}
               onChange={handleMaxInputChange}
+              onBlur={handleMaxInputBlur}
               style={{ width: "120px" }}
-              min={0}
-              max={100000000}
             />
           </div>
         </div>

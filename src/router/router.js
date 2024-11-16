@@ -14,6 +14,8 @@ import MaterialManagement from "../pages/materialManagement/MaterialManagement";
 import TypeOfShoeManagement from "../pages/typeOfShoeManagement/TypeOfShoeManagement";
 import AddProductManagement from "../pages/productManagement/addProduct/AddProductManagement";
 import ProductDetailManagement from "../pages/productManagement/productDetailManagement/ProductDetailManagement";
+import EmployeeManagement from "../pages/employeeManagement/EmployeeManagement";
+import AddEmployee from "../pages/employeeManagement/addEmployee/AddEmployee";
 
 const generalRoutes = [
   { path: "*", element: <NotFound /> },
@@ -89,6 +91,28 @@ const adminRoutes = [
       <MiddlewareRouter>
         <DefaultLayout>
           <AddProductManagement/>
+        </DefaultLayout>
+      </MiddlewareRouter>
+    ),
+  },
+
+  {
+    path: SCREEN.employeeManagement.path,
+    element: (
+      <MiddlewareRouter>
+        <DefaultLayout>
+          <EmployeeManagement/>
+        </DefaultLayout>
+      </MiddlewareRouter>
+    ),
+  },
+
+  {
+    path: SCREEN.addEmployee.path,
+    element: (
+      <MiddlewareRouter>
+        <DefaultLayout>
+          <AddEmployee/>
         </DefaultLayout>
       </MiddlewareRouter>
     ),

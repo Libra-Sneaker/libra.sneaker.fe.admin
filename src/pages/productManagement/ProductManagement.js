@@ -68,8 +68,8 @@ const ProductManagement = () => {
             onChange={(value) => setEditingStatus(value)}
             style={{ width: "100%" }}
           >
-            <Select.Option value={1}>Đang bán</Select.Option>
-            <Select.Option value={0}>Dừng bán</Select.Option>
+            <Select.Option value="1">Đang bán</Select.Option>
+            <Select.Option value="0">Dừng bán</Select.Option>
           </Select>
         ) : status === 1 ? (
           <Tag
