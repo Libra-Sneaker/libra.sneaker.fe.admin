@@ -12,4 +12,11 @@ export class BillManagementApi {
     });
   };
 
+  static infoBill = (id) => {
+    return request({
+      method: "GET",
+      url: `${baseUrl}/infoBill/${id}`,
+    });
+  };
+
 };

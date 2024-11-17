@@ -32,4 +32,7 @@ export const SCREEN = {
   billManagement:{
     path: "/bill-management",
   },
+  billDetailManagement: {
+    path: "/bill-detail-management/:billId",
+  },
 };

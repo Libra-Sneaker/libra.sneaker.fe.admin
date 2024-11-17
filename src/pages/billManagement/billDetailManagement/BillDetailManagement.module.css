@@ -1,0 +1,33 @@
+.Container{
+  background-color: white;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0px 0px 5px 0px #ccc;
+}
+
+.BillHistory {
+
+}
+
+
+.BillInf{
+
+}
+
+.BillContainer{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-right: 30px;
+  margin-left: 30px;
+}
+
+.PaymentHistory{
+
+}
+
+.BillDetail{
+  
+}

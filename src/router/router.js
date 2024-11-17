@@ -19,6 +19,7 @@ import AddEmployee from "../pages/employeeManagement/addEmployee/AddEmployee";
 import CustomerManagement from "../pages/customerManagement/CustomerManagement";
 import ModalAddCustomer from "../pages/customerManagement/addCustomer/AddCustomer";
 import BillManagement from "../pages/billManagement/BillManagementt";
+import BillDetailManagement from "../pages/billManagement/billDetailManagement/BillDetailManagement";
 
 const generalRoutes = [
   { path: "*", element: <NotFound /> },
@@ -149,6 +150,17 @@ const adminRoutes = [
       <MiddlewareRouter>
         <DefaultLayout>
           <BillManagement/>
+        </DefaultLayout>
+      </MiddlewareRouter>
+    ),
+  },
+
+  {
+    path: SCREEN.billDetailManagement.path,
+    element: (
+      <MiddlewareRouter>
+        <DefaultLayout>
+          <BillDetailManagement/>
         </DefaultLayout>
       </MiddlewareRouter>
     ),

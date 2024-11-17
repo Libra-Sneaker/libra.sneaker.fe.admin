@@ -168,3 +168,7 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   justify-content: left;
 }
+
+.svg-inline--fa.fa-shop.ant-menu-item-icon{
+  color: white !important;
+}
