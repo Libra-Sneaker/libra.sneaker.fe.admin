@@ -17,6 +17,7 @@ import moment from "moment";
 import Search from "antd/es/transfer/search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { PlusOutlined } from "@ant-design/icons";
 
 const ProductManagement = () => {
   const [listProduct, setListProduct] = useState([]);
@@ -71,7 +72,7 @@ const ProductManagement = () => {
             <Select.Option value="1">Đang bán</Select.Option>
             <Select.Option value="0">Dừng bán</Select.Option>
           </Select>
-        ) : status === 1 ? (
+        ) : status === "1" ? (
           <Tag
             style={{
               display: "flex",
@@ -185,9 +186,11 @@ const ProductManagement = () => {
 
       // Update status if totalQuantity is 0
       const updatedProducts = response.data.content.map((product) => {
+        product.status = product.status.toString();
         if (product.totalQuantity === 0) {
-          return { ...product, status: 0 }; // Set status to 0 (Dừng bán) if totalQuantity is 0
+          return { ...product, status: "0" }; // Set status to 0 (Dừng bán) if totalQuantity is 0
         }
+        
         return product;
       });
 
@@ -321,11 +324,16 @@ const ProductManagement = () => {
       >
         <div className={styles.contanerAddProduct}>
           <Button
-            type="primary"
+            icon={<PlusOutlined />}
+            style={{
+              backgroundColor: "orange",
+              borderColor: "orange",
+              color: "white",
+            }}
             className={styles.btnAddProduct}
             onClick={handleShowAddProduct}
           >
-            Add Product
+            Thêm sản phẩm
           </Button>
         </div>
         <Table

@@ -70,11 +70,12 @@ const BillManagement = () => {
       title: "Trạng thái",
       key: "status",
       dataIndex: "status",
-      render: (text) => (
-        <Tag color={text === 1 ? "green" : "red"} className={styles.largeTag}>
-          {text === 1 ? "Đã hoàn thành" : "Đã hủy"}
-        </Tag>
-      ),
+      render: (text) => 
+        text === 1 ? (
+          <Tag color="green" className={styles.largeTag}>
+            Đã hoàn thành
+          </Tag>
+        ) : null,
     },
     {
       title: "Action",

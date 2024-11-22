@@ -1,0 +1,60 @@
+.Container{
+  background-color: white;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0px 0px 5px 0px #ccc;
+}
+
+.HeaderContainer{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px;
+}
+
+.ButtonAdd {
+  background-color: orange;
+  border-color: orange;
+  color: white;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+
+.NoOrdersMessage {
+  text-align: center;
+  color: gray;
+  font-size: 16px;
+  margin: 20px;
+}
+
+.ContentContainer{
+  display: flex;
+  justify-content: space-between;
+  margin: 10px;
+  align-items: center;
+}
+
+.Container{
+
+}
+
+.ContainerItem{
+  background-color: white;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0px 0px 5px 0px #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.BillDetailImg{
+  margin-left: 20px;
+}
+
+.DeleteButton{
+  margin-right: 20px;
+}

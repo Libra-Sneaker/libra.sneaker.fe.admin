@@ -8,6 +8,7 @@ import {
   faCogs,
   faShoePrints,
   faShop,
+  faShoppingCart,
   faTrademark,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
@@ -90,6 +91,16 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
             <img src="" alt="" width="60%" />
           </div>
         )}
+
+        <Menu.Item
+          // key="/brand-management"
+          className="menu_custom"
+          style={{ color: "white" }}
+          icon={<FontAwesomeIcon icon={faShoppingCart} />}
+        >
+          <Link to="/counter-sale-management">Bán hàng tại quầy</Link>
+        </Menu.Item>
+
         <Menu.Item
           // key="/brand-management"
           className="menu_custom"
@@ -133,7 +144,7 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
           </Menu.Item>
 
           <Menu.Item
-            key="/type-of-shoe-management" 
+            key="/type-of-shoe-management"
             className="menu_custom"
             style={{ color: "white" }}
             icon={<FontAwesomeIcon icon={faBox} />}

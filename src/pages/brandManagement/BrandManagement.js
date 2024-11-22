@@ -6,6 +6,7 @@ import moment from "moment";
 import ModalAddBrand from "./ModalAddBrand"; // Import your ModalAddBrand component
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { PlusOutlined } from "@ant-design/icons";
 
 const BrandManagement = () => {
   const [editingKey, setEditingKey] = useState(""); // Track which row is being edited
@@ -21,8 +22,6 @@ const BrandManagement = () => {
     pageSize: 10,
     total: 0,
   });
-
-  
 
   const handleDeleteBrand = async (id, currentStatus) => {
     console.log("Function triggered");
@@ -86,8 +85,8 @@ const BrandManagement = () => {
       key: "status",
       render: (text) => (
         <Tag color={text === 1 ? "green" : "red"} className={styles.largeTag}>
-      {text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}
-    </Tag>
+          {text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}
+        </Tag>
       ),
     },
     {
@@ -243,7 +242,15 @@ const BrandManagement = () => {
           className={styles.inputSearch}
           style={{ width: "50%" }}
         />
-        <Button type="primary" onClick={handleOpenModal}>
+        <Button
+          icon={<PlusOutlined />}
+          style={{
+            backgroundColor: "orange",
+            borderColor: "orange",
+            color: "white",
+          }}
+          onClick={handleOpenModal}
+        >
           Thêm thương hiệu
         </Button>
       </div>

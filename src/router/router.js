@@ -20,6 +20,7 @@ import CustomerManagement from "../pages/customerManagement/CustomerManagement";
 import ModalAddCustomer from "../pages/customerManagement/addCustomer/AddCustomer";
 import BillManagement from "../pages/billManagement/BillManagementt";
 import BillDetailManagement from "../pages/billManagement/billDetailManagement/BillDetailManagement";
+import CounterSaleManagement from "../pages/counterSaleManagement/CounterSaleManagement";
 
 const generalRoutes = [
   { path: "*", element: <NotFound /> },
@@ -161,6 +162,17 @@ const adminRoutes = [
       <MiddlewareRouter>
         <DefaultLayout>
           <BillDetailManagement/>
+        </DefaultLayout>
+      </MiddlewareRouter>
+    ),
+  },
+
+  {
+    path: SCREEN.counterSaleManagement.path,
+    element: (
+      <MiddlewareRouter>
+        <DefaultLayout>
+          <CounterSaleManagement/>
         </DefaultLayout>
       </MiddlewareRouter>
     ),

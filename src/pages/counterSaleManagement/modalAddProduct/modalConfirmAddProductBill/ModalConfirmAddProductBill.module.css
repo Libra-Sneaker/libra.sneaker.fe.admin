@@ -1,0 +1,35 @@
+.Container {
+  padding: 20px;
+  margin: 10px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0px 0px 5px 0px #ccc;
+}
+
+.ContainerItems{
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.BillDetailImg{
+  width: 120px;
+  border-radius: 10px;
+
+  height: 120px;
+  box-shadow: 0px 0px 5px 0px #ccc;
+}
+
+.BillDetailItems{
+
+}
+
+.BillDetailQuantity{
+
+}
+
+.BillDetailTotal{
+  font-weight: bold;
+  color: red;
+}
+

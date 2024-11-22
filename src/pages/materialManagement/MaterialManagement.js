@@ -6,6 +6,7 @@ import { MaterialManagementApi } from "../../api/admin/materialManagement/Materi
 import ModalAddMaterial from "./ModalAddMaterial";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { PlusOutlined } from "@ant-design/icons";
 
 const MaterialManagement = () => {
   const [listMaterial, setListMaterial] = useState([]); // Full list of Materials
@@ -212,7 +213,12 @@ const MaterialManagement = () => {
           className={styles.inputSearch}
           style={{ width: "50%" }}
         />
-        <Button type="primary" onClick={handleOpenModal}>
+        <Button icon={<PlusOutlined />}
+            style={{
+              backgroundColor: "orange",
+              borderColor: "orange",
+              color: "white",
+            }} onClick={handleOpenModal}>
           Thêm chất liệu
         </Button>
       </div>

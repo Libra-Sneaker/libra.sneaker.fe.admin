@@ -15,7 +15,7 @@
 
 }
 
-.BillContainer{
+.ContentContainer{
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
@@ -27,7 +27,71 @@
 .PaymentHistory{
 
 }
-
-.BillDetail{
+.BillDetailContainer{
   
+}
+.BillDetail{
+ 
+}
+
+.BillDetailRow{
+  display: flex;
+  justify-content: space-between;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin: 20px;
+}
+
+.BillDetailImg{
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 20px;
+
+}
+
+.BillDetailQuantity{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.BillDetailTotal{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 20px;
+  font-weight: bold;
+  color: red;
+
+}
+
+.BillDetailItems{
+  padding: 10px;
+  margin-right: 20px;
+  font-size: 14px;
+
+}
+
+.ItemsBillDetail{
+  display: flex;
+  align-items: center;
+
+}
+
+
+
+.ToltalBillDetails{
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 20px;
+  /* width: 300px; */
+}
+
+.ToltalBillDetailsItems{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  margin-bottom: 10px;  
 }

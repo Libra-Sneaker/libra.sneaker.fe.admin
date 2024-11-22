@@ -16,6 +16,7 @@ import { faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router";
 import ModalEmployeeDetail from "./modalEmployeeDetail/ModalEmployeeDetail";
 import { Search } from "@mui/icons-material";
+import { PlusOutlined } from "@ant-design/icons";
 
 const EmployeeManagement = () => {
   const [listEmployees, setListEmployees] = useState([]);
@@ -336,7 +337,12 @@ const EmployeeManagement = () => {
       >
         <div className={styles.employeeContainer}>
           <div className={styles.AddEmployeeBtnContainer}>
-            <Button type="primary" onClick={handleAddEmployee}>
+            <Button icon={<PlusOutlined />}
+            style={{
+              backgroundColor: "orange",
+              borderColor: "orange",
+              color: "white",
+            }} onClick={handleAddEmployee}>
               Thêm nhân viên
             </Button>
           </div>

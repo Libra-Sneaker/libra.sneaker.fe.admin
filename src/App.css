@@ -169,6 +169,7 @@ body::-webkit-scrollbar-thumb {
   justify-content: left;
 }
 
+.svg-inline--fa.fa-user.ant-menu-item-icon,
 .svg-inline--fa.fa-shop.ant-menu-item-icon{
   color: white !important;
 }

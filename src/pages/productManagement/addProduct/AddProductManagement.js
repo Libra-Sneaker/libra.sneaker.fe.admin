@@ -563,7 +563,7 @@ const AddProductManagement = () => {
                       {color.name}
                     </Button>
                   );
-                })}
+              })}
 
               <ModalColor
                 setListColorSelected={setListColorSelected}

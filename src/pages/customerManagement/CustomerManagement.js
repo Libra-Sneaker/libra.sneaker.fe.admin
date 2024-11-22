@@ -15,6 +15,7 @@ import { faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router";
 import { CustomerManagementApi } from "../../api/admin/customerManagement/CustomerManagementApi";
 import ModalCustomerDetail from "./addCustomer/modalCustomerDetail/ModalCustomerDetail";
+import { PlusOutlined } from "@ant-design/icons";
 
 const CustomerManagement = () => {
   const [listCustomer, setListCustomer] = useState([]);
@@ -311,7 +312,12 @@ const CustomerManagement = () => {
       >
         <div className={styles.employeeContainer}>
           <div className={styles.AddEmployeeBtnContainer}>
-            <Button type="primary" onClick={handleAddCustomer}>
+            <Button icon={<PlusOutlined />}
+            style={{
+              backgroundColor: "orange",
+              borderColor: "orange",
+              color: "white",
+            }} onClick={handleAddCustomer}>
               Thêm khách hàng
             </Button>
           </div>

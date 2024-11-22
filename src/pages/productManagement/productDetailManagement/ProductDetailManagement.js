@@ -428,11 +428,11 @@ const ProductDetailManagement = () => {
             onChange={(value) => handleEditInputChange(value, record, "status")} // Gọi hàm khi thay đổi giá trị
             style={{ width: 120 }}
           >
-            <Select.Option value={1}>Đang bán</Select.Option>
-            <Select.Option value={0}>Ngừng bán</Select.Option>
+            <Select.Option value="1">Đang bán</Select.Option>
+            <Select.Option value="0">Ngừng bán</Select.Option>
           </Select>
         ) : (
-          <span>{record.status === 1 ? "Đang bán" : "Ngừng bán"}</span>
+          <span>{record.status === "1" ? "Đang bán" : "Ngừng bán"}</span>
         ),
     },
 
@@ -476,7 +476,19 @@ const ProductDetailManagement = () => {
       const response = await ProductDetailManagementApi.getProductDetails(
         params
       );
-      setListProductDetails(response.data.content);
+
+      // Chuyển đổi status từ số thành chuỗi
+      const updatedData = response.data.content.map((item) => ({
+        ...item,
+        status: item.status.toString(), 
+      }));
+
+      console.log("updateData");
+      
+      console.log(updatedData);
+      
+  
+      setListProductDetails(updatedData);
       setTotalItems(response.data.totalElements);
     } catch (error) {
       console.error("Error fetching data: ", error);
@@ -493,7 +505,11 @@ const ProductDetailManagement = () => {
 
   useEffect(() => {
     if (productId) {
-      fetchData(productId, currentPage, pageSize); // Call fetchData with productId
+      fetchData(productId, currentPage, pageSize);
+      console.log("status");
+      console.log();
+      
+      // Call fetchData with productId
     }
   }, [productId, currentPage, pageSize]); // Run this effect whenever productId changes
 
@@ -545,10 +561,10 @@ const ProductDetailManagement = () => {
   };
 
   // search price
-  const [priceRange, setPriceRange] = useState([0, 10000000]);
+  const [priceRange, setPriceRange] = useState([0, 5000000]);
   const [displayPriceRange, setDisplayPriceRange] = useState([
     "0 VND",
-    "100,000,000 VND",
+    "5,000,000 VND",
   ]);
 
   // Format number to currency with "VND"
@@ -594,191 +610,196 @@ const ProductDetailManagement = () => {
         Quay lại
       </Button>
 
-<div style={{
+      <div
+        style={{
           backgroundColor: "#fff",
           borderRadius: "10px",
           padding: "10px",
           marginBottom: "20px",
           boxShadow: "0px 0px 5px 0px #ccc",
-        }}>
+        }}
+      >
+        <div className={styles.containerSearch}>
+          <div className={styles.inputSearch}>
+            <Input
+            style={{
+              height:'33px',
+              marginRight:'20px'
+            }}
+              placeholder="Nhập mã sản phẩm ..."
+              value={searchText}
+              onChange={handleInputChange}
+            ></Input>
+            <div
+              style={{
+                width: "1000px",
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "16px",
+              }}
+            >
+              {/* Minimum price input */}
+              <Input
+                type="text"
+                value={displayPriceRange[0]}
+                onChange={handleMinInputChange}
+                onBlur={handleMinInputBlur}
+                style={{ width: "120px", marginRight: "8px" }}
+              />
 
-      <div className={styles.containerSearch}>
-        <div className={styles.inputSearch}>
-          <Input
-            placeholder="Nhập mã sản phẩm ..."
-            value={searchText}
-            onChange={handleInputChange}
-          ></Input>
+              {/* Slider */}
+              <Slider
+                range
+                min={0}
+                max={5000000}
+                step={1000}
+                value={priceRange}
+                onChange={handleSliderChange}
+                tooltip={{ formatter: formatCurrency }}
+                style={{ flex: 1, marginRight: "8px" }}
+              />
+
+              {/* Maximum price input */}
+              <Input
+                type="text"
+                value={displayPriceRange[1]}
+                onChange={handleMaxInputChange}
+                onBlur={handleMaxInputBlur}
+                style={{ width: "120px" }}
+              />
+            </div>
+          </div>
+
+          <div className={styles.selectSearch}>
+            <div>
+              <label>Brand: </label>
+              <Select
+                placeholder="Thương hiệu..."
+                options={brandOptions}
+                onChange={(value) => handleSelectChange("brand", value)}
+                value={selectedBrand}
+                allowClear
+              ></Select>
+            </div>
+            <div>
+              <label>Danh mục: </label>
+              <Select
+                placeholder="Loại giày..."
+                options={typeOptions}
+                onChange={(value) => handleSelectChange("type", value)}
+                value={selectedType}
+                allowClear
+              />
+            </div>
+            <div>
+              <label>Chất liệu: </label>
+              <Select
+                placeholder="Chất liệu..."
+                options={materialOptions}
+                onChange={(value) => handleSelectChange("material", value)}
+                value={selectedMaterial}
+                allowClear
+              ></Select>
+            </div>
+            <div>
+              <label>Màu sắc: </label>
+              <Select
+                placeholder="Màu sắc..."
+                options={colorOptions}
+                onChange={(value) => handleSelectChange("color", value)}
+                value={selectedColor}
+                allowClear
+              ></Select>
+            </div>
+          </div>
+          <div className={styles.selectSearch}>
+            <div>
+              <label>Kích cỡ: </label>
+              <Select
+                placeholder="Kích cỡ..."
+                options={sizeOptions}
+                onChange={(value) => handleSelectChange("size", value)}
+                value={selectedSize}
+                allowClear
+              ></Select>
+            </div>
+            <div>
+              <label>Trạng thái: </label>
+              <Select
+                placeholder="Trạng thái..."
+                options={[
+                  { value: "1", label: "Đang bán" },
+                  { value: "0", label: "Dừng bán" },
+                ]}
+                onChange={(value) => handleSelectChange("status", value)}
+                value={selectedStatus}
+                allowClear
+              ></Select>
+            </div>
+          </div>
+
+          <div className={styles.ButtonSearch}>
+            <Button type="primary" onClick={handleSearchData}>
+              Tìm kiếm
+            </Button>
+            <Button onClick={handleRefresh}>Làm mới</Button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          backgroundColor: "#fff",
+          borderRadius: "10px",
+          padding: "10px",
+          marginBottom: "20px",
+          boxShadow: "0px 0px 5px 0px #ccc",
+        }}
+      >
+        <div className={styles.containerTable}>
           <div
             style={{
-              width: "1000px",
               display: "flex",
+              justifyContent: "flex-end",
+              marginBottom: "20px",
+            }}
+          >
+            <Button
+              type="primary"
+              onClick={() => {
+                handleSaveListProductDetails();
+              }}
+            >
+              Lưu thay đổi
+            </Button>
+          </div>
+
+          <Table
+            columns={columns}
+            dataSource={listProductDetails}
+            loading={loading}
+            rowKey="productDetailId"
+            pagination={false}
+          />
+
+          <Pagination
+            style={{
+              padding: "20px",
+              display: "flex",
+              justifyContent: "center",
               alignItems: "center",
-              marginBottom: "16px",
+              gap: "10px",
             }}
-          >
-            {/* Minimum price input */}
-            <Input
-              type="text"
-              value={displayPriceRange[0]}
-              onChange={handleMinInputChange}
-              onBlur={handleMinInputBlur}
-              style={{ width: "120px", marginRight: "8px" }}
-            />
-
-            {/* Slider */}
-            <Slider
-              range
-              min={0}
-              max={10000000}
-              step={1000}
-              value={priceRange}
-              onChange={handleSliderChange}
-              tooltip={{ formatter: formatCurrency }}
-              style={{ flex: 1, marginRight: "8px" }}
-            />
-
-            {/* Maximum price input */}
-            <Input
-              type="text"
-              value={displayPriceRange[1]}
-              onChange={handleMaxInputChange}
-              onBlur={handleMaxInputBlur}
-              style={{ width: "120px" }}
-            />
-          </div>
-        </div>
-
-        <div className={styles.selectSearch}>
-          <div>
-            <label>Brand: </label>
-            <Select
-              placeholder="Thương hiệu..."
-              options={brandOptions}
-              onChange={(value) => handleSelectChange("brand", value)}
-              value={selectedBrand}
-              allowClear
-            ></Select>
-          </div>
-          <div>
-            <label>Danh mục: </label>
-            <Select
-              placeholder="Loại giày..."
-              options={typeOptions}
-              onChange={(value) => handleSelectChange("type", value)}
-              value={selectedType}
-              allowClear
-            />
-          </div>
-          <div>
-            <label>Chất liệu: </label>
-            <Select
-              placeholder="Chất liệu..."
-              options={materialOptions}
-              onChange={(value) => handleSelectChange("material", value)}
-              value={selectedMaterial}
-              allowClear
-            ></Select>
-          </div>
-          <div>
-            <label>Màu sắc: </label>
-            <Select
-              placeholder="Màu sắc..."
-              options={colorOptions}
-              onChange={(value) => handleSelectChange("color", value)}
-              value={selectedColor}
-              allowClear
-            ></Select>
-          </div>
-        </div>
-        <div className={styles.selectSearch}>
-          <div>
-            <label>Kích cỡ: </label>
-            <Select
-              placeholder="Kích cỡ..."
-              options={sizeOptions}
-              onChange={(value) => handleSelectChange("size", value)}
-              value={selectedSize}
-              allowClear
-            ></Select>
-          </div>
-          <div>
-            <label>Trạng thái: </label>
-            <Select
-              placeholder="Trạng thái..."
-              options={[
-                { value: 1, label: "Đang bán" },
-                { value: 0, label: "Dừng bán" },
-              ]}
-              onChange={(value) => handleSelectChange("status", value)}
-              value={selectedStatus}
-              allowClear
-            ></Select>
-          </div>
-        </div>
-
-        <div className={styles.ButtonSearch}>
-          <Button type="primary" onClick={handleSearchData}>
-            Tìm kiếm
-          </Button>
-          <Button onClick={handleRefresh}>Làm mới</Button>
+            simple
+            current={currentPage}
+            pageSize={pageSize}
+            total={totalItems}
+            onChange={handlePageChange}
+            showSizeChanger
+            pageSizeOptions={["10", "20", "50", "100"]}
+          />
         </div>
       </div>
-</div>
-
-<div style={{
-          backgroundColor: "#fff",
-          borderRadius: "10px",
-          padding: "10px",
-          marginBottom: "20px",
-          boxShadow: "0px 0px 5px 0px #ccc",
-        }}>
-
-      <div className={styles.containerTable}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "20px",
-          }}
-        >
-          <Button
-            type="primary"
-            onClick={() => {
-              handleSaveListProductDetails();
-            }}
-          >
-            Lưu thay đổi
-          </Button>
-        </div>
-
-        <Table
-          columns={columns}
-          dataSource={listProductDetails}
-          loading={loading}
-          rowKey="productDetailId"
-          pagination={false}
-        />
-
-        <Pagination
-          style={{
-            padding: "20px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "10px",
-          }}
-          simple
-          current={currentPage}
-          pageSize={pageSize}
-          total={totalItems}
-          onChange={handlePageChange}
-          showSizeChanger
-          pageSizeOptions={["10", "20", "50", "100"]}
-        />
-      </div>
-        </div>
-
 
       <ModalProductDetail
         isModalOpen={isModalOpen}

@@ -35,4 +35,7 @@ export const SCREEN = {
   billDetailManagement: {
     path: "/bill-detail-management/:billId",
   },
+  counterSaleManagement:{
+    path: "/counter-sale-management",
+  },
 };

@@ -6,6 +6,7 @@ import moment from "moment";
 import ModalAddTypeOfShoe from "./ModalAddTypeOfShoe"; // Import your ModalAddTypeOfShoe component
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { PlusOutlined } from "@ant-design/icons";
 
 const TypeOfShoeManagement = () => {
   const [editingKey, setEditingKey] = useState(""); // Track which row is being edited
@@ -136,8 +137,8 @@ const TypeOfShoeManagement = () => {
       key: "status",
       render: (text) => (
         <Tag color={text === 1 ? "green" : "red"} className={styles.largeTag}>
-      {text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}
-    </Tag>
+          {text === 1 ? "Đang hoạt động" : "Ngừng hoạt động"}
+        </Tag>
       ),
     },
     {
@@ -197,7 +198,15 @@ const TypeOfShoeManagement = () => {
           onChange={handleSearchInputChange}
           style={{ width: "50%" }}
         />
-        <Button type="primary" onClick={handleOpenModal}>
+        <Button
+          icon={<PlusOutlined />}
+          style={{
+            backgroundColor: "orange",
+            borderColor: "orange",
+            color: "white",
+          }}
+          onClick={handleOpenModal}
+        >
           Thêm loại giày
         </Button>
       </div>
