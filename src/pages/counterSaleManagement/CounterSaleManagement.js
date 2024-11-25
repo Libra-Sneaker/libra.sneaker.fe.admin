@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./CounterSaleManagement.module.css";
-import { Button, message, Modal, Table, Tabs } from "antd";
-import { MinusOutlined, PlusOutlined, QrcodeOutlined } from "@ant-design/icons";
+import { Button, Input, message, Modal, Switch, Tabs, Tag } from "antd";
+import { DollarCircleOutlined, MinusOutlined, PlusOutlined, QrcodeOutlined } from "@ant-design/icons";
 import { BillManagementApi } from "../../api/admin/billManagement/BillManagementApi";
 import ModalAddProduct from "./modalAddProduct/ModalAddProduct";
 import { BillDetailsManagementApi } from "../../api/admin/billDetailsManagement/BillDetailsManagementApi";
@@ -16,8 +16,9 @@ const CounterSaleManagement = () => {
   const [billId, setBillId] = useState();
 
   const [billDetails, setBillDetails] = useState([]); // State lưu trữ danh sách sản phẩm trong hóa đơn
-  const [billDetailsId, setBillDetailsId] = useState([]); 
+  const [billDetailsId, setBillDetailsId] = useState([]);
   const [loading, setLoading] = useState(false); // State để quản lý trạng thái loading
+  const [quantityProductDetail, setQuantityProductDetail] = useState();
 
   const handleProductsSelected = (products) => {
     setSelectedProducts(products); // Cập nhật danh sách sản phẩm đã chọn
@@ -214,7 +215,6 @@ const CounterSaleManagement = () => {
   const getBillDetails = async () => {
     setLoading(true); // Bật trạng thái loading khi bắt đầu gọi API
     console.log("parma truyenf vao");
-
     console.log(billId);
 
     try {
@@ -223,6 +223,9 @@ const CounterSaleManagement = () => {
 
       // Cập nhật dữ liệu vào state
       setBillDetails(data);
+      console.log("bill details");
+
+      console.log(data);
     } catch (error) {
       console.error("Lỗi khi lấy chi tiết hóa đơn:", error);
       message.error("Lấy chi tiết hóa đơn thất bại!");
@@ -237,22 +240,23 @@ const CounterSaleManagement = () => {
     }
   }, [billId]); // Gọi lại khi `billId` thay đổi
 
-
   const handleDeleteBillDetails = (product) => {
     Modal.confirm({
-      title: 'Bạn có chắc chắn muốn xóa chi tiết hóa đơn này?',
-      content: 'Hành động này sẽ không thể phục hồi.',
-      okText: 'Xóa',
-      cancelText: 'Hủy',
+      title: "Bạn có chắc chắn muốn xóa chi tiết hóa đơn này?",
+      content: "Hành động này sẽ không thể phục hồi.",
+      okText: "Xóa",
+      cancelText: "Hủy",
       onOk: async () => {
         try {
           // Gọi API để xóa chi tiết hóa đơn
-          const response = await BillDetailsManagementApi.updateDeleteFlag(product.id);
+          const response = await BillDetailsManagementApi.updateDeleteFlag(
+            product.id
+          );
           console.log("API Response:", response);
-  
+
           // Hiển thị thông báo thành công
           message.success("Xóa chi tiết hóa đơn thành công!");
-  
+
           // Load lại danh sách dữ liệu sau khi xóa
           getBillDetails(); // Hàm để lấy lại dữ liệu chi tiết hóa đơn
         } catch (error) {
@@ -263,10 +267,74 @@ const CounterSaleManagement = () => {
       onCancel() {
         // Thực hiện khi người dùng hủy bỏ
         console.log("Hủy xóa");
-      }
+      },
     });
   };
-  
+
+  const handleQuantityChange = async (product, change) => {
+    // Lấy số lượng hiện tại từ state hoặc từ product
+    const currentDetail = billDetails.find(
+      (detail) => detail.productDetailId === product.productDetailId
+    );
+
+    const currentQuantity = currentDetail
+      ? currentDetail.quantity
+      : product.quantity;
+
+    const newQuantity = currentQuantity + change; // Số lượng mới, chỉ tăng hoặc giảm 1
+
+    // Kiểm tra số lượng hợp lệ
+    if (newQuantity < 1) {
+      message.warning("Số lượng không thể nhỏ hơn 1.");
+      return;
+    }
+
+    // Không cho phép tăng nếu số lượng trong kho đã bằng 0
+    if (change > 0 && product.productDetailQuantity === 0) {
+      message.warning("Số lượng sản phẩm trong kho hiện không đủ.");
+      return;
+    }
+
+    // Thông tin cần gửi tới backend
+    const param = {
+      productDetailId: product.productDetailId,
+      quantity: change, // Chỉ gửi sự thay đổi (+1 hoặc -1)
+      billId: billId,
+    };
+
+    console.log("Sending to backend:", param);
+
+    try {
+      // Gọi API cập nhật số lượng
+      await BillDetailsManagementApi.create(param);
+
+      // Hiển thị thông báo thành công
+      message.success("Cập nhật số lượng thành công!");
+
+      // Gọi lại hàm `getBillDetails` để làm mới dữ liệu
+      await getBillDetails();
+    } catch (error) {
+      console.error("Lỗi khi cập nhật số lượng:", error);
+
+      // Kiểm tra lỗi và hiển thị modal nếu lỗi là "Số lượng sản phẩm trong kho không đủ"
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message === "Số lượng sản phẩm trong kho không đủ!"
+      ) {
+        Modal.error({
+          title: "Lỗi cập nhật số lượng",
+          content:
+            "Hiện số lượng sản phẩm này trong kho không đủ, vui lòng chọn sản phẩm khác!",
+        });
+      } else {
+        message.error("Cập nhật số lượng thất bại!");
+      }
+    } finally {
+      // Luôn gọi lại `getBillDetails` để đảm bảo dữ liệu được làm mới
+      await getBillDetails();
+    }
+  };
 
   return (
     <div className={styles.Container}>
@@ -302,28 +370,31 @@ const CounterSaleManagement = () => {
               // id: tab.id,
               key: tab.key,
               children: (
-                <div >
-                  <div style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center", 
-                    margin:'10px'
-                  }}>
-
-                  <h2>{tab.label}</h2>
-                  <Button
-                    icon={<PlusOutlined />}
-                    className={styles.ButtonAdd}
-                    onClick={handleOpenModal}
+                <div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      margin: "10px",
+                    }}
                   >
-                    Thêm sản phẩm
-                  </Button>
+                    <h2>{tab.label}</h2>
+                    <Button
+                      icon={<PlusOutlined />}
+                      className={styles.ButtonAdd}
+                      onClick={handleOpenModal}
+                    >
+                      Thêm sản phẩm
+                    </Button>
                   </div>
 
                   {/* Danh sách sản phẩm đã chọn */}
-                  <div style={{
-                    margin:'10px'
-                  }}>
+                  <div
+                    style={{
+                      margin: "10px",
+                    }}
+                  >
                     {loading ? (
                       <div>Đang tải...</div> // Hiển thị khi đang tải dữ liệu
                     ) : (
@@ -388,10 +459,16 @@ const CounterSaleManagement = () => {
                             >
                               <div style={{ margin: "5px" }}>
                                 <MinusOutlined
+                                  onClick={() =>
+                                    handleQuantityChange(product, -1)
+                                  }
                                   style={{ margin: "5px", fontSize: "10px" }}
                                 />
                                 {product.quantity || "N/A"}
                                 <PlusOutlined
+                                  onClick={() =>
+                                    handleQuantityChange(product, 1)
+                                  }
                                   style={{ margin: "5px", fontSize: "10px" }}
                                 />
                               </div>
@@ -413,7 +490,7 @@ const CounterSaleManagement = () => {
                           <Button
                             className={styles.DeleteButton}
                             onClick={() => {
-                              handleDeleteBillDetails(product)
+                              handleDeleteBillDetails(product);
                             }}
                           >
                             Xóa
@@ -421,6 +498,82 @@ const CounterSaleManagement = () => {
                         </div>
                       ))
                     )}
+
+                    <div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          alignItems: "center",
+                          marginTop: "10px",
+                          marginBottom: "25px",
+                        }}
+                      >
+                        <Button
+                          className={styles.ButtonAdd}
+                          icon={<PlusOutlined />}
+                        >
+                          Thêm khách hàng
+                        </Button>
+                      </div>
+                      <div className={styles.ContainerItem}>
+                        {/* Content  left */}
+                        <div className={styles.TotalMoneyLeft}>
+                          <div className={styles.TotalMoneyItemLeft}>
+                          <div>
+                            Tên khách hàng
+                          </div>
+                          <Tag>
+                            Tên khách hàng
+                          </Tag>
+                          </div>
+
+                          <div className={styles.TotalMoneyItemLeft}>
+                            <div>Giao hàng</div>
+                            <Switch/>
+                          </div>
+                        </div>
+
+                        {/* Content right */}
+                        <div className={styles.TotalMoneyRight}>
+                          <div className={styles.TotalMoneyItemRight}>
+                            <div>Tiền hàng </div>
+                            <div>1,000,000 VND</div>
+                          </div>
+
+                          <div className={styles.TotalMoneyItemRight}>
+                            <div>Phí vận chuyển</div>
+                            <div>0 VND</div>
+                          </div>
+
+                          <div className={styles.TotalMoneyItemRight}>
+                            <div>Giảm giá </div>
+                            <div>0 VND</div>
+                          </div>
+
+                          <div className={styles.TotalMoneyItemRight}>
+                            <div>Khách thanh toán
+                              <DollarCircleOutlined/>
+                            </div>
+                            <div>0 VND</div>
+                          </div>
+
+                          <div className={styles.TotalMoneyItemRight}>
+                            <div>
+                              <strong>Tổng tiền </strong>
+                            </div>
+                            <div
+                              style={{
+                                fontWeight: "bold",
+                                color: "red",
+                              }}
+                            >
+                              1,000,000 VND
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ),

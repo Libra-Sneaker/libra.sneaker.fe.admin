@@ -11,6 +11,7 @@ import {
   Upload,
   Spin,
   Pagination,
+  message,
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { SizeManagementApi } from "../../../api/admin/sizeManagement/SizeManagementApi";
@@ -270,13 +271,17 @@ const ModalAddProduct = ({ isModalOpen, handleCancel, onProductsSelected,billIdS
           <Button
             size="medium"
             onClick={() => {
-              handleOpenModalExtra(record);
+              if (record.quantity === 0) {
+                message.warning("Hiện tại sản phẩm này đang hết!");
+              } else {
+                handleOpenModalExtra(record);
+              }
             }}
           >
             Chọn
           </Button>
         </div>
-      ),
+      )
     },
   ];
 
@@ -401,6 +406,8 @@ const ModalAddProduct = ({ isModalOpen, handleCancel, onProductsSelected,billIdS
     setCurrentPage(page); // Cập nhật trang hiện tại
     setPageSize(size); // Cập nhật kích thước trang
   };
+
+  useEffect(() => {if(isModalOpen)fetchData()}, [isModalOpen])
 
   // get data product details
   const fetchData = async () => {
@@ -652,6 +659,7 @@ const ModalAddProduct = ({ isModalOpen, handleCancel, onProductsSelected,billIdS
         selectedProduct={selectedProduct}
         billIdSelectedDetail ={billIdSelected}
         getBillDetails={getBillDetails}
+        fetchData={fetchData}
       />
     </Modal>
   );

@@ -1,4 +1,4 @@
-.Container{
+.Container {
   background-color: white;
   border-radius: 10px;
   padding: 10px;
@@ -6,7 +6,7 @@
   box-shadow: 0px 0px 5px 0px #ccc;
 }
 
-.HeaderContainer{
+.HeaderContainer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -21,7 +21,6 @@
   margin-left: 10px;
 }
 
-
 .NoOrdersMessage {
   text-align: center;
   color: gray;
@@ -29,18 +28,17 @@
   margin: 20px;
 }
 
-.ContentContainer{
+.ContentContainer {
   display: flex;
   justify-content: space-between;
   margin: 10px;
   align-items: center;
 }
 
-.Container{
-
+.Container {
 }
 
-.ContainerItem{
+.ContainerItem {
   background-color: white;
   border-radius: 10px;
   padding: 10px;
@@ -51,10 +49,34 @@
   align-items: center;
 }
 
-.BillDetailImg{
+.BillDetailImg {
   margin-left: 20px;
 }
 
-.DeleteButton{
+.DeleteButton {
   margin-right: 20px;
 }
+
+.TotalMoneyLeft{
+  margin: 10px;
+  width: 250px;
+}
+
+.TotalMoneyItemLeft{
+  display: flex;
+  margin: 10px;
+  justify-content: space-between;
+}
+
+.TotalMoneyRight {
+  margin: 10px;
+  width: 250px;
+}
+
+.TotalMoneyItemRight {
+  display: flex;
+  margin: 10px;
+  justify-content: space-between;
+}
+
+

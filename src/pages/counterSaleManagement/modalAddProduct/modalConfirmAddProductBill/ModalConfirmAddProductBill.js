@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./ModalConfirmAddProductBill.module.css";
-import { message, Modal } from "antd";
+import { Input, message, Modal } from "antd";
 import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { BillDetailsManagementApi } from "../../../../api/admin/billDetailsManagement/BillDetailsManagementApi";
 
@@ -9,7 +9,8 @@ const ModalConfirmAddProductBill = ({
   handleCancelExtra,
   selectedProduct,
   billIdSelectedDetail,
-  getBillDetails
+  getBillDetails,
+  fetchData,
 }) => {
   const [quantity, setQuantity] = useState(1);
 
@@ -27,6 +28,7 @@ const ModalConfirmAddProductBill = ({
       setQuantity((prevQuantity) => prevQuantity + 1); // Tăng số lượng nếu hợp lệ
     }
   };
+
   // Reset quantity về 1 khi modal đóng
   useEffect(() => {
     if (!isModalOpendExtra) {
@@ -38,43 +40,71 @@ const ModalConfirmAddProductBill = ({
     console.log(selectedProduct);
   }, [selectedProduct]);
 
-  const handleOk = () => {
+  const validateQuantity = (quantity, availableQuantity) => {
+    if (isNaN(quantity) || quantity < 1) {
+      message.error("Số lượng không hợp lệ. Vui lòng nhập số lượng lớn hơn 0.");
+      return false;
+    }
+    if (quantity > availableQuantity) {
+      Modal.error({
+        title: "Số lượng không hợp lệ",
+        content: `Số lượng trong kho không đủ. Chỉ còn ${availableQuantity} sản phẩm.`,
+        centered: true,
+      });
+      return false;
+    }
+    return true;
+  };
+  
+  const handleOk = (product) => {
+    const inputQuantity = Number(quantity);
+  
+    // Kiểm tra số lượng nhập
+    if (!validateQuantity(inputQuantity, selectedProduct.quantity)) {
+      return;
+    }
+  
     // Xác nhận người dùng có chắc chắn muốn thêm sản phẩm không
     Modal.confirm({
-      title: "Bạn có chắc chắn muốn thêm sản phẩm này vào hóa đơn?",
+      title: "Xác nhận thêm sản phẩm",
+      content: (
+        <>
+          Bạn có chắc chắn muốn thêm sản phẩm "
+          <strong>{selectedProduct.productName}</strong>" vào hóa đơn với số lượng{" "}
+          <strong>{inputQuantity}</strong>?
+        </>
+      ),
       centered: true,
       onOk: async () => {
         const params = {
           productDetailId: selectedProduct.productDetailId,
-          quantity: quantity, // Thêm số lượng được chọn
-          price: selectedProduct.price, // Thêm giá sản phẩm
-          billId: billIdSelectedDetail, // Thêm id của hóa đơn
+          quantity: inputQuantity,
+          price: selectedProduct.price,
+          billId: billIdSelectedDetail,
         };
-
+  
         console.log(params);
-
+  
         try {
           // Gọi API để tạo BillDetail
-          const createBillDetail = await BillDetailsManagementApi.create(
-            params
-          );
-
-          // Kiểm tra kết quả và thông báo thành công
+          const createBillDetail = await BillDetailsManagementApi.create(params);
+  
           if (createBillDetail) {
             message.success("Thêm sản phẩm vào hóa đơn thành công!");
           }
         } catch (error) {
-          message.error("Thêm sản phẩm vào hóa đơn thất bại!"); // Hiển thị thông báo lỗi nếu có
+          message.error("Thêm sản phẩm vào hóa đơn thất bại!");
         }
         getBillDetails();
-
-        handleCancelExtra(); // Đóng modal sau khi thao tác xong
+        fetchData();
+        handleCancelExtra(); // Đóng modal
       },
       onCancel() {
-        console.log("Người dùng đã hủy việc thêm sản phẩm"); // Thực hiện hành động nếu người dùng hủy
+        console.log("Người dùng đã hủy việc thêm sản phẩm");
       },
     });
   };
+  
 
   return (
     <Modal
@@ -89,8 +119,7 @@ const ModalConfirmAddProductBill = ({
       onOk={handleOk}
       onCancel={handleCancelExtra}
       width={800}
-      centered = {true}
-
+      centered={true}
     >
       <div className={styles.Container}>
         {selectedProduct ? (
@@ -148,7 +177,32 @@ const ModalConfirmAddProductBill = ({
                     }}
                     onClick={decreaseQuantity}
                   />
-                  {quantity}
+                  <Input
+                    value={quantity}
+                    onChange={(e) => {
+                      const inputQuantity = e.target.value;
+                      setQuantity(inputQuantity); // Cập nhật giá trị mà không ràng buộc
+                    }}
+                    onBlur={() => {
+                      const inputQuantity = Number(quantity);
+                      if (
+                        inputQuantity < 1 ||
+                        inputQuantity > selectedProduct.quantity
+                      ) {
+                        message.error(
+                          `Số lượng trong kho không đủ, Xin vui lòng nhập lại.`
+                        );
+                        // setQuantity(1); // Reset về giá trị mặc định hợp lệ
+                      }
+                    }}
+                    style={{
+                      width: "50px",
+                      textAlign: "center",
+                      border: "1px solid #fff",
+                      borderRadius: "4px",
+                    }}
+                  />
+
                   <PlusOutlined
                     style={{
                       margin: "5px",
