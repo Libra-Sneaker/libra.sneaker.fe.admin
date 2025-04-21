@@ -47,18 +47,31 @@ const BillManagement = () => {
     },
     {
       title: "Tổng sản phẩm",
-      dataIndex: "totalProduct",
-      key: "totalProduct",
+      dataIndex: "totalQuantity",
+      key: "totalQuantity",
+      render: (text) => {
+        return text !== undefined && text !== null ? text : 0; // Kiểm tra và trả về 0 nếu không có giá trị
+      },
     },
     {
       title: "Tổng tiền",
       dataIndex: "totalAmount",
       key: "totalAmount",
+      render: (totalAmount) => {
+        return totalAmount?.toLocaleString("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        });
+      },
     },
     {
       title: "Tên khách hàng",
       dataIndex: "customerName",
       key: "customerName",
+      render: (text) => {
+        // Kiểm tra nếu có dữ liệu thì render tên khách hàng, nếu không có dữ liệu thì hiển thị "Khách lẻ"
+        return text ? text : "Khách lẻ";
+      },
     },
     {
       title: "Ngày thanh toán",
@@ -70,7 +83,7 @@ const BillManagement = () => {
       title: "Trạng thái",
       key: "status",
       dataIndex: "status",
-      render: (text) => 
+      render: (text) =>
         text === 1 ? (
           <Tag color="green" className={styles.largeTag}>
             Đã hoàn thành
@@ -94,7 +107,7 @@ const BillManagement = () => {
 
   const fetchData = async (page = 1, size = 10) => {
     console.log(`Fetching page: ${page}, size: ${size}`);
-    
+
     setLoading(true);
     const params = {
       page: page - 1,
@@ -127,7 +140,7 @@ const BillManagement = () => {
   };
 
   // Lấy giá trị ngày
-  const   handleRangeChange = (dates, dateStrings) => {
+  const handleRangeChange = (dates, dateStrings) => {
     if (dates) {
       setDatePaymentStart(dateStrings[0]); // Lấy giá trị ngày bắt đầu
       setDatePaymentEnd(dateStrings[1]); // Lấy giá trị ngày kết thúc
@@ -161,7 +174,7 @@ const BillManagement = () => {
       datePaymentStart: datePaymentStart,
       datePaymentEnd: datePaymentEnd,
     };
-    
+
     console.log(params);
 
     try {
@@ -170,8 +183,6 @@ const BillManagement = () => {
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
-    
-    
   };
 
   return (

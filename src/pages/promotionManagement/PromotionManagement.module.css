@@ -1,0 +1,366 @@
+/* Base styling */
+.pageWrapper {
+  background-color: #f0f2f5;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pageIcon {
+  font-size: 24px;
+  color: #4f46e5;
+}
+
+/* Card styling */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 500;
+  color: #111827;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardIcon {
+  color: #4f46e5;
+  font-size: 20px;
+}
+
+.cardBody {
+  padding: 24px;
+}
+
+/* Filter section */
+.filterSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+}
+
+.searchInputWrapper {
+  flex: 1;
+  min-width: 280px;
+}
+
+.searchInput {
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: 15px;
+}
+
+.searchInput:hover {
+  border-color: #d1d5db;
+}
+
+.searchInput:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+/* Date picker */
+.datePickerWrapper {
+  min-width: 320px;
+}
+
+.datePicker {
+  height: 44px;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Radio group */
+.statusFilter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statusLabel {
+  font-weight: 500;
+  color: #374151;
+  margin-right: 4px;
+}
+
+.radioGroup {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Action buttons */
+.actionButtonsWrapper {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* Buttons styling */
+.addButton {
+  height: 44px;
+  padding: 0 20px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+  background: orange;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.addButton:hover {
+  background: #4338ca;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.addButton:active {
+  transform: translateY(0);
+}
+
+.searchButton {
+  height: 44px;
+  padding: 0 20px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+  background: #4f46e5;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.searchButton:hover {
+  background: #4338ca;
+}
+
+.exportButton {
+  height: 44px;
+  padding: 0 20px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.exportButton:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+/* Table styling */
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 1100px;
+}
+
+.tableHeader th {
+  background-color: #f9fafb !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  padding: 16px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.tableRow:hover > td {
+  background-color: #f3f4f6 !important;
+}
+
+.tableCell {
+  padding: 15px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+.tableCellType {
+  width: 85px;
+}
+
+.codeCell {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-weight: 500;
+  color: #4f46e5;
+}
+
+.discountValue {
+  font-weight: 600;
+  color: #059669;
+}
+
+.discountPercentage {
+  font-weight: 600;
+  color: #0891b2;
+}
+
+/* Status tags */
+.statusTag {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  display: inline-block;
+  min-width: 110px;
+}
+
+.activeTag {
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.expiredTag {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+/* Action buttons */
+.actionButton {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  color: #4f46e5;
+  transition: all 0.2s ease;
+  margin-left: 20px;
+}
+
+.actionButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #4338ca;
+}
+
+/* Pagination */
+.paginationWrapper {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f3f4f6;
+}
+
+.paginationInfo {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Empty state */
+.emptyState {
+  padding: 40px 0;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.emptyDescription {
+  color: #6b7280;
+  max-width: 400px;
+  margin: 0 auto 24px;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .filterRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .searchInputWrapper,
+  .datePickerWrapper,
+  .statusFilter,
+  .actionButtonsWrapper {
+    width: 100%;
+  }
+
+  .actionButtonsWrapper {
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .pageWrapper {
+    padding: 16px;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .cardBody {
+    padding: 16px;
+  }
+
+  .paginationWrapper {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

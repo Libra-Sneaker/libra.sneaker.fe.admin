@@ -15,6 +15,11 @@ const checkAuth = () => {
     const currentTime = Date.now() / 1000;
     return decodedToken.exp && decodedToken.exp > currentTime;
   } catch {
+    // Nếu token không hợp lệ, xóa token và thông tin người dùng
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("email");
+    localStorage.removeItem("name");
     return false;
   }
 };
@@ -22,6 +27,7 @@ const checkAuth = () => {
 const MiddlewareRouter = ({ children }) => {
   const dispatch = useAppDispatch();
   const isAuthenticated = checkAuth();
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -31,9 +37,13 @@ const MiddlewareRouter = ({ children }) => {
         dispatch(SetUserCurrent(decodedToken));
       }
     }
-  }, [isAuthenticated, dispatch]); 
+  }, [isAuthenticated, dispatch]);
 
+  if (!isAuthenticated || role !== "ADMIN") {
+    return <Navigate to="/" replace />; // Chuyển hướng về trang chủ
+  }
 
+  // Nếu xác thực thành công và role là ADMIN, render children
   return children;
 };
 

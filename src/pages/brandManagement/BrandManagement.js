@@ -265,6 +265,7 @@ const BrandManagement = () => {
         }}
         onChange={handleTableChange}
       />
+
       <ModalAddBrand
         isModalOpen={isModalOpen}
         handleCancel={handleModalClose}

@@ -1,0 +1,41 @@
+.TotalAmount{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.TotalAmountDue{
+  font-weight: bold;
+  color: red;
+}
+
+.MethodPayment{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.MethodPaymentItem{
+  display: flex;
+  justify-content: center;
+  align-items: center;;
+  margin-left: 10px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  width: 150px;
+  height: 35px;
+}
+
+.SelectedMethodContainer{
+  margin-top: 20px;
+}
+
+.TransactionCodeInput{
+  margin-bottom: 30px;
+}
+
+.TransferSwitch{
+  margin-top: 10px;
+  margin-bottom: 10px;
+}

@@ -17,25 +17,45 @@ export const SCREEN = {
   addProductManagement: {
     path: "/add-product-management",
   },
-  employeeManagement:{
+  employeeManagement: {
     path: "/employee-management",
   },
-  addEmployee:{
+  addEmployee: {
     path: "/add-employee-management",
   },
-  customerManagement:{
+  customerManagement: {
     path: "/customer-management",
   },
-  addCustomer:{
+  addCustomer: {
     path: "/add-customer-management",
   },
-  billManagement:{
+  billManagement: {
     path: "/bill-management",
   },
   billDetailManagement: {
     path: "/bill-detail-management/:billId",
   },
-  counterSaleManagement:{
+  counterSaleManagement: {
     path: "/counter-sale-management",
+  },
+  returnManagement: {
+    path: "/return-management",
+  },
+  promotionManagement: {
+    path: "/promotion-management",
+  },
+  createCouponManagement: {
+    path: "/create-coupon-management",
+  },
+
+  couponDetailManagement: {
+    path: "/coupon-detail-management/:id",
+  },
+
+  bigPromotionManagement: {
+    path: "/big-promotion-management",
+  },
+  analysisManagement: {
+    path: "/analysis-management",
   },
 };

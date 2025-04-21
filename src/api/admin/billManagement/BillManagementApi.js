@@ -45,4 +45,13 @@ export class BillManagementApi {
       url: `${baseUrl}/updateDeleteFlag/${id}`,
     });
   };
+
+  // Phương thức update mới để gửi toàn bộ thông tin hóa đơn
+  static update = (billData) => {
+    return request({
+      method: "PUT",
+      url: `${baseUrl}/update`,
+      data: billData, // Gửi toàn bộ dữ liệu trong body
+    });
+  };
 }

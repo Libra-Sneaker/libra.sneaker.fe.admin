@@ -1,4 +1,4 @@
-.addProductContainer{
+.addProductContainer {
   /* display: flex; */
 
   background: #fff;
@@ -8,7 +8,50 @@
   border: 1px solid #ccc;
 }
 
-.formProductContainer{
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px;
+}
+
+.pageTitle {
+  margin: 0 !important;
+  color: var(--heading-color) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.2px;
+}
+
+.breadcrumbSeparator {
+  margin: 0 8px;
+  color: var(--text-secondary);
+}
+
+.breadcrumbCurrent {
+  color: var(--text-secondary);
+  font-weight: normal;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  border-radius: var(--border-radius);
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0 18px;
+}
+
+.backButton:hover {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  background-color: var(--primary-light);
+}
+
+.formProductContainer {
   background-color: aliceblue;
   margin: 10px;
   padding: 10px;
@@ -16,7 +59,7 @@
   border: 1 px solid #ccc;
 }
 
-.formProductDetailContainer{
+.formProductDetailContainer {
   background-color: aliceblue;
   margin: 10px;
   padding: 10px;
@@ -24,7 +67,7 @@
   border: 1 px solid #ccc;
 }
 
-.tableProductDetail{
+.tableProductDetail {
   /* background-color: aliceblue; */
   margin: 10px;
   padding-top: 10px;
@@ -33,7 +76,7 @@
   border: 1 px solid #ccc;
 }
 
-.btnAddProduct{
+.btnAddProduct {
   display: flex;
   justify-content: flex-end;
   margin: 20px;

@@ -23,7 +23,13 @@ import { ProductDetailManagementApi } from "../../../api/admin/productDetailMana
 import { FileUploadApi } from "../../../api/admin/fileUpload/FileUploadApi";
 import ModalConfirmAddProductBill from "./modalConfirmAddProductBill/ModalConfirmAddProductBill";
 
-const ModalAddProduct = ({ isModalOpen, handleCancel, onProductsSelected,billIdSelected,getBillDetails }) => {
+const ModalAddProduct = ({
+  isModalOpen,
+  handleCancel,
+  onProductsSelected,
+  billIdSelected,
+  getBillDetails,
+}) => {
   const [brandOptions, setBrandOptions] = useState([]);
   const [typeOptions, setTypeOptions] = useState([]);
   const [colorOptions, setColorOptions] = useState([]);
@@ -247,10 +253,14 @@ const ModalAddProduct = ({ isModalOpen, handleCancel, onProductsSelected,billIdS
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (text, record) =>
-        listSelectRow.includes(record.productDetailId) ? (
+      render: (text, record) => {
+        if (record.quantity === 0) {
+          return <span style={{ color: "red" }}>Hết hàng</span>;
+        }
+
+        return listSelectRow.includes(record.productDetailId) ? (
           <Select
-            key={`status-${record.productDetailId}`} // Thêm key duy nhất
+            key={`status-${record.productDetailId}`}
             value={record.status}
             style={{ width: 120 }}
           >
@@ -259,9 +269,9 @@ const ModalAddProduct = ({ isModalOpen, handleCancel, onProductsSelected,billIdS
           </Select>
         ) : (
           <span>{record.status === "1" ? "Đang bán" : "Ngừng bán"}</span>
-        ),
+        );
+      },
     },
-
     {
       title: "Thao tác",
       dataIndex: "action",
@@ -271,7 +281,7 @@ const ModalAddProduct = ({ isModalOpen, handleCancel, onProductsSelected,billIdS
           <Button
             size="medium"
             onClick={() => {
-              if (record.quantity === 0) {
+              if (record.quantity === 0 || record.status === "0") {
                 message.warning("Hiện tại sản phẩm này đang hết!");
               } else {
                 handleOpenModalExtra(record);
@@ -281,7 +291,7 @@ const ModalAddProduct = ({ isModalOpen, handleCancel, onProductsSelected,billIdS
             Chọn
           </Button>
         </div>
-      )
+      ),
     },
   ];
 
@@ -407,7 +417,9 @@ const ModalAddProduct = ({ isModalOpen, handleCancel, onProductsSelected,billIdS
     setPageSize(size); // Cập nhật kích thước trang
   };
 
-  useEffect(() => {if(isModalOpen)fetchData()}, [isModalOpen])
+  useEffect(() => {
+    if (isModalOpen) fetchData();
+  }, [isModalOpen]);
 
   // get data product details
   const fetchData = async () => {
@@ -657,7 +669,7 @@ const ModalAddProduct = ({ isModalOpen, handleCancel, onProductsSelected,billIdS
         isModalOpendExtra={isModalOpendExtra}
         handleCancelExtra={handleModalCloseExtra}
         selectedProduct={selectedProduct}
-        billIdSelectedDetail ={billIdSelected}
+        billIdSelectedDetail={billIdSelected}
         getBillDetails={getBillDetails}
         fetchData={fetchData}
       />

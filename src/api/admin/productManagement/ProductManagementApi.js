@@ -10,12 +10,12 @@ export class ProductManagementApi {
       data: data,
     });
   };
-  
+
   static getProducts = (filter) => {
     return request({
       method: "GET",
       url: `${baseUrl}/search`,
-      params: filter
+      params: filter,
     });
   };
 
@@ -25,7 +25,7 @@ export class ProductManagementApi {
       url: `${baseUrl}/updateStatus?id=${id}&status=${status}`,
     });
   };
-  
+
   static updateNameAndStatusProduct = (id, name, status) => {
     return request({
       method: "PUT",
@@ -33,4 +33,10 @@ export class ProductManagementApi {
     });
   };
 
+  static getProductStatistics = () => {
+    return request({
+      method: "GET",
+      url: `${baseUrl}/statistics`,
+    });
+  };
 }

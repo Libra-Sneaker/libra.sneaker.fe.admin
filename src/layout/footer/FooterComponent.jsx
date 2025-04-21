@@ -78,9 +78,9 @@ const FooterComponent = () => {
           style={{ color: "#003770", fontWeight: 500 }}
         >
           {" "}
-          Copyright © 2024 - Developed by{" "}
+          Developed by{" "}
           <Link
-            to={`https://4sdigital.vn`}
+            to={`#`}
             style={{ color: "#003770" }}
             target="_blank"
           >
@@ -88,7 +88,7 @@ const FooterComponent = () => {
               style={{ textDecoration: "underline" }}
               className="digital-services"
             >
-              4S Digital Services
+               LibraSneaker
             </span>
           </Link>
         </i>

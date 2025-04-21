@@ -21,6 +21,12 @@ import ModalAddCustomer from "../pages/customerManagement/addCustomer/AddCustome
 import BillManagement from "../pages/billManagement/BillManagementt";
 import BillDetailManagement from "../pages/billManagement/billDetailManagement/BillDetailManagement";
 import CounterSaleManagement from "../pages/counterSaleManagement/CounterSaleManagement";
+import HomePage from "../pages/homePage/HomePage";
+import ReturnManagement from "../pages/returnManagement/ReturnManagement";
+import PromotionManagement from "../pages/promotionManagement/PromotionManagement";
+import AnalysisManagement from "../pages/analysisManagement/AnalysisManagement";
+import CreateCouponManagement from "../pages/promotionManagement/CreateCoupon/CreateCouponManagement";
+import CouponDetailManagement from "../pages/promotionManagement/CouponDetail/CouponDetailManagement";
 
 const generalRoutes = [
   { path: "*", element: <NotFound /> },
@@ -31,10 +37,18 @@ const generalRoutes = [
   { path: "/not-aceptable/*", element: <NotAceptable /> },
 ];
 
+const publicRoutes = [
+  { path: "/", element: <HomePage /> }, // Trang homepage
+  // { path: "/login", element: <Login /> }, // Trang đăng nhập (cần tạo component Login)
+];
+
 const adminRoutes = [
-  { path: "/", element: <Navigate replace to={SCREEN.productManagement.path} /> },
+  // {
+  //   path: "/",
+  //   element: <Navigate replace to={SCREEN.productManagement.path} />,
+  // },
+  { path: "/", element: <Navigate replace to="/login" /> },
   {
-    
     path: SCREEN.brandManagement.path,
     element: (
       <MiddlewareRouter>
@@ -43,7 +57,6 @@ const adminRoutes = [
         </DefaultLayout>
       </MiddlewareRouter>
     ),
-    
   },
 
   {
@@ -62,7 +75,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <ProductDetailManagement/>
+          <ProductDetailManagement />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
@@ -73,7 +86,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <MaterialManagement/>
+          <MaterialManagement />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
@@ -84,7 +97,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <TypeOfShoeManagement/>
+          <TypeOfShoeManagement />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
@@ -95,7 +108,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <AddProductManagement/>
+          <AddProductManagement />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
@@ -106,7 +119,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <EmployeeManagement/>
+          <EmployeeManagement />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
@@ -117,7 +130,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <AddEmployee/>
+          <AddEmployee />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
@@ -128,7 +141,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <CustomerManagement/>
+          <CustomerManagement />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
@@ -139,7 +152,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <ModalAddCustomer/>
+          <ModalAddCustomer />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
@@ -150,7 +163,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <BillManagement/>
+          <BillManagement />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
@@ -161,7 +174,7 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <BillDetailManagement/>
+          <BillDetailManagement />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
@@ -172,14 +185,68 @@ const adminRoutes = [
     element: (
       <MiddlewareRouter>
         <DefaultLayout>
-          <CounterSaleManagement/>
+          <CounterSaleManagement />
         </DefaultLayout>
       </MiddlewareRouter>
     ),
   },
-  
+
+  {
+    path: SCREEN.returnManagement.path,
+    element: (
+      <MiddlewareRouter>
+        <DefaultLayout>
+          <ReturnManagement />
+        </DefaultLayout>
+      </MiddlewareRouter>
+    ),
+  },
+
+  {
+    path: SCREEN.promotionManagement.path,
+    element: (
+      <MiddlewareRouter>
+        <DefaultLayout>
+          <PromotionManagement />
+        </DefaultLayout>
+      </MiddlewareRouter>
+    ),
+  },
+
+  {
+    path: SCREEN.createCouponManagement.path,
+    element: (
+      <MiddlewareRouter>
+        <DefaultLayout>
+          <CreateCouponManagement />
+        </DefaultLayout>
+      </MiddlewareRouter>
+    ),
+  },
+
+  {
+    path: SCREEN.couponDetailManagement.path,
+    element: (
+      <MiddlewareRouter>
+        <DefaultLayout>
+          <CouponDetailManagement />
+        </DefaultLayout>
+      </MiddlewareRouter>
+    ),
+  },
+
+  {
+    path: SCREEN.analysisManagement.path,
+    element: (
+      <MiddlewareRouter>
+        <DefaultLayout>
+          <AnalysisManagement />
+        </DefaultLayout>
+      </MiddlewareRouter>
+    ),
+  },
 ];
 
-const routes = [...generalRoutes, ...adminRoutes];
+const routes = [...generalRoutes, ...publicRoutes, ...adminRoutes];
 
 export default routes;

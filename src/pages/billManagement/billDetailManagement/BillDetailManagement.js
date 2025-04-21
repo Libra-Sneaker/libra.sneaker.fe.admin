@@ -169,17 +169,17 @@ const BillDetailManagement = () => {
 
     {
       title: "Phương thức thanh toán",
-      dataIndex: "typeMethod",
-      key: "typeMethod",
-      render: (typeMethod) => (
+      dataIndex: "typeTransaction",
+      key: "typeTransaction",
+      render: (typeTransaction) => (
         <Tag
-          color={typeMethod === 0 ? "green" : "blue"}
+          color={typeTransaction === 0 ? "green" : "blue"}
           style={{
             fontSize: "13px", // Tăng kích thước chữ
             padding: "5px 10px", // Tăng kích thước padding
           }}
         >
-          {typeMethod === 0 ? "Tiền mặt" : "Chuyển khoản"}
+          {typeTransaction === 0 ? "Tiền mặt" : "Chuyển khoản"}
         </Tag>
       ),
     },
@@ -300,7 +300,7 @@ const BillDetailManagement = () => {
             <div>
               <label>Loại: </label>
               <span>
-                {listBill?.type === "0" ? (
+                {listBill?.typeMethod === "0" ? (
                   <Tag
                     color="gold"
                     style={{
@@ -310,7 +310,7 @@ const BillDetailManagement = () => {
                   >
                     Tại quầy
                   </Tag>
-                ) : listBill?.type === "1" ? (
+                ) : listBill?.typeMethod === "1" ? (
                   <Tag
                     color="blue"
                     style={{

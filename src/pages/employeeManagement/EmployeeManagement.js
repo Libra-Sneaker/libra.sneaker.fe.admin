@@ -4,6 +4,7 @@ import {
   Button,
   Input,
   message,
+  Pagination,
   Popconfirm,
   Radio,
   Select,
@@ -337,12 +338,15 @@ const EmployeeManagement = () => {
       >
         <div className={styles.employeeContainer}>
           <div className={styles.AddEmployeeBtnContainer}>
-            <Button icon={<PlusOutlined />}
-            style={{
-              backgroundColor: "orange",
-              borderColor: "orange",
-              color: "white",
-            }} onClick={handleAddEmployee}>
+            <Button
+              icon={<PlusOutlined />}
+              style={{
+                backgroundColor: "orange",
+                borderColor: "orange",
+                color: "white",
+              }}
+              onClick={handleAddEmployee}
+            >
               Thêm nhân viên
             </Button>
           </div>
@@ -351,12 +355,24 @@ const EmployeeManagement = () => {
             columns={columns}
             dataSource={listEmployees}
             rowKey="id"
-            pagination={{
-              current: currentPage,
-              pageSize: pageSize,
-              total: totalItems,
-              onChange: handlePageChange,
+            pagination={false}
+          />
+
+          <Pagination
+            style={{
+              padding: "20px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "10px",
             }}
+            simple
+            current={currentPage}
+            pageSize={pageSize}
+            total={totalItems}
+            onChange={handlePageChange}
+            showSizeChanger
+            pageSizeOptions={["10", "20", "50", "100"]}
           />
         </div>
       </div>

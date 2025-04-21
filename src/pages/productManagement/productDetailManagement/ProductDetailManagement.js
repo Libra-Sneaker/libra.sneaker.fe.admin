@@ -421,11 +421,13 @@ const ProductDetailManagement = () => {
       dataIndex: "status",
       key: "status",
       render: (text, record) =>
-        listSelectRow.includes(record.productDetailId) ? (
+        record.quantity === 0 ? ( // Nếu số lượng = 0, hiển thị "Hết hàng"
+          <span style={{ color: "red", fontWeight: "bold" }}>Hết hàng</span>
+        ) : listSelectRow.includes(record.productDetailId) ? ( // Nếu đang chỉnh sửa, hiển thị Select
           <Select
-            key={`status-${record.productDetailId}`} // Thêm key duy nhất
+            key={`status-${record.productDetailId}`}
             value={record.status}
-            onChange={(value) => handleEditInputChange(value, record, "status")} // Gọi hàm khi thay đổi giá trị
+            onChange={(value) => handleEditInputChange(value, record, "status")}
             style={{ width: 120 }}
           >
             <Select.Option value="1">Đang bán</Select.Option>
@@ -436,18 +438,18 @@ const ProductDetailManagement = () => {
         ),
     },
 
-    {
-      title: "Thao tác",
-      dataIndex: "action",
-      key: "action",
-      render: (_, record) => (
-        <div>
-          <Button size="small" onClick={() => handleOpenModal(record)}>
-            <FontAwesomeIcon icon={faEye} />
-          </Button>
-        </div>
-      ),
-    },
+    // {
+    //   title: "Thao tác",
+    //   dataIndex: "action",
+    //   key: "action",
+    //   render: (_, record) => (
+    //     <div>
+    //       <Button size="small" onClick={() => handleOpenModal(record)}>
+    //         <FontAwesomeIcon icon={faEye} />
+    //       </Button>
+    //     </div>
+    //   ),
+    // },
   ];
 
   // Modal product detail
@@ -480,14 +482,13 @@ const ProductDetailManagement = () => {
       // Chuyển đổi status từ số thành chuỗi
       const updatedData = response.data.content.map((item) => ({
         ...item,
-        status: item.status.toString(), 
+        status: item.status.toString(),
       }));
 
       console.log("updateData");
-      
+
       console.log(updatedData);
-      
-  
+
       setListProductDetails(updatedData);
       setTotalItems(response.data.totalElements);
     } catch (error) {
@@ -508,7 +509,7 @@ const ProductDetailManagement = () => {
       fetchData(productId, currentPage, pageSize);
       console.log("status");
       console.log();
-      
+
       // Call fetchData with productId
     }
   }, [productId, currentPage, pageSize]); // Run this effect whenever productId changes
@@ -601,7 +602,7 @@ const ProductDetailManagement = () => {
 
   return (
     <div>
-      <h1>Product Detail Management</h1>
+      <h1>Chi tiết sản phẩm</h1>
       <Button
         type="default"
         onClick={handleBack}
@@ -622,10 +623,10 @@ const ProductDetailManagement = () => {
         <div className={styles.containerSearch}>
           <div className={styles.inputSearch}>
             <Input
-            style={{
-              height:'33px',
-              marginRight:'20px'
-            }}
+              style={{
+                height: "33px",
+                marginRight: "20px",
+              }}
               placeholder="Nhập mã sản phẩm ..."
               value={searchText}
               onChange={handleInputChange}

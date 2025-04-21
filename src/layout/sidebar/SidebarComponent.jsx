@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Menu } from "antd";
-import { Link, useLocation } from "react-router-dom";
+import { Layout, Menu, Modal } from "antd";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBox,
@@ -9,24 +9,46 @@ import {
   faShoePrints,
   faShop,
   faShoppingCart,
+  faSignOutAlt,
   faTrademark,
+  faChartSimple,
+  faReply,
   faUser,
+  faTags,
+  faFileAlt,
+  faTag,
+  faMoneyCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { MenuUnfoldOutlined } from "@ant-design/icons";
 import "./style-sidebar.css";
 import { useAppDispatch } from "../../app/hook";
+import { logout } from "../../util/auth";
 
 const { Sider } = Layout;
 
 const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
   const location = useLocation();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const [selectedKey, setSelectedKey] = useState("");
 
   useEffect(() => {
     setSelectedKey(location.pathname);
   }, [location]);
+
+  const handleLogout = () => {
+    Modal.confirm({
+      title: "Xác nhận đăng xuất",
+      content: "Bạn có chắc chắn muốn đăng xuất?",
+      okText: "Đăng xuất",
+      okType: "danger",
+      cancelText: "Hủy",
+      onOk: () => {
+        logout(navigate); // Gọi hàm logout
+      },
+    });
+  };
 
   return (
     <Sider
@@ -96,6 +118,15 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
           // key="/brand-management"
           className="menu_custom"
           style={{ color: "white" }}
+          icon={<FontAwesomeIcon icon={faChartSimple} />}
+        >
+          <Link to="/analysis-management">Thống kê</Link>
+        </Menu.Item>
+
+        <Menu.Item
+          // key="/brand-management"
+          className="menu_custom"
+          style={{ color: "white" }}
           icon={<FontAwesomeIcon icon={faShoppingCart} />}
         >
           <Link to="/counter-sale-management">Bán hàng tại quầy</Link>
@@ -105,7 +136,7 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
           // key="/brand-management"
           className="menu_custom"
           style={{ color: "white" }}
-          icon={<FontAwesomeIcon icon={faCarTunnel} />}
+          icon={<FontAwesomeIcon icon={faFileAlt} />}
         >
           <Link to="/bill-management">Quản lý hóa đơn</Link>
         </Menu.Item>
@@ -153,6 +184,7 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
           </Menu.Item>
         </Menu.SubMenu>
 
+        {/* Account Management */}
         <Menu.SubMenu
           key="/account-management-options"
           title="Tài khoản"
@@ -177,6 +209,63 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
             <Link to="/customer-management">Quản lý khách hàng</Link>
           </Menu.Item>
         </Menu.SubMenu>
+
+        <Menu.Item
+          // key="/brand-management"
+          className="menu_custom"
+          style={{ color: "white" }}
+          icon={<FontAwesomeIcon icon={faReply} />}
+        >
+          <Link to="/return-management">Trả hàng</Link>
+        </Menu.Item>
+
+        {/* <Menu.Item
+          // key="/brand-management"
+          className="menu_custom"
+          style={{ color: "white" }}
+          icon={<FontAwesomeIcon icon={faTags} />}
+        >
+          <Link to="/promotion-management">Khuyến mãi</Link>
+        </Menu.Item> */}
+
+        {/* Promotion Management */}
+        <Menu.SubMenu
+          key="/promotion-management-options"
+          title="Khuyến mãi"
+          icon={
+            <FontAwesomeIcon style={{ color: "white" }} icon={faMoneyCheck} />
+          }
+          style={{ color: "white" }}
+        >
+          <Menu.Item
+            key="/promotion-management"
+            className="menu_custom"
+            style={{ color: "white" }}
+            icon={<FontAwesomeIcon icon={faTag} />}
+          >
+            <Link to="/promotion-management">Mã khuyến mãi </Link>
+          </Menu.Item>
+
+          <Menu.Item
+            key="/big-promotion-management"
+            className="menu_custom"
+            style={{ color: "white" }}
+            icon={<FontAwesomeIcon icon={faUser} />}
+          >
+            <Link to="/big-promotion-management">Đợt khuyến mãi </Link>
+          </Menu.Item>
+        </Menu.SubMenu>
+
+        {/* Nút Đăng xuất */}
+        <Menu.Item
+          key="logout"
+          className="menu_custom"
+          style={{ color: "white", marginTop: "auto" }}
+          icon={<FontAwesomeIcon icon={faSignOutAlt} />}
+          onClick={handleLogout}
+        >
+          Đăng xuất
+        </Menu.Item>
       </Menu>
     </Sider>
   );

@@ -1,12 +1,13 @@
 import { request } from "../../../util/axios/request.helper";
 
-const baseUrl = `/admin/transactionManagement`;
+const baseUrl = `/admin/couponManagement`;
 
-export class TransactionManagementApi {
-  static getTransaction = (id) => {
+export class CouponManagementApi {
+  static searchCoupon = (filter) => {
     return request({
       method: "GET",
-      url: `${baseUrl}/transaction/${id}`,
+      url: `${baseUrl}/search`,
+      params: filter,
     });
   };
 
@@ -18,10 +19,11 @@ export class TransactionManagementApi {
     });
   };
 
-  static deleteTransaction = (id) => {
+  static update = (data) => {
     return request({
-      method: "DELETE",
-      url: `${baseUrl}/delete/${id}`,
+      method: "PUT",
+      url: `${baseUrl}/update`,
+      data: data,
     });
   };
 }

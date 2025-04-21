@@ -14,7 +14,7 @@ import {
   Table,
   Upload,
 } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, PlusOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import ModalColor from "./ModalColor";
 import ModalSize from "./ModalSize";
@@ -26,6 +26,7 @@ import { ProductManagementApi } from "../../../api/admin/productManagement/Produ
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FileUploadApi } from "../../../api/admin/fileUpload/FileUploadApi";
+import Title from "antd/es/typography/Title";
 
 const AddProductManagement = () => {
   const [productName, setProductName] = useState("");
@@ -339,7 +340,7 @@ const AddProductManagement = () => {
   const handleUpload = async (file) => {
     const formData = new FormData();
     formData.append("multipartFile", file);
-  
+
     try {
       const response = await FileUploadApi.uploadFileImage(formData);
       return response.data; // Return image URL directly from response data
@@ -348,24 +349,36 @@ const AddProductManagement = () => {
       throw error; // Rethrow error to handle in handleAddProduct
     }
   };
-  
+
   const handleAddProduct = async () => {
     try {
-       // Check if essential fields are filled
-       if (!productName || !form.getFieldValue("brand") || !form.getFieldValue("material") || !form.getFieldValue("category") || !description) {
+      // Check if essential fields are filled
+      if (
+        !productName ||
+        !form.getFieldValue("brand") ||
+        !form.getFieldValue("material") ||
+        !form.getFieldValue("category") ||
+        !description
+      ) {
         message.error("Vui lòng điền đầy đủ thông tin sản phẩm.");
         return;
       }
 
       // Check if any color and size details are selected
       if (listProductDetail.length === 0) {
-        message.error("Vui lòng chọn ít nhất một màu sắc và kích cỡ cho sản phẩm.");
+        message.error(
+          "Vui lòng chọn ít nhất một màu sắc và kích cỡ cho sản phẩm."
+        );
         return;
       }
 
       // Check if each product detail has necessary fields
-      const incompleteDetails = listProductDetail.some(detail => 
-        !detail.sizeId || !detail.colorId || detail.price === undefined || detail.quantity === undefined
+      const incompleteDetails = listProductDetail.some(
+        (detail) =>
+          !detail.sizeId ||
+          !detail.colorId ||
+          detail.price === undefined ||
+          detail.quantity === undefined
       );
 
       if (incompleteDetails) {
@@ -382,7 +395,7 @@ const AddProductManagement = () => {
           return product; // No file, return unchanged
         })
       );
-  
+
       // Prepare product data after all uploads are done
       const productData = {
         name: productName,
@@ -398,20 +411,20 @@ const AddProductManagement = () => {
           urlImg: detail.urlImg, // Use updated urlImg
         })),
       };
-  
+
       console.log("Thông tin sản phẩm:", productData);
-  
+
       // Create product after uploads are complete
       await ProductManagementApi.create(productData);
-  
+
       message.success("Sản phẩm được thêm thành công!");
-  
+
       // Clear form and reset states after success
       form.resetFields();
       setProductName("");
       setDescription("");
       setListProductDetail([]);
-  
+
       // Navigate back to the product management page
       navigate("/product-management");
     } catch (error) {
@@ -419,20 +432,27 @@ const AddProductManagement = () => {
       message.error("Có lỗi xảy ra khi thêm sản phẩm.");
     }
   };
-  
 
   useEffect(() => {}, []);
 
   return (
     <div className={styles.addProductContainer}>
-      <h2>Sản phẩm &gt; Thêm sản phẩm</h2>
-      <Button
-        type="default"
-        onClick={handleBack}
-        style={{ marginBottom: "16px" }}
-      >
-        Quay lại
-      </Button>
+      <div className={styles.header}>
+        <Space align="center">
+          <Title level={4} className={styles.pageTitle}>
+            Khuyến mãi
+            <span className={styles.breadcrumbSeparator}>/</span>
+            <span className={styles.breadcrumbCurrent}>Tạo mã khuyến mãi</span>
+          </Title>
+        </Space>
+        <Button
+          icon={<ArrowLeftOutlined />}
+          onClick={handleBack}
+          className={styles.backButton}
+        >
+          Quay lại
+        </Button>
+      </div>
 
       <div className={styles.formProductContainer}>
         <div style={{ maxWidth: 800, margin: "auto", padding: "2rem" }}>
@@ -563,7 +583,7 @@ const AddProductManagement = () => {
                       {color.name}
                     </Button>
                   );
-              })}
+                })}
 
               <ModalColor
                 setListColorSelected={setListColorSelected}
@@ -616,16 +636,16 @@ const AddProductManagement = () => {
       </div>
 
       <div className={styles.btnAddProduct}>
-      <Popconfirm
-        title="Bạn có chắc muốn thêm sản phẩm mới?"
-        onConfirm={handleAddProduct}
-        onCancel={() => console.log("Thêm sản phẩm bị hủy")}
-        okText="Đúng"
-        cancelText="Hủy"
-      >
-        <Button type="primary">Thêm mới</Button>
-      </Popconfirm>
-    </div>
+        <Popconfirm
+          title="Bạn có chắc muốn thêm sản phẩm mới?"
+          onConfirm={handleAddProduct}
+          onCancel={() => console.log("Thêm sản phẩm bị hủy")}
+          okText="Đúng"
+          cancelText="Hủy"
+        >
+          <Button type="primary">Thêm mới</Button>
+        </Popconfirm>
+      </div>
     </div>
   );
 };

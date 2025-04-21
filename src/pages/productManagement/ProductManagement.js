@@ -69,10 +69,10 @@ const ProductManagement = () => {
             onChange={(value) => setEditingStatus(value)}
             style={{ width: "100%" }}
           >
-            <Select.Option value="1">Đang bán</Select.Option>
-            <Select.Option value="0">Dừng bán</Select.Option>
+            <Select.Option value={1}>Đang bán</Select.Option>
+            <Select.Option value={0}>Dừng bán</Select.Option>
           </Select>
-        ) : status === "1" ? (
+        ) : status == 1 ? (
           <Tag
             style={{
               display: "flex",
@@ -88,7 +88,7 @@ const ProductManagement = () => {
             }}
             color="green"
           >
-            Đang bán
+            Còn hàng
           </Tag>
         ) : (
           <Tag
@@ -107,7 +107,7 @@ const ProductManagement = () => {
             size="large"
             color="red"
           >
-            Dừng bán
+            Hết hàng
           </Tag>
         ),
     },
@@ -173,8 +173,8 @@ const ProductManagement = () => {
       status:
         status === "all" || status === "null"
           ? undefined
-          : status === "2"
-          ? 0
+          : status === 1
+          ? 1
           : status,
       page: page - 1,
       size: size,
@@ -190,7 +190,7 @@ const ProductManagement = () => {
         if (product.totalQuantity === 0) {
           return { ...product, status: "0" }; // Set status to 0 (Dừng bán) if totalQuantity is 0
         }
-        
+
         return product;
       });
 
@@ -232,12 +232,13 @@ const ProductManagement = () => {
       }
 
       // Chỉ thêm status nếu có giá trị khác "all" và "null"
-      if (status && status !== "all" && status !== "null") {
-        if (statusNumber === 2) {
-          params.status = 0; // Truyền status là 0 cho "Dừng bán"
-        } else {
-          params.status = statusNumber; // Truyền status là 1 cho "Đang bán"
-        }
+
+      if (statusNumber === 0) {
+        params.status = 0; // Truyền status là 0 cho "Dừng bán"
+      } else if (statusNumber === 1) {
+        params.status = statusNumber; // Truyền status là 1 cho "Đang bán"
+      } else {
+        params.name = ""; // Truyền status là 1 cho "Đang bán"
       }
 
       const response = await ProductManagementApi.getProducts(params);
@@ -288,8 +289,8 @@ const ProductManagement = () => {
                   value={status}
                 >
                   <Radio value="all">Tất cả</Radio>
-                  <Radio value="1">Đang bán</Radio>
-                  <Radio value="2">Dừng bán</Radio>
+                  <Radio value={1}>Đang bán</Radio>
+                  <Radio value={0}>Dừng bán</Radio>
                 </Radio.Group>
               </div>
             </div>
