@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"; // Để lấy ID và điều hướng
 import {
-  Form,
+  // Form,
   Input,
-  Button,
+  // Button,
   DatePicker,
-  Radio,
+  // Radio,
   Select,
   InputNumber,
   Checkbox,
@@ -13,8 +13,8 @@ import {
   message,
   Spin, // Thêm Spin để hiển thị loading
   Row, // Thêm Row, Col để chia layout
-  Col,
-  Divider,
+  // Col,
+  // Divider,
 } from "antd";
 import { CalendarOutlined, SearchOutlined } from "@ant-design/icons";
 import styles from "./CouponDetailManagement.module.css"; // Tạo file CSS riêng
@@ -33,15 +33,15 @@ const CouponDetailManagement = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
-  const [loadingSubmit, setLoadingSubmit] = useState(false); // State cho nút submit
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [loadingCustomers, setLoadingCustomers] = useState(false); // Add loading state for customer list
   const [listCustomer, setListCustomer] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]); // Có thể không cần nếu dùng listSelectRow
-  // const [selectedCustomers, setSelectedCustomers] = useState([]); // Có thể không cần
-
-  const [listSelectRow, setListSelectRow] = useState([]); // Track selected rows as an array of customer IDs
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [listSelectRow, setListSelectRow] = useState([]);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
+  const [selectedCustomerCount, setSelectedCustomerCount] = useState(0); // Add counter for selected customers
 
   // Form state variables
   const [code, setCode] = useState("");
@@ -64,30 +64,50 @@ const CouponDetailManagement = () => {
 
   const { RangePicker } = DatePicker;
 
-  // --- Logic chọn khách hàng (handleSelectAllChange, handleCheckboxChange) giữ nguyên ---
-  const handleSelectAllChange = (e) => {
-    const isChecked = e.target.checked;
-    setSelectAllChecked(isChecked);
-    if (isChecked) {
-      setListSelectRow(listCustomer.map((item) => item.id)); // Chọn tất cả ID
-    } else {
-      setListSelectRow([]); // Bỏ chọn tất cả
-    }
-  };
-
+  // Update handleCheckboxChange to show better feedback
   const handleCheckboxChange = (record) => {
     const id = record.id;
     const isSelected = listSelectRow.includes(id);
+
+    let newSelectedRows;
     if (isSelected) {
-      setListSelectRow(listSelectRow.filter((rowId) => rowId !== id)); // Bỏ chọn
+      newSelectedRows = listSelectRow.filter((rowId) => rowId !== id);
+      message.info(`Đã bỏ chọn khách hàng ${record.name} (ID: ${id})`);
     } else {
-      setListSelectRow([...listSelectRow, id]); // Chọn
+      newSelectedRows = [...listSelectRow, id];
+      message.success(`Đã chọn khách hàng ${record.name} (ID: ${id})`);
     }
-    // Cập nhật lại trạng thái của checkbox "Chọn tất cả"
+
+    setListSelectRow(newSelectedRows);
+    setSelectedCustomerCount(newSelectedRows.length);
+
+    // Update select all checkbox state
     setSelectAllChecked(
-      listSelectRow.length + (isSelected ? -1 : 1) === listCustomer.length &&
-        listCustomer.length > 0
+      newSelectedRows.length === listCustomer.length && listCustomer.length > 0
     );
+
+    console.log(
+      `Customer ID ${id} (${record.name}) is now ${
+        isSelected ? "unselected" : "selected"
+      }`
+    );
+  };
+
+  // Update handleSelectAllChange to show better feedback
+  const handleSelectAllChange = (e) => {
+    const isChecked = e.target.checked;
+    setSelectAllChecked(isChecked);
+
+    if (isChecked) {
+      const allIds = listCustomer.map((item) => item.id);
+      setListSelectRow(allIds);
+      setSelectedCustomerCount(allIds.length);
+      message.success(`Đã chọn tất cả ${allIds.length} khách hàng`);
+    } else {
+      setListSelectRow([]);
+      setSelectedCustomerCount(0);
+      message.info("Đã bỏ chọn tất cả khách hàng");
+    }
   };
 
   // Cập nhật useEffect để kiểm tra lại selectAllChecked khi listSelectRow thay đổi
@@ -256,123 +276,105 @@ const CouponDetailManagement = () => {
     },
   ];
 
-  // --- Fetch dữ liệu khách hàng ---
+  // Update fetchData to handle loading states better
   const fetchData = async (page = 1, size = 10, term = "") => {
-    console.log(
-      `Workspaceing data - Page: ${page}, Size: ${size}, Term: ${term}, Coupon ID: ${couponIdFromUrl}`
-    );
     setLoading(true);
-
-    const paramsCustomer = {
-      page: page - 1,
-      size: size,
-      searchTerm: term,
-    };
-
-    const paramCoupon = {
-      page: 0, // Thường lấy trang đầu tiên khi chỉ tìm theo ID
-      size: 100, // Lấy đủ lớn để chứa hết các customerId nếu API trả về nhiều dòng
-      couponId: couponIdFromUrl,
-    };
+    setLoadingCustomers(true);
 
     try {
-      // Gọi cả hai API song song để tiết kiệm thời gian (tùy chọn)
+      const paramsCustomer = {
+        page: page - 1,
+        size: size,
+        searchTerm: term,
+      };
+
+      const paramCoupon = {
+        page: 0,
+        size: 100,
+        couponId: couponIdFromUrl,
+      };
+
+      // message.loading({
+      //   content: "Đang tải thông tin phiếu giảm giá...",
+      //   key: "loadingCoupon",
+      // });
+
       const [responseCustomer, responseCoupon] = await Promise.all([
         CustomerManagementApi.search(paramsCustomer),
-        CouponManagementApi.searchCoupon(paramCoupon), // Giả sử API này trả về danh sách các dòng khớp với couponId
+        CouponManagementApi.searchCoupon(paramCoupon),
       ]);
-
-      console.log("Customer Response data:", responseCustomer.data?.content);
-      console.log("Coupon Response data:", responseCoupon.data?.content);
 
       const currentCustomers = responseCustomer.data?.content || [];
       const totalCustomerItems = responseCustomer.data?.totalElements || 0;
-      const couponEntries = responseCoupon.data?.content || []; // Đây có thể là mảng các dòng dữ liệu coupon/customer
+      const couponEntries = responseCoupon.data?.content || [];
 
-      // Cập nhật danh sách khách hàng và tổng số lượng cho bảng
       setListCustomer(currentCustomers);
       setTotalItems(totalCustomerItems);
 
-      let initiallySelectedIds = []; // Mảng để lưu các ID cần chọn ban đầu
+      let initiallySelectedIds = [];
 
       if (couponEntries.length > 0) {
-        // Lấy thông tin coupon chính từ dòng đầu tiên (giả sử các thông tin cơ bản giống nhau)
         const couponData = couponEntries[0];
-        console.log("Processing Coupon Data (first entry):", couponData);
+        console.log("Processing Coupon Data:", couponData);
 
-        // Cập nhật state cho các trường của form (như code cũ)
+        // Update form fields
         setCode(couponData.code || "");
         setName(couponData.name || "");
         setValue(couponData.value?.toString() || "");
-        // Quan trọng: Đảm bảo setUnit và setType trước khi xử lý logic chọn KH
-        setUnit(couponData.unit ?? 0); // Dùng ?? để nếu null/undefined thì mặc định là 0 (%)
-        setType(couponData.type ?? 1); // Dùng ?? để nếu null/undefined thì mặc định là 1 (Công khai)
+        setUnit(couponData.unit ?? 0);
+        setType(couponData.type ?? 1);
         setMaxValue(couponData.maxValue?.toString() || "");
         setQuantity(couponData.quantity?.toString() || "");
         setMinCondition(couponData.minCondition?.toString() || "");
-        // Nên dùng dayjs.utc() nếu backend trả về UTC string hoặc đảm bảo múi giờ nhất quán
         setStartDate(
           couponData.startDate ? dayjs.utc(couponData.startDate) : null
         );
         setEndDate(couponData.endDate ? dayjs.utc(couponData.endDate) : null);
 
-        // --- LOGIC CHỌN KHÁCH HÀNG TỰ ĐỘNG ---
         if (couponData.type === 0) {
-          // Chỉ xử lý nếu là coupon cá nhân
-          // Lấy tất cả customerId từ các dòng coupon trả về
           const associatedCustomerIds = couponEntries
-            .map((entry) => entry.customerId) // Trích xuất customerId từ mỗi dòng
-            .filter((id) => id != null); // Loại bỏ các giá trị null hoặc undefined
+            .map((entry) => entry.customerId)
+            .filter((id) => id != null);
 
-          console.log(
-            "Associated Customer IDs from Coupon API:",
-            associatedCustomerIds
-          );
+          console.log("Associated Customer IDs:", associatedCustomerIds);
 
-          // Lấy ID của các khách hàng đang hiển thị trên trang hiện tại
           const currentPageCustomerIds = currentCustomers.map(
             (cust) => cust.id
           );
-
-          // Tìm những customerId liên kết nào có trong trang khách hàng hiện tại
           initiallySelectedIds = associatedCustomerIds.filter((assocId) =>
             currentPageCustomerIds.includes(assocId)
           );
 
-          console.log(
-            "Initially selecting IDs (present on current page):",
-            initiallySelectedIds
-          );
+          console.log("Initially selected IDs:", initiallySelectedIds);
+          setSelectedCustomerCount(initiallySelectedIds.length);
+
+          if (initiallySelectedIds.length > 0) {
+            message.success({
+              content: `Đã tìm thấy ${initiallySelectedIds.length} khách hàng được gán phiếu giảm giá này`,
+              key: "loadingCoupon",
+            });
+          }
         }
-        // --- KẾT THÚC LOGIC CHỌN KHÁCH HÀNG ---
       } else {
-        // Xử lý trường hợp không tìm thấy dữ liệu coupon
-        console.warn("No coupon data found for ID:", couponIdFromUrl);
-        message.error("Không tìm thấy thông tin phiếu giảm giá.");
-        // Có thể reset form ở đây nếu muốn
-        setCode("");
-        setName("");
-        setValue("");
-        setMaxValue("");
-        setQuantity("");
-        setMinCondition("");
-        setStartDate(null);
-        setEndDate(null);
-        setType(1); // Reset về public
-        setUnit(0); // Reset về %
+        message.error({
+          content: "Không tìm thấy thông tin phiếu giảm giá.",
+          key: "loadingCoupon",
+        });
+        navigate("/promotion-management");
+        return;
       }
 
-      // Cập nhật state listSelectRow với các ID đã tìm được
       setListSelectRow(initiallySelectedIds);
-      // State selectAllChecked sẽ tự động cập nhật nhờ useEffect đã có
     } catch (error) {
-      console.error("Error fetching data: ", error);
-      message.error("Lỗi khi tải dữ liệu phiếu giảm giá hoặc khách hàng.");
-      setListCustomer([]);
-      setTotalItems(0);
-      setListSelectRow([]); // Đảm bảo reset lựa chọn khi có lỗi
+      console.error("Error fetching data:", error);
+      message.error({
+        content: "Đã xảy ra lỗi khi tải dữ liệu",
+        key: "loadingCoupon",
+      });
+      navigate("/promotion-management");
     } finally {
       setLoading(false);
+      setLoadingCustomers(false);
     }
   };
 
@@ -630,33 +632,43 @@ const CouponDetailManagement = () => {
                 <h2 className={styles.cardTitle}>Danh sách khách hàng</h2>
                 {/* Thêm ô tìm kiếm khách hàng */}
                 <div className={styles.searchCustomer}>
-                  <input
+                  <Input
                     type="text"
                     placeholder="Tìm kiếm khách hàng (mã, tên, sđt, email)..."
                     value={searchTerm}
                     onChange={handleSearchTermChange}
                     className={styles.formControl}
+                    prefix={<SearchOutlined />}
                   />
                 </div>
-                <Table
-                  columns={columns}
-                  dataSource={listCustomer}
-                  loading={loading}
-                  rowKey="id"
-                  pagination={{
-                    current: currentPage,
-                    pageSize: pageSize,
-                    total: totalItems,
-                    showSizeChanger: true,
-                    pageSizeOptions: ["5", "10", "20", "50"],
-                  }}
-                  onChange={handleTableChange} // Xử lý thay đổi trang/kích thước trang
-                  scroll={{ y: 300 }} // Giới hạn chiều cao và cho phép cuộn
-                  size="small"
-                />
+                <Spin spinning={loadingCustomers}>
+                  <Table
+                    columns={columns}
+                    dataSource={listCustomer}
+                    loading={loadingCustomers}
+                    rowKey="id"
+                    pagination={{
+                      current: currentPage,
+                      pageSize: pageSize,
+                      total: totalItems,
+                      showSizeChanger: true,
+                      pageSizeOptions: ["5", "10", "20", "50"],
+                    }}
+                    onChange={handleTableChange}
+                    scroll={{ y: 300 }}
+                    size="small"
+                  />
+                </Spin>
               </div>
             )}
           </div>
+
+          {/* Add selected customer count display */}
+          {type === 0 && (
+            <div className={styles.selectedInfo}>
+              Đã chọn {selectedCustomerCount} khách hàng
+            </div>
+          )}
 
           {/* Nút bấm */}
           <div className={styles.buttonContainer}>
@@ -671,7 +683,7 @@ const CouponDetailManagement = () => {
               className={styles.addButton}
               onClick={handleSubmit}
               disabled={loadingSubmit} // Disable khi đang gửi
-              // loading={loadingSubmit} // Thuộc tính loading của Antd Button (nếu dùng)
+              // loading={loadingSubmit} // Thuộc tính loading của Antd Button
             >
               Hoàn Tất
             </button>

@@ -13,6 +13,7 @@ import {
 import { ProductManagementApi } from "../../api/admin/productManagement/ProductManagementApi";
 import { Bar, Pie } from "react-chartjs-2";
 import { DatePicker, Typography, Empty, Spin } from "antd";
+import { CustomerManagementApi } from "../../api/admin/customerManagement/CustomerManagementApi";
 
 // Đăng ký các thành phần cần thiết cho Chart.js
 ChartJS.register(
@@ -43,6 +44,13 @@ const AnalysisManagement = () => {
   });
   const [dateRange, setDateRange] = useState([]);
 
+  const [bestSellingProducts, setBestSellingProducts] = useState([]);
+
+  const [customerStats, setCustomerStats] = useState({
+    totalCustomersThisMonth: 0,
+    topCustomers: [],
+  });
+
   // Bộ màu mới, chuyên nghiệp
   const colors = {
     primary: "#4F46E5", // Indigo
@@ -54,17 +62,29 @@ const AnalysisManagement = () => {
   };
 
   // Gọi API để lấy dữ liệu thống kê sản phẩm
+  // Cập nhật useEffect để sử dụng dateRange
   useEffect(() => {
-    const fetchProductStatistics = async () => {
+    const fetchData = async () => {
       try {
-        const response = await ProductManagementApi.getProductStatistics();
-        const data = response.data;
+        setLoading(true);
 
-        // Lấy soldProducts và remainingProducts từ API
-        const sold = data.soldProducts || 0;
-        const remaining = data.remainingProducts || 0;
+        // Nếu có dateRange, sử dụng nó để lấy dữ liệu
+        const params =
+          dateRange.length === 2
+            ? {
+                startDate: dateRange[0].format("YYYY-MM-DD"),
+                endDate: dateRange[1].format("YYYY-MM-DD"),
+              }
+            : {};
 
-        // Tính toán totalProducts = soldProducts + remainingProducts
+        // Gọi API lấy thống kê sản phẩm
+        const statsResponse = await ProductManagementApi.getProductStatistics(
+          params
+        );
+        const statsData = statsResponse.data;
+
+        const sold = statsData.soldProducts || 0;
+        const remaining = statsData.remainingProducts || 0;
         const calculatedTotal = sold + remaining;
 
         setProductStats({
@@ -72,15 +92,31 @@ const AnalysisManagement = () => {
           soldProducts: sold,
           remainingProducts: remaining,
         });
+
+        // Gọi API lấy sản phẩm bán chạy
+        const bestSaleResponse = await ProductManagementApi.getBestSaleProduct(
+          params
+        );
+        setBestSellingProducts(bestSaleResponse.data);
+
+        // Gọi API lấy thống kê khách hàng
+        const customerResponse = await CustomerManagementApi.getLoyalCustomer(
+          params
+        );
+        const customerData = customerResponse.data;
+        setCustomerStats({
+          totalCustomersThisMonth: customerData.totalCustomersThisMonth || 0,
+          topCustomers: customerData.topCustomers || [],
+        });
       } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu thống kê sản phẩm:", error);
+        console.error("Lỗi khi lấy dữ liệu:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProductStatistics();
-  }, []);
+    fetchData();
+  }, [dateRange]);
 
   // Dữ liệu cho biểu đồ cột
   const productStatsBarData = {
@@ -120,10 +156,75 @@ const AnalysisManagement = () => {
     ],
   };
 
+  // Dữ liệu cho biểu đồ sản phẩm bán chạy
+  const bestSellingProductsData = {
+    labels: bestSellingProducts.map((product) => product.name),
+    datasets: [
+      {
+        label: "Số lượng đã bán",
+        data: bestSellingProducts.map((product) => product.quantitySold),
+        backgroundColor: `${colors.primary}99`,
+        borderColor: colors.primary,
+        borderWidth: 1,
+      },
+    ],
+  };
+
   // Xử lý thay đổi ngày
-  const handleDateChange = (dates) => {
+  const handleDateChange = async (dates) => {
+    if (!dates || dates.length === 0) {
+      setDateRange([]);
+      return;
+    }
+
     setDateRange(dates);
-    // Thêm logic để lấy dữ liệu dựa trên khoảng ngày
+    setLoading(true);
+
+    try {
+      // Format dates để gửi lên server
+      const startDate = dates[0].format("YYYY-MM-DD");
+      const endDate = dates[1].format("YYYY-MM-DD");
+
+      // Gọi API lấy thống kê sản phẩm theo khoảng thời gian
+      const statsResponse = await ProductManagementApi.getProductStatistics({
+        startDate,
+        endDate,
+      });
+      const statsData = statsResponse.data;
+
+      // Cập nhật state với dữ liệu mới
+      const sold = statsData.soldProducts || 0;
+      const remaining = statsData.remainingProducts || 0;
+      const calculatedTotal = sold + remaining;
+
+      setProductStats({
+        totalProducts: calculatedTotal,
+        soldProducts: sold,
+        remainingProducts: remaining,
+      });
+
+      // Gọi API lấy sản phẩm bán chạy theo khoảng thời gian
+      const bestSaleResponse = await ProductManagementApi.getBestSaleProduct({
+        startDate,
+        endDate,
+      });
+      setBestSellingProducts(bestSaleResponse.data);
+
+      // Gọi API lấy thống kê khách hàng theo khoảng thời gian
+      const customerResponse = await CustomerManagementApi.getLoyalCustomer({
+        startDate,
+        endDate,
+      });
+      const customerData = customerResponse.data;
+      setCustomerStats({
+        totalCustomersThisMonth: customerData.totalCustomersThisMonth || 0,
+        topCustomers: customerData.topCustomers || [],
+      });
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu theo khoảng thời gian:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderNoData = () => (
@@ -134,158 +235,105 @@ const AnalysisManagement = () => {
 
   return (
     <div className={styles.analysisContainer}>
+      {/* Header */}
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Thống kê và phân tích</h1>
+        <h1 className={styles.pageTitle}>Thống kê & Phân tích</h1>
       </div>
 
+      {/* Bộ lọc thời gian */}
       <div className={styles.filterContainer}>
         <span className={styles.filterLabel}>Khoảng thời gian:</span>
-        <RangePicker onChange={handleDateChange} />
+        <RangePicker
+          onChange={handleDateChange}
+          value={dateRange}
+          format="DD/MM/YYYY"
+          allowClear={true}
+          style={{ width: "300px" }}
+          placeholder={["Từ ngày", "Đến ngày"]}
+        />
       </div>
 
+      {/* Stat Cards */}
       <div className={styles.statCards}>
         <div className={styles.statCard}>
-          <div className={styles.label}>Tổng sản phẩm</div>
-          <div className={styles.value}>{productStats.totalProducts}</div>
+          <div className={styles.statIcon} style={{ background: "#4F46E5" }}>
+            📦
+          </div>
+          <div>
+            <div className={styles.statLabel}>Tổng sản phẩm</div>
+            <div className={styles.statValue}>{productStats.totalProducts}</div>
+          </div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.label}>Sản phẩm đã bán</div>
-          <div className={styles.value}>{productStats.soldProducts}</div>
+          <div className={styles.statIcon} style={{ background: "#10B981" }}>
+            ✅
+          </div>
+          <div>
+            <div className={styles.statLabel}>Đã bán</div>
+            <div className={styles.statValue}>{productStats.soldProducts}</div>
+          </div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.label}>Sản phẩm tồn kho</div>
-          <div className={styles.value}>{productStats.remainingProducts}</div>
+          <div className={styles.statIcon} style={{ background: "#F43F5E" }}>
+            🗃️
+          </div>
+          <div>
+            <div className={styles.statLabel}>Tồn kho</div>
+            <div className={styles.statValue}>
+              {productStats.remainingProducts}
+            </div>
+          </div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.label}>Tỷ lệ bán ra</div>
-          <div className={styles.value}>
-            {productStats.totalProducts > 0
-              ? Math.round(
-                  (productStats.soldProducts / productStats.totalProducts) * 100
-                )
-              : 0}
-            %
+          <div className={styles.statIcon} style={{ background: "#7C3AED" }}>
+            📊
+          </div>
+          <div>
+            <div className={styles.statLabel}>Tỷ lệ bán ra</div>
+            <div className={styles.statValue}>
+              {productStats.totalProducts > 0
+                ? Math.round(
+                    (productStats.soldProducts / productStats.totalProducts) *
+                      100
+                  )
+                : 0}
+              %
+            </div>
           </div>
         </div>
       </div>
 
-      <div className={styles.itemContainer}>
-        {/* Phần Sản phẩm với biểu đồ cột */}
-        <div className={styles.item}>
+      {/* Biểu đồ sản phẩm */}
+      <div className={styles.chartsRow}>
+        <div className={styles.chartBox}>
           <h3>Thống kê sản phẩm</h3>
           <div className={styles.chartContainer}>
             {loading ? (
               <Spin size="large" />
-            ) : productStats.totalProducts === 0 ? (
-              renderNoData()
             ) : (
               <Bar
                 data={productStatsBarData}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      title: {
-                        display: true,
-                        text: "Số lượng",
-                        font: {
-                          weight: "bold",
-                        },
-                        color: colors.dark,
-                      },
-                      grid: {
-                        color: "rgba(0, 0, 0, 0.04)",
-                      },
-                      ticks: {
-                        color: colors.gray,
-                      },
-                    },
-                    x: {
-                      grid: {
-                        display: false,
-                      },
-                      ticks: {
-                        color: colors.gray,
-                      },
-                    },
-                  },
-                  plugins: {
-                    legend: {
-                      display: false,
-                    },
-                    tooltip: {
-                      backgroundColor: "rgba(0, 0, 0, 0.75)",
-                      padding: 12,
-                      titleFont: {
-                        size: 14,
-                      },
-                      bodyFont: {
-                        size: 13,
-                      },
-                      titleColor: "#fff",
-                      bodyColor: "#fff",
-                      borderColor: "rgba(255, 255, 255, 0.1)",
-                      borderWidth: 1,
-                    },
-                  },
+                  plugins: { legend: { display: false } },
                 }}
               />
             )}
           </div>
         </div>
-
-        {/* Phần Doanh thu */}
-        <div className={styles.item}>
+        <div className={styles.chartBox}>
           <h3>Tỷ lệ sản phẩm bán ra</h3>
           <div className={styles.chartContainer}>
             {loading ? (
               <Spin size="large" />
-            ) : productStats.totalProducts === 0 ? (
-              renderNoData()
             ) : (
               <Pie
                 data={productStatsPieData}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      position: "bottom",
-                      labels: {
-                        padding: 20,
-                        font: {
-                          size: 12,
-                        },
-                        color: colors.dark,
-                      },
-                    },
-                    tooltip: {
-                      backgroundColor: "rgba(0, 0, 0, 0.75)",
-                      padding: 12,
-                      titleFont: {
-                        size: 14,
-                      },
-                      bodyFont: {
-                        size: 13,
-                      },
-                      titleColor: "#fff",
-                      bodyColor: "#fff",
-                      callbacks: {
-                        label: function (context) {
-                          const label = context.label || "";
-                          const value = context.raw || 0;
-                          const total = context.dataset.data.reduce(
-                            (a, b) => a + b,
-                            0
-                          );
-                          const percentage = Math.round((value / total) * 100);
-                          return `${label}: ${value} (${percentage}%)`;
-                        },
-                      },
-                    },
-                  },
+                  plugins: { legend: { position: "bottom" } },
                 }}
               />
             )}
@@ -293,20 +341,107 @@ const AnalysisManagement = () => {
         </div>
       </div>
 
-      <div className={styles.itemContainer}>
-        {/* Phần Sản phẩm bán chạy */}
-        <div className={styles.item}>
+      {/* Sản phẩm bán chạy & Báo cáo khách hàng */}
+      <div className={styles.bottomRow}>
+        {/* Sản phẩm bán chạy */}
+        <div className={styles.bottomBox}>
           <h3>Sản phẩm bán chạy</h3>
-          <div className={styles.chartContainer}>
-            {renderNoData()} {/* Thay thế bằng dữ liệu thực tế khi có */}
+          <div className={styles.bestSellingProducts}>
+            {loading ? (
+              <Spin size="large" />
+            ) : bestSellingProducts.length === 0 ? (
+              renderNoData()
+            ) : (
+              bestSellingProducts.map((product, idx) => (
+                <div key={product.productId} className={styles.bestProductCard}>
+                  <div
+                    className={styles.bestProductRank}
+                    style={{
+                      background:
+                        idx === 0
+                          ? "linear-gradient(135deg, #FFD700, #FFB300)"
+                          : idx === 1
+                          ? "linear-gradient(135deg, #C0C0C0, #B0B0B0)"
+                          : "linear-gradient(135deg, #CD7F32, #B87333)",
+                    }}
+                  >
+                    {idx + 1}
+                  </div>
+                  <img
+                    className={styles.bestProductImg}
+                    src={product.urlImg}
+                    alt={product.productName}
+                  />
+                  <div className={styles.bestProductInfo}>
+                    <div className={styles.bestProductName}>
+                      {product.productName}
+                    </div>
+                    <div className={styles.bestProductSold}>
+                      Đã bán:{" "}
+                      <b>{product.totalSoldQuantity.toLocaleString("vi-VN")}</b>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
-
-        {/* Phần Báo cáo khách hàng */}
-        <div className={styles.item}>
+        {/* Báo cáo khách hàng */}
+        <div className={styles.bottomBox}>
           <h3>Báo cáo khách hàng</h3>
-          <div className={styles.chartContainer}>
-            {renderNoData()} {/* Thay thế bằng dữ liệu thực tế khi có */}
+          <div className={styles.customerReportTotal}>
+            Tổng khách hàng tháng này:{" "}
+            <b>{customerStats?.totalCustomersThisMonth || 0}</b>
+          </div>
+          <div className={styles.topCustomersGrid}>
+            {loading ? (
+              <Spin size="large" />
+            ) : customerStats?.topCustomers?.length === 0 ? (
+              renderNoData()
+            ) : (
+              customerStats.topCustomers.map((customer, idx) => (
+                <div key={customer.customerId} className={styles.customerCard}>
+                  <div className={styles.cardHeader}>
+                    <div
+                      className={styles.rankBadge}
+                      style={{
+                        background:
+                          idx === 0
+                            ? "linear-gradient(135deg, #FFD700, #FFB300)"
+                            : idx === 1
+                            ? "linear-gradient(135deg, #C0C0C0, #B0B0B0)"
+                            : "linear-gradient(135deg, #CD7F32, #B87333)",
+                      }}
+                    >
+                      {idx + 1}
+                    </div>
+                    <div className={styles.customerName}>
+                      {customer.customerName || "N/A"}
+                    </div>
+                  </div>
+                  <div className={styles.cardBody}>
+                    <div className={styles.contactInfo}>
+                      <span>{customer.phoneNumber || "N/A"}</span>
+                      <span>{customer.email || "N/A"}</span>
+                    </div>
+                    <div className={styles.statsGrid}>
+                      <div className={styles.statBox}>
+                        <div className={styles.statTitle}>Tổng đơn hàng</div>
+                        <div className={styles.statNumber}>
+                          {customer.totalOrders || 0}
+                        </div>
+                      </div>
+                      <div className={styles.statBox}>
+                        <div className={styles.statTitle}>Tổng chi tiêu</div>
+                        <div className={styles.statNumber}>
+                          {(customer.totalSpent || 0).toLocaleString("vi-VN")}đ
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

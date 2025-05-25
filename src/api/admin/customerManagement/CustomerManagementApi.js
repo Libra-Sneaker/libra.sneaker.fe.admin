@@ -15,24 +15,30 @@ export class CustomerManagementApi {
     return request({
       method: "GET",
       url: `${baseUrl}/search`,
-      params: filter
+      params: filter,
     });
   };
 
   static update = (data) => {
     return request({
-        method: "PUT",
-        url: `${baseUrl}/update`, 
-        data: data,
+      method: "PUT",
+      url: `${baseUrl}/update`,
+      data: data,
     });
-};
+  };
 
-static updateDeleteFlagCustomer= (id, deleteFlag) => {
-  return request({
-    method: "PUT",
-    url: `${baseUrl}/updateStatus`,
-    params: {id,deleteFlag},
-  });
-};
+  static updateDeleteFlagCustomer = (id, deleteFlag) => {
+    return request({
+      method: "PUT",
+      url: `${baseUrl}/updateStatus`,
+      params: { id, deleteFlag },
+    });
+  };
 
+  static getLoyalCustomer = () => {
+    return request({
+      method: "GET",
+      url: `${baseUrl}/statistics`,
+    });
+  };
 }

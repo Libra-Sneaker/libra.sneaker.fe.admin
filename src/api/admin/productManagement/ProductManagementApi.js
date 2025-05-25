@@ -39,4 +39,11 @@ export class ProductManagementApi {
       url: `${baseUrl}/statistics`,
     });
   };
+
+  static getBestSaleProduct = () => {
+    return request({
+      method: "GET",
+      url: `${baseUrl}/top-sold-products`,
+    });
+  };
 }

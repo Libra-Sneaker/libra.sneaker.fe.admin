@@ -5,10 +5,12 @@ import { useDispatch } from "react-redux";
 import { SetLoading } from "../../app/reducer/common/LoadingSlice.reducer";
 import { LoginApi } from "../../api/admin/login/LoginApi";
 import { SCREEN } from "../../router/screen";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import styles from "./LoginModal.module.css";
 
 const { Text } = Typography;
 
-const LoginModal = ({ visible, onClose }) => {
+const LoginModal = ({ visible, onClose, onSwitchToRegister }) => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -26,13 +28,11 @@ const LoginModal = ({ visible, onClose }) => {
 
       if (response.status === 200) {
         const data = response.data;
-        // Lưu thông tin vào localStorage
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
         localStorage.setItem("email", data.email);
         localStorage.setItem("name", data.name);
 
-        // Đóng modal và chuyển hướng
         onClose();
         navigate(SCREEN.productManagement.path);
         message.success("Đăng nhập thành công!");
@@ -58,43 +58,80 @@ const LoginModal = ({ visible, onClose }) => {
 
   return (
     <Modal
-      title="Đăng nhập"
-      visible={visible}
+      title={
+        <div className={styles.modalTitle}>
+          <h2>Đăng nhập</h2>
+          <p className={styles.subtitle}>Chào mừng bạn quay trở lại!</p>
+        </div>
+      }
+      open={visible}
       onCancel={onClose}
       footer={null}
       centered
+      width={400}
+      className={styles.loginModal}
+      destroyOnClose
     >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleLogin}
-        initialValues={{ email: "", password: "" }}
-      >
-        <Form.Item
-          label="Email"
-          name="email"
-          rules={[
-            { required: true, message: "Vui lòng nhập email!" },
-            { type: "email", message: "Email không hợp lệ!" },
-          ]}
+      <div className={styles.formContainer}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleLogin}
+          initialValues={{ email: "", password: "" }}
+          className={styles.loginForm}
+          size="large"
         >
-          <Input placeholder="Nhập email" />
-        </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              { required: true, message: "Vui lòng nhập email!" },
+              { type: "email", message: "Email không hợp lệ!" },
+            ]}
+          >
+            <Input 
+              prefix={<UserOutlined />}
+              placeholder="Nhập email của bạn"
+              className={styles.inputField}
+            />
+          </Form.Item>
 
-        <Form.Item
-          label="Mật khẩu"
-          name="password"
-          rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-        >
-          <Input.Password placeholder="Nhập mật khẩu" />
-        </Form.Item>
+          <Form.Item
+            label="Mật khẩu"
+            name="password"
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+          >
+            <Input.Password 
+              prefix={<LockOutlined />}
+              placeholder="Nhập mật khẩu của bạn"
+              className={styles.inputField}
+            />
+          </Form.Item>
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit" block loading={loading}>
-            Đăng nhập
-          </Button>
-        </Form.Item>
-      </Form>
+          <Form.Item>
+            <div className={styles.formActions}>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onSwitchToRegister();
+                }}
+                className={styles.registerLink}
+              >
+                Chưa có tài khoản? Đăng ký
+              </button>
+              <Button 
+                type="primary" 
+                htmlType="submit" 
+                loading={loading}
+                className={styles.submitButton}
+              >
+                Đăng nhập
+              </Button>
+            </div>
+          </Form.Item>
+        </Form>
+      </div>
     </Modal>
   );
 };

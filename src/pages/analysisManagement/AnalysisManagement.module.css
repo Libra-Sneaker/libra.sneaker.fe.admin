@@ -1,174 +1,15 @@
-/* src/pages/analysisManagement/AnalysisManagement.module.css */
+/* AnalysisManagement.module.css */
+
 .analysisContainer {
-  padding: 24px 32px;
+  padding: 24px;
   background-color: #f8fafc;
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
-.itemContainer {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.item {
-  flex: 1;
-  background-color: #fff;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-  min-height: 400px;
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  min-width: 300px;
-  border: 1px solid rgba(0, 0, 0, 0.03);
-}
-
-.item:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  transform: translateY(-2px);
-}
-
-.item h3 {
-  margin-bottom: 24px;
-  font-size: 18px;
-  font-weight: 600;
-  color: #344054;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f0f2f5;
-  position: relative;
-}
-
-.item h3::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, #4f46e5, #7c3aed);
-}
-
-.chartContainer {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.statCards {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.statCard {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  flex: 1;
-  min-width: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.03);
-}
-
-.statCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-}
-
-.statCard .value {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 8px 0;
-  color: #344054;
-}
-
-.statCard .label {
-  font-size: 14px;
-  color: #667085;
-  font-weight: 500;
-}
-
-.statCard:nth-child(1) {
-  border-top: 3px solid #4f46e5;
-}
-
-.statCard:nth-child(1) .value {
-  color: #4f46e5;
-}
-
-.statCard:nth-child(2) {
-  border-top: 3px solid #10b981;
-}
-
-.statCard:nth-child(2) .value {
-  color: #10b981;
-}
-
-.statCard:nth-child(3) {
-  border-top: 3px solid #f43f5e;
-}
-
-.statCard:nth-child(3) .value {
-  color: #f43f5e;
-}
-
-.statCard:nth-child(4) {
-  border-top: 3px solid #7c3aed;
-}
-
-.statCard:nth-child(4) .value {
-  color: #7c3aed;
-}
-
-.filterContainer {
-  margin-bottom: 24px;
-  background-color: #fff;
-  padding: 16px 20px;
-  border-radius: 10px;
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.03);
-}
-
-.filterLabel {
-  font-weight: 500;
-  color: #344054;
-  margin-right: 8px;
-}
-
-.noData {
-  display: flex;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  color: #667085;
-  font-size: 16px;
-  flex-direction: column;
-}
-
-.noData svg {
-  margin-bottom: 16px;
-  opacity: 0.6;
-}
-
-/* Thanh tiêu đề chính */
+/* Header Styles */
 .pageHeader {
   margin-bottom: 24px;
   display: flex;
@@ -178,19 +19,312 @@
 
 .pageTitle {
   font-size: 24px;
-  font-weight: 600;
-  color: #101828;
+  font-weight: 700;
+  color: #1e293b;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
-/* Media queries để đảm bảo responsive */
-@media (max-width: 1024px) {
-  .itemContainer {
-    flex-direction: column;
+/* Filter Section */
+.filterContainer {
+  background: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.filterLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4f46e5;
+}
+
+/* Stat Cards */
+.statCards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(79, 70, 229, 0.08);
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1);
+}
+
+.statIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.statContent {
+  flex: 1;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+/* Charts Section */
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.chartBox {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chartBox h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.chartContainer {
+  height: 320px;
+  position: relative;
+}
+
+/* Best Selling Products */
+.bestSellingProducts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.bestProductCard {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(79, 70, 229, 0.08);
+}
+
+.bestProductCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1);
+}
+
+.bestProductRank {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.bestProductImg {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #f1f5f9;
+}
+
+.bestProductInfo {
+  flex: 1;
+}
+
+.bestProductName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.bestProductSold {
+  font-size: 13px;
+  color: #4f46e5;
+  font-weight: 500;
+}
+
+/* Customer Report */
+.customerReportHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.customerReportTotal {
+  background: #4f46e5;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topCustomersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.customerCard {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  border: 1px solid rgba(79, 70, 229, 0.08);
+}
+
+.customerCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.rankBadge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.customerName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contactInfo {
+  display: flex;
+  gap: 12px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.statBox {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.statTitle {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.statNumber {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4f46e5;
+}
+
+/* Loading & Empty States */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+}
+
+.noData {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+  color: #64748b;
+}
+
+.noData svg {
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .statCards {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .item {
-    width: 100%;
+  .bestSellingProducts,
+  .topCustomersGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -199,11 +333,35 @@
     padding: 16px;
   }
 
-  .statCards {
-    flex-direction: column;
+  .statCards,
+  .bestSellingProducts,
+  .topCustomersGrid {
+    grid-template-columns: 1fr;
   }
 
-  .statCard {
-    width: 100%;
+  .customerReportHeader {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
   }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.item {
+  animation: fadeIn 0.3s ease-out;
 }

@@ -68,8 +68,37 @@ const PromotionManagement = () => {
       const response = await CouponManagementApi.searchCoupon(apiParams);
 
       if (response.data) {
-        setPromotions(response.data.content || []);
-        setTotalItems(response.data.totalElements || 0);
+        // Group coupons by code to remove duplicates
+        const groupedCoupons = response.data.content.reduce((acc, coupon) => {
+          const existingCoupon = acc.find((c) => c.code === coupon.code);
+
+          if (existingCoupon) {
+            // If coupon already exists, just update the quantity
+            existingCoupon.quantity =
+              (existingCoupon.quantity || 0) + (coupon.quantity || 1);
+          } else {
+            // If coupon doesn't exist, add it to the accumulator
+            acc.push({
+              ...coupon,
+              quantity: coupon.quantity || 1,
+            });
+          }
+          return acc;
+        }, []);
+
+        // Sort grouped coupons by creation date (newest first)
+        groupedCoupons.sort(
+          (a, b) => new Date(b.createdDate) - new Date(a.createdDate)
+        );
+
+        // Add row numbers
+        const couponsWithRowNum = groupedCoupons.map((coupon, index) => ({
+          ...coupon,
+          rowNum: (page - 1) * size + index + 1,
+        }));
+
+        setPromotions(couponsWithRowNum);
+        setTotalItems(groupedCoupons.length);
       } else {
         setPromotions([]);
         setTotalItems(0);

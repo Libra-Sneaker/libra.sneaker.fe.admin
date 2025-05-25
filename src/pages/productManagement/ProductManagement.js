@@ -10,13 +10,13 @@ import {
   message,
   Input,
   Tag,
+  Card,
 } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import Search from "antd/es/transfer/search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faSearch, faSync } from "@fortawesome/free-solid-svg-icons";
 import { PlusOutlined } from "@ant-design/icons";
 
 const ProductManagement = () => {
@@ -36,7 +36,13 @@ const ProductManagement = () => {
   const [editingStatus, setEditingStatus] = useState(null);
 
   const columns = [
-    { title: "STT", dataIndex: "rowNum", key: "row" },
+    { 
+      title: "STT", 
+      dataIndex: "rowNum", 
+      key: "row",
+      width: 80,
+      align: 'center'
+    },
     {
       title: "Tên sản phẩm",
       dataIndex: "productName",
@@ -46,22 +52,43 @@ const ProductManagement = () => {
           <Input
             value={editingName}
             onChange={(e) => setEditingName(e.target.value)}
+            placeholder="Nhập tên sản phẩm"
           />
         ) : (
-          text
+          <span style={{ fontWeight: 500 }}>{text}</span>
         ),
     },
     {
       title: "Ngày thêm",
       dataIndex: "createdDate",
       key: "createdDate",
-      render: (text) => moment(text).format("DD/MM/YYYY"),
+      width: 120,
+      render: (text) => (
+        <span style={{ color: '#64748b' }}>
+          {moment(text).format("DD/MM/YYYY")}
+        </span>
+      ),
     },
-    { title: "Số lượng", dataIndex: "totalQuantity", key: "totalQuantity" },
+    { 
+      title: "Số lượng", 
+      dataIndex: "totalQuantity", 
+      key: "totalQuantity",
+      width: 100,
+      align: 'center',
+      render: (text) => (
+        <span style={{ 
+          fontWeight: 600,
+          color: text > 0 ? '#10b981' : '#ef4444'
+        }}>
+          {text}
+        </span>
+      )
+    },
     {
       title: "Trạng thái",
       key: "status",
       dataIndex: "status",
+      width: 120,
       render: (status, record) =>
         editingProductId === record.id ? (
           <Select
@@ -73,67 +100,58 @@ const ProductManagement = () => {
             <Select.Option value={0}>Dừng bán</Select.Option>
           </Select>
         ) : status == 1 ? (
-          <Tag
-            style={{
-              display: "flex",
-              width: "80px",
-              height: "32px",
-              lineHeight: "32px",
-              borderRadius: "5px",
-              fontSize: "13px",
-              cursor: "pointer",
-              marginBottom: "5px",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            color="green"
-          >
+          <Tag color="success" style={{ margin: 0 }}>
             Còn hàng
           </Tag>
         ) : (
-          <Tag
-            style={{
-              display: "flex",
-              width: "80px",
-              height: "32px",
-              lineHeight: "32px",
-              borderRadius: "5px",
-              fontSize: "13px",
-              cursor: "pointer",
-              marginBottom: "5px",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            size="large"
-            color="red"
-          >
+          <Tag color="error" style={{ margin: 0 }}>
             Hết hàng
           </Tag>
         ),
     },
     {
-      title: "Action",
+      title: "Thao tác",
       key: "action",
+      width: 150,
       render: (text, record) => (
-        <Space size="middle">
+        <Space size="small">
           <Button
+            type="text"
             onClick={() => navigate(`/product-detail-management/${record.id}`)}
-          >
-            <FontAwesomeIcon icon={faEye} />
-          </Button>
+            icon={<FontAwesomeIcon icon={faEye} />}
+            title="Xem chi tiết"
+          />
 
           {editingProductId === record.id ? (
             <>
-              <Button onClick={() => handleSave(record.id)}>Save</Button>
-              <Button onClick={handleCancelEdit}>Cancel</Button>
+              <Button 
+                type="primary" 
+                size="small"
+                onClick={() => handleSave(record.id)}
+              >
+                Lưu
+              </Button>
+              <Button 
+                size="small"
+                onClick={handleCancelEdit}
+              >
+                Hủy
+              </Button>
             </>
           ) : (
-            <Button onClick={() => handleEdit(record)}>Edit</Button>
+            <Button 
+              type="primary" 
+              size="small"
+              onClick={() => handleEdit(record)}
+            >
+              Sửa
+            </Button>
           )}
         </Space>
       ),
     },
   ];
+
   const handleEdit = (record) => {
     console.log(record.productName);
 
@@ -260,53 +278,46 @@ const ProductManagement = () => {
 
   return (
     <div className={styles.productContainer}>
-      <div className="headerProductContainer">
-        <h1>Sản Phẩm</h1>
+      <div className={styles.headerProductContainer}>
+        <h1>Quản lý sản phẩm</h1>
 
-        <div
-          style={{
-            backgroundColor: "#fff",
-            borderRadius: "10px",
-            padding: "10px",
-            marginBottom: "20px",
-            boxShadow: "0px 0px 5px 0px #ccc",
-          }}
-        >
-          <div className={styles.headerProduct}>
-            <div className={styles.searchContainer}>
-              <Search
-                className={styles.inputSearch}
-                placeholder="Tìm kiếm sản phẩm..."
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-                onPressEnter={handleSearch}
-              />
+        <div className={styles.headerProduct}>
+          <div className={styles.searchContainer}>
+            <Input
+              className={styles.inputSearch}
+              placeholder="Tìm kiếm sản phẩm..."
+              onChange={(e) => setName(e.target.value)}
+              value={name}
+              onPressEnter={handleSearch}
+              prefix={<FontAwesomeIcon icon={faSearch} style={{ color: '#94a3b8' }} />}
+            />
 
-              <div className={styles.radioContainer}>
-                <span className={styles.statusLabel}>Trạng thái: </span>
-                <Radio.Group
-                  onChange={(e) => setStatus(e.target.value)}
-                  value={status}
-                >
-                  <Radio value="all">Tất cả</Radio>
-                  <Radio value={1}>Đang bán</Radio>
-                  <Radio value={0}>Dừng bán</Radio>
-                </Radio.Group>
-              </div>
+            <div className={styles.radioContainer}>
+              <span className={styles.statusLabel}>Trạng thái:</span>
+              <Radio.Group
+                onChange={(e) => setStatus(e.target.value)}
+                value={status}
+              >
+                <Radio value="all">Tất cả</Radio>
+                <Radio value={1}>Đang bán</Radio>
+                <Radio value={0}>Dừng bán</Radio>
+              </Radio.Group>
             </div>
           </div>
+
           <div className={styles.containerSearchReset}>
             <Button
               className={styles.btnRefreshProduct}
               onClick={handleRefresh}
-              style={{ marginLeft: "8px" }} // Add some margin for spacing
+              icon={<FontAwesomeIcon icon={faSync} />}
             >
-              Refresh
+              Làm mới
             </Button>
             <Button
               className={styles.btnSearchProduct}
               type="primary"
               onClick={handleSearch}
+              icon={<FontAwesomeIcon icon={faSearch} />}
             >
               Tìm kiếm
             </Button>
@@ -314,55 +325,42 @@ const ProductManagement = () => {
         </div>
       </div>
 
-      <div
-        style={{
-          backgroundColor: "#fff",
-          borderRadius: "10px",
-          padding: "10px",
-          marginBottom: "20px",
-          boxShadow: "0px 0px 5px 0px #ccc",
-        }}
-      >
+      <Card className={styles.tableProduct}>
         <div className={styles.contanerAddProduct}>
           <Button
             icon={<PlusOutlined />}
-            style={{
-              backgroundColor: "orange",
-              borderColor: "orange",
-              color: "white",
-            }}
             className={styles.btnAddProduct}
             onClick={handleShowAddProduct}
           >
             Thêm sản phẩm
           </Button>
         </div>
+
         <Table
-          className={styles.tableProduct}
           columns={columns}
           dataSource={listProduct}
           loading={loading}
           rowKey="id"
           pagination={false}
+          scroll={{ x: 'max-content' }}
         />
 
         <Pagination
           style={{
-            padding: "20px",
+            marginTop: 24,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            gap: "10px",
           }}
-          simple
           current={currentPage}
           pageSize={pageSize}
           total={totalItems}
           onChange={handlePageChange}
           showSizeChanger
           pageSizeOptions={["10", "20", "50", "100"]}
+          showTotal={(total) => `Tổng số ${total} sản phẩm`}
         />
-      </div>
+      </Card>
     </div>
   );
 };

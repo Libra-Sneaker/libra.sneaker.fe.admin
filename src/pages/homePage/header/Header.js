@@ -1,123 +1,107 @@
 // components/Header.js
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Button, Space, Typography } from "antd";
 import LoginModal from "../LoginModal";
+import RegisterModal from "../RegisterModal";
 import { SearchOutlined, ShoppingCartOutlined } from "@mui/icons-material";
 import styles from "./Header.module.css";
 
 const { Text } = Typography;
 
 const Header = () => {
-  const [loginModalVisible, setLoginModalVisible] = useState(false);
+  const [modalType, setModalType] = useState(null); // 'login' | 'register' | null
 
-  const handleOpenLoginModal = () => {
-    setLoginModalVisible(true);
-  };
+  const handleOpenLoginModal = useCallback(() => {
+    setModalType('login');
+  }, []);
 
-  const handleCloseLoginModal = () => {
-    setLoginModalVisible(false);
-  };
+  const handleCloseLoginModal = useCallback(() => {
+    setModalType(null);
+  }, []);
 
-  // Hàm xử lý cuộn xuống phần "Liên hệ với chúng tôi"
-  const handleScrollToContact = () => {
-    const contactSection = document.getElementById("contact-section");
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: "smooth" });
+  const handleOpenRegisterModal = useCallback(() => {
+    setModalType('register');
+  }, []);
+
+  const handleCloseRegisterModal = useCallback(() => {
+    setModalType(null);
+  }, []);
+
+  // Hàm xử lý cuộn đến các section
+  const handleScrollToSection = (sectionId) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // Hàm xử lý cuộn lên đầu trang
-  const handleScrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   return (
-    <div
-      style={{
-        backgroundColor: "#fff", // Màu nền trắng giống trong hình
-        color: "#000",
-        padding: "10px 40px",
-        position: "sticky",
-        top: 0,
-        zIndex: 999,
-        height: 60,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)", // Thêm bóng nhẹ cho header
-      }}
-    >
-      {/* Bên trái: Logo */}
-      <div>
-        <Text
-          style={{
-            fontSize: 24,
-            fontWeight: 700,
-            color: "#000",
-          }}
-        >
-          LIBRA SNEAKER
+    <div className={styles.header}>
+      {/* Logo */}
+      <div className={styles.logo}>
+        <Text className={styles.logoText}>
+          LIBRA <span className={styles.highlight}>SNEAKER</span>
         </Text>
       </div>
 
-      {/* Giữa: Các mục điều hướng */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 30,
-          fontSize: 16,
-          fontWeight: 500,
-          color: "#000",
-        }}
-      >
+      {/* Navigation */}
+      <div className={styles.navigation}>
         <div
-          className={styles.title}
-          onClick={handleScrollToTop} // Thêm sự kiện onClick để cuộn lên đầu
-          style={{ cursor: "pointer" }} // Thêm con trỏ để biểu thị có thể nhấp
+          className={styles.navItem}
+          onClick={() => handleScrollToSection('hero-section')}
         >
           Trang chủ
         </div>
-        <div className={styles.title}>Sản Phẩm</div>
-        <div className={styles.title}>Giới Thiệu</div>
-        <div
-          className={styles.title}
-          onClick={handleScrollToContact} // Thêm sự kiện onClick
-          style={{ cursor: "pointer" }} // Thêm con trỏ để biểu thị có thể nhấp
+        <div 
+          className={styles.navItem}
+          onClick={() => handleScrollToSection('features-section')}
         >
-          Liên Hệ
+          Tính năng
+        </div>
+        <div 
+          className={styles.navItem}
+          onClick={() => handleScrollToSection('benefits-section')}
+        >
+          Lợi ích
+        </div>
+        <div
+          className={styles.navItem}
+          onClick={() => handleScrollToSection('contact-section')}
+        >
+          Liên hệ
         </div>
       </div>
 
-      {/* Bên phải: Nút Đăng nhập và biểu tượng dấu cộng */}
-      <Space size="middle">
-        <div
-          style={{
-            fontSize: 20,
-            fontWeight: 700,
-            color: "#000",
-            cursor: "pointer",
-          }}
+      {/* Auth Buttons */}
+      <Space size="middle" className={styles.authButtons}>
+        <Button
+          type="default"
+          className={styles.registerButton}
+          onClick={handleOpenRegisterModal}
         >
-          +
-        </div>
+          Đăng ký
+        </Button>
         <Button
           type="primary"
-          style={{
-            backgroundColor: "#4a90e2", // Màu xanh dương giống trong hình
-            borderColor: "#4a90e2",
-            borderRadius: 20, // Bo góc
-            fontWeight: 500,
-          }}
+          className={styles.loginButton}
           onClick={handleOpenLoginModal}
         >
           Đăng nhập
         </Button>
       </Space>
 
-      {/* Modal đăng nhập */}
-      <LoginModal visible={loginModalVisible} onClose={handleCloseLoginModal} />
+      {/* Modals */}
+      <LoginModal 
+        visible={modalType === 'login'} 
+        onClose={handleCloseLoginModal}
+        onSwitchToRegister={handleOpenRegisterModal}
+      />
+      
+      <RegisterModal 
+        visible={modalType === 'register'} 
+        onCancel={handleCloseRegisterModal}
+        onSwitchToLogin={handleOpenLoginModal}
+      />
     </div>
   );
 };

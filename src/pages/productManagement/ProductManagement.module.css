@@ -1,89 +1,290 @@
 .productContainer {
-  /* background-color: #ccc; */
-  /* background-color: #f1f1f1; */
-  border-radius: 10px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  padding: 32px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .headerProductContainer {
-  padding: 10px;
-  margin: 10px;
-  background-color: #fff;
-  border-radius: 10px;
-  /* border: 1px solid #ccc; */
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  border: 1px solid #edf2f7;
+}
+
+.headerProductContainer h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 32px;
+  position: relative;
+  padding-left: 20px;
+  letter-spacing: -0.01em;
+}
+
+.headerProductContainer h1::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 28px;
+  background: #4a5568;
+  border-radius: 2px;
 }
 
 .headerProduct {
   display: flex;
-  justify-content: space-between;
-  padding: 10px;
-}
-
-.inputSearch {
-  width: 50%;
-  margin-right: 10px;
-  padding: 5px;
-}
-
-.btnSearchProduct {
-  margin-left: 15px;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .searchContainer {
-  width: 100%;
   display: flex;
-  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.statusLabel {
-  margin-right: 10px;
-  font-weight: bold;
+.inputSearch {
+  flex: 1;
+  min-width: 300px;
+}
+
+.inputSearch :global(.ant-input) {
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 0 16px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.inputSearch :global(.ant-input:hover),
+.inputSearch :global(.ant-input:focus) {
+  border-color: #4a5568;
+  box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.05);
 }
 
 .radioContainer {
   display: flex;
-  margin-right: 10px;
-  border-radius: 10px;
-  width: 50%;
-  justify-content: space-evenly;
-  padding-bottom: 0px;
-  padding-left: 20px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
 }
 
-.containerTable {
-  background-color: #fff;
-  border-radius: 10px;
-  /* border: 1px solid #ccc; */
+.statusLabel {
+  font-weight: 600;
+  color: #4a5568;
+  white-space: nowrap;
 }
 
-.contanerAddProduct {
+.radioContainer :global(.ant-radio-group) {
   display: flex;
-  justify-content: flex-end;
+  gap: 16px;
 }
 
-.btnAddProduct {
-  margin: 25px 20px 5px 0px;
-}
-
-.tableProduct {
-  margin-top: 30px;
-  padding: 10px;
-  margin: 10px;
-  background-color: #fff;
+.radioContainer :global(.ant-radio-wrapper) {
+  font-size: 14px;
+  color: #4a5568;
 }
 
 .containerSearchReset {
   display: flex;
   justify-content: flex-end;
-
-  margin-right: 20px;
-  margin-bottom: 25px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 24px;
 }
 
-.largeTag {
-  font-size: 14px;
-  padding: 5px 10px;
+.btnSearchProduct,
+.btnRefreshProduct {
+  height: 44px;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 600;
   border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btnSearchProduct {
+  background: #4a5568 !important;
+  border: none !important;
+  color: white !important;
+}
+
+.btnSearchProduct:hover {
+  background: #2d3748 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btnRefreshProduct {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #4a5568 !important;
+}
+
+.btnRefreshProduct:hover {
+  background: #f7fafc !important;
+  border-color: #cbd5e0 !important;
+  transform: translateY(-1px);
+}
+
+.contanerAddProduct {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+
+.btnAddProduct {
+  height: 44px;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: #4a5568 !important;
+  border: none !important;
+  color: white !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btnAddProduct:hover {
+  background: #2d3748 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tableProduct {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  border: 1px solid #edf2f7;
+}
+
+.tableProduct :global(.ant-table-thead > tr > th) {
+  background: #f7fafc;
+  color: #4a5568;
+  font-weight: 600;
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tableProduct :global(.ant-table-tbody > tr > td) {
+  padding: 16px;
+  border-bottom: 1px solid #f7fafc;
+}
+
+.tableProduct :global(.ant-table-tbody > tr:hover > td) {
+  background: #f7fafc;
+}
+
+.tableProduct :global(.ant-table-pagination) {
+  margin: 24px 0 0 0;
+  padding: 0;
+}
+
+.tableProduct :global(.ant-pagination-item) {
+  border-radius: 6px;
+  margin: 0 2px;
+}
+
+.tableProduct :global(.ant-pagination-item-active) {
+  background: #4a5568;
+  border-color: #4a5568;
+}
+
+.tableProduct :global(.ant-pagination-item-active a) {
+  color: white;
+}
+
+.tableProduct :global(.ant-tag) {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  border: none;
+}
+
+.tableProduct :global(.ant-btn) {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tableProduct :global(.ant-btn-primary) {
+  background: #4a5568;
+  border-color: #4a5568;
+}
+
+.tableProduct :global(.ant-btn-primary:hover) {
+  background: #2d3748;
+  border-color: #2d3748;
+}
+
+.tableProduct :global(.ant-btn-text) {
+  color: #4a5568;
+}
+
+.tableProduct :global(.ant-btn-text:hover) {
+  background: rgba(74, 85, 104, 0.05);
+  color: #2d3748;
+}
+
+@media (max-width: 768px) {
+  .productContainer {
+    padding: 16px;
+  }
+
+  .headerProductContainer {
+    padding: 20px;
+  }
+
+  .headerProductContainer h1 {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .searchContainer {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .inputSearch {
+    width: 100%;
+  }
+
+  .radioContainer {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 12px;
+  }
+
+  .containerSearchReset {
+    flex-direction: column;
+  }
+
+  .btnSearchProduct,
+  .btnRefreshProduct {
+    width: 100%;
+  }
+
+  .tableProduct {
+    padding: 16px;
+  }
 }
