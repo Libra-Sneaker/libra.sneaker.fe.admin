@@ -1,10 +1,12 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Modal } from "antd";
+import { Button, Modal, Input, message } from "antd";
 import React, { useEffect, useState } from "react";
 import { SizeManagementApi } from "../../../api/admin/sizeManagement/SizeManagementApi";
 
 const ModalSize = ({ isModalOpen, handleCancel, setListSizeSelected }) => {
   const [listSize, setListSize] = useState([]);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newSizeName, setNewSizeName] = useState("");
 
   const getSize = () => {
     SizeManagementApi.getSize().then((res) => {
@@ -38,6 +40,22 @@ const ModalSize = ({ isModalOpen, handleCancel, setListSizeSelected }) => {
         return [...prevList, item];
       }
     });
+  };
+
+  const handleCreateSize = async () => {
+    if (!newSizeName?.trim()) {
+      message.warning("Vui lòng nhập tên size");
+      return;
+    }
+    try {
+      await SizeManagementApi.create({ name: newSizeName.trim() });
+      message.success("Tạo size thành công");
+      setNewSizeName("");
+      setIsCreateOpen(false);
+      getSize();
+    } catch (e) {
+      message.error("Tạo size thất bại");
+    }
   };
 
   return (
@@ -75,7 +93,22 @@ const ModalSize = ({ isModalOpen, handleCancel, setListSizeSelected }) => {
             margin: "10px",
           }}
           type="primary"
+          onClick={() => setIsCreateOpen(true)}
         />
+        <Modal
+          title="Tạo size mới"
+          open={isCreateOpen}
+          onOk={handleCreateSize}
+          onCancel={() => setIsCreateOpen(false)}
+          okText="Tạo"
+          cancelText="Hủy"
+        >
+          <Input
+            placeholder="Nhập tên size"
+            value={newSizeName}
+            onChange={(e) => setNewSizeName(e.target.value)}
+          />
+        </Modal>
       </Modal>
     </div>
   );

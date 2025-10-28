@@ -1,5 +1,5 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Modal } from "antd";
+import { Button, Modal, Input, message } from "antd";
 import React, { useEffect, useState } from "react";
 import { ColorManagementApi } from "../../../api/admin/colorManagemnet/ColorManagementApi";
 
@@ -9,6 +9,8 @@ const ModalColor = ({
   handleCancel,
 }) => {
   const [listColor, setListColor] = useState([]);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newColorName, setNewColorName] = useState("");
 
   const getColor = () => {
     ColorManagementApi.getColor().then((res) => {
@@ -37,6 +39,22 @@ const ModalColor = ({
         return [...prevList, item];
       }
     });
+  };
+
+  const handleCreateColor = async () => {
+    if (!newColorName?.trim()) {
+      message.warning("Vui lòng nhập tên màu");
+      return;
+    }
+    try {
+      await ColorManagementApi.create({ name: newColorName.trim() });
+      message.success("Tạo màu thành công");
+      setNewColorName("");
+      setIsCreateOpen(false);
+      getColor();
+    } catch (e) {
+      message.error("Tạo màu thất bại");
+    }
   };
 
   return (
@@ -73,7 +91,22 @@ const ModalColor = ({
           margin: "5px",
         }}
         type="primary"
+        onClick={() => setIsCreateOpen(true)}
       />
+      <Modal
+        title="Tạo màu mới"
+        open={isCreateOpen}
+        onOk={handleCreateColor}
+        onCancel={() => setIsCreateOpen(false)}
+        okText="Tạo"
+        cancelText="Hủy"
+      >
+        <Input
+          placeholder="Nhập tên màu"
+          value={newColorName}
+          onChange={(e) => setNewColorName(e.target.value)}
+        />
+      </Modal>
     </Modal>
   );
 };
