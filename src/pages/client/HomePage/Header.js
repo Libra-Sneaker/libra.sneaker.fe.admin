@@ -106,6 +106,20 @@ const Header = () => {
     // navigate('/checkout');
   };
 
+  // Listen for global cart add events from other pages
+  useEffect(() => {
+    const onAdd = (e) => {
+      const { id, name, price, image, qty = 1 } = e.detail || {};
+      setCartItems(prev => {
+        const exist = prev.find(i => i.id === id);
+        if (exist) return prev.map(i => i.id === id ? { ...i, qty: (i.qty || 1) + qty } : i);
+        return [...prev, { id, name, price, image, qty }];
+      });
+    };
+    window.addEventListener('cart:add', onAdd);
+    return () => window.removeEventListener('cart:add', onAdd);
+  }, []);
+
   return (
     <>
       <div className={styles.header}>
@@ -175,6 +189,7 @@ const Header = () => {
                   type="text" 
                   icon={<ShoppingCartOutlined />}
                   className={styles.cartButton}
+                  id="header-cart-anchor"
                   onClick={() => setCartVisible(true)}
                 >
                   Giỏ hàng

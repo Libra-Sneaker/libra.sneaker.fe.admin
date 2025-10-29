@@ -57,8 +57,42 @@ const ProductDetailPage = () => {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   const handleAddToCart = (productId) => {
-    // TODO: integrate real cart API
-    console.log('Add to cart:', productId);
+    const p = mockProducts[id] || mockProducts[1];
+    // Dispatch global add-to-cart for header badge/cart
+    window.dispatchEvent(new CustomEvent('cart:add', { detail: {
+      id: productId,
+      name: p?.name,
+      price: Math.round(p?.price || 0) * 1000,
+      image: p?.images?.[0],
+      qty: 1,
+    }}));
+
+    // Fly-to-cart animation using current card image
+    const cartEl = document.getElementById('header-cart-anchor');
+    if (!cartEl) return;
+    const imgEl = document.querySelector(`[data-product-img="detail-best-${productId}"]`);
+    if (!imgEl) return;
+    const imgRect = imgEl.getBoundingClientRect();
+    const cartRect = cartEl.getBoundingClientRect();
+    const flyImg = imgEl.cloneNode(true);
+    flyImg.style.position = 'fixed';
+    flyImg.style.left = imgRect.left + 'px';
+    flyImg.style.top = imgRect.top + 'px';
+    flyImg.style.width = imgRect.width + 'px';
+    flyImg.style.height = imgRect.height + 'px';
+    flyImg.style.borderRadius = '8px';
+    flyImg.style.zIndex = 2000;
+    flyImg.style.transition = 'transform 0.8s ease, opacity 0.8s ease, left 0.8s ease, top 0.8s ease, width 0.8s ease, height 0.8s ease';
+    document.body.appendChild(flyImg);
+    requestAnimationFrame(() => {
+      flyImg.style.left = cartRect.left + 'px';
+      flyImg.style.top = cartRect.top + 'px';
+      flyImg.style.width = '24px';
+      flyImg.style.height = '24px';
+      flyImg.style.opacity = '0.2';
+      flyImg.style.transform = 'translate(0, -20px) scale(0.5)';
+    });
+    setTimeout(() => { try { document.body.removeChild(flyImg); } catch (_) {} }, 850);
   };
 
   // Always start from top when opening/changing product detail
@@ -170,7 +204,7 @@ const ProductDetailPage = () => {
                     <div key={idx} className={styles.horizontalProductCard}>
                       <div className={styles.productCard} onClick={() => navigate(`/products/${idToGo}`)}>
                         <div className={styles.productImageContainer} onClick={() => navigate(`/products/${idToGo}`)}>
-                          <img src={p.images[0]} alt={p.name} className={styles.productImage} />
+                          <img src={p.images[0]} alt={p.name} className={styles.productImage} data-product-img={`detail-best-${idToGo}`} />
                           <div className={styles.productBadges}>
                             <div className={styles.bestsellerBadge}>BÁN CHẠY</div>
                           </div>
@@ -195,7 +229,7 @@ const ProductDetailPage = () => {
                     <div key={`dup-${idx}`} className={styles.horizontalProductCard}>
                       <div className={styles.productCard} onClick={() => navigate(`/products/${idToGo}`)}>
                         <div className={styles.productImageContainer} onClick={() => navigate(`/products/${idToGo}`)}>
-                          <img src={p.images[0]} alt={p.name} className={styles.productImage} />
+                          <img src={p.images[0]} alt={p.name} className={styles.productImage} data-product-img={`detail-best-${idToGo}`} />
                           <div className={styles.productBadges}>
                             <div className={styles.bestsellerBadge}>BÁN CHẠY</div>
                           </div>
