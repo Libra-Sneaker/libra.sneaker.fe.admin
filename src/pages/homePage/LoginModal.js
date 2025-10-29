@@ -10,7 +10,7 @@ import styles from "./LoginModal.module.css";
 
 const { Text } = Typography;
 
-const LoginModal = ({ visible, onClose, onSwitchToRegister }) => {
+const LoginModal = ({ visible, onClose, onSwitchToRegister, onLoginSuccess }) => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -34,7 +34,15 @@ const LoginModal = ({ visible, onClose, onSwitchToRegister }) => {
         localStorage.setItem("name", data.name);
 
         onClose();
-        navigate(SCREEN.productManagement.path);
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        } else {
+          // Default navigation for admin users
+          const role = data.role;
+          if (role === 'ADMIN' || role === 'EMPLOYEE') { // Admin or Employee
+            navigate(SCREEN.productManagement.path);
+          }
+        }
         message.success("Đăng nhập thành công!");
       }
     } catch (err) {

@@ -21,7 +21,9 @@ import ModalAddCustomer from "../pages/customerManagement/addCustomer/AddCustome
 import BillManagement from "../pages/billManagement/BillManagementt";
 import BillDetailManagement from "../pages/billManagement/billDetailManagement/BillDetailManagement";
 import CounterSaleManagement from "../pages/counterSaleManagement/CounterSaleManagement";
-import HomePage from "../pages/homePage/HomePage";
+import HomePage from "../pages/client/HomePage/HomePage";
+import ProductPage from "../pages/client/Product/ProductPage";
+import ProductDetailPage from "../pages/client/Product/ProductDetailPage";
 import ReturnManagement from "../pages/returnManagement/ReturnManagement";
 import PromotionManagement from "../pages/promotionManagement/PromotionManagement";
 import AnalysisManagement from "../pages/analysisManagement/AnalysisManagement";
@@ -39,6 +41,8 @@ const generalRoutes = [
 
 const publicRoutes = [
   { path: "/", element: <HomePage /> }, // Trang homepage
+  { path: "/products", element: <ProductPage /> }, // Trang sản phẩm công khai
+  { path: "/products/:id", element: <ProductDetailPage /> }, // Trang chi tiết sản phẩm
   // { path: "/login", element: <Login /> }, // Trang đăng nhập (cần tạo component Login)
 ];
 
