@@ -23,6 +23,7 @@ import BillDetailManagement from "../pages/billManagement/billDetailManagement/B
 import CounterSaleManagement from "../pages/counterSaleManagement/CounterSaleManagement";
 import HomePage from "../pages/client/HomePage/HomePage";
 import ProductPage from "../pages/client/Product/ProductPage";
+import CartPage from "../pages/client/Cart/CartPage";
 import ProductDetailPage from "../pages/client/Product/ProductDetailPage";
 import ReturnManagement from "../pages/returnManagement/ReturnManagement";
 import PromotionManagement from "../pages/promotionManagement/PromotionManagement";
@@ -42,6 +43,7 @@ const generalRoutes = [
 const publicRoutes = [
   { path: "/", element: <HomePage /> }, // Trang homepage
   { path: "/products", element: <ProductPage /> }, // Trang sản phẩm công khai
+  { path: "/cart", element: <CartPage /> }, // Trang giỏ hàng
   { path: "/products/:id", element: <ProductDetailPage /> }, // Trang chi tiết sản phẩm
   // { path: "/login", element: <Login /> }, // Trang đăng nhập (cần tạo component Login)
 ];

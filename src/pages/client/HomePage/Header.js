@@ -9,7 +9,6 @@ import {
 } from "@ant-design/icons";
 import styles from "./Header.module.css";
 import LoginModal from "../../homePage/LoginModal";
-import CartModal from "../Cart/CartModal";
 import CustomerRegisterModal from "../../homePage/CustomerRegisterModal";
 import { SCREEN } from "../../../router/screen";
 
@@ -120,6 +119,11 @@ const Header = () => {
     return () => window.removeEventListener('cart:add', onAdd);
   }, []);
 
+  // Persist cart items for CartPage
+  useEffect(() => {
+    try { localStorage.setItem('cartItems', JSON.stringify(cartItems)); } catch (_) {}
+  }, [cartItems]);
+
   return (
     <>
       <div className={styles.header}>
@@ -190,7 +194,7 @@ const Header = () => {
                   icon={<ShoppingCartOutlined />}
                   className={styles.cartButton}
                   id="header-cart-anchor"
-                  onClick={() => setCartVisible(true)}
+                  onClick={() => navigate('/cart')}
                 >
                   Giỏ hàng
                 </Button>
@@ -215,15 +219,7 @@ const Header = () => {
         onSwitchToLogin={openLoginModal}
       />
 
-      {/* Cart Modal */}
-      <CartModal
-        visible={cartVisible}
-        onClose={() => setCartVisible(false)}
-        items={cartItems}
-        onChangeQty={(id, qty) => setCartItems(prev => prev.map(i => i.id === id ? { ...i, qty } : i))}
-        onRemove={(id) => setCartItems(prev => prev.filter(i => i.id !== id))}
-        onCheckout={handleCheckout}
-      />
+      {/* Cart Modal removed in favor of dedicated page */}
     </>
   );
 };
