@@ -69,7 +69,7 @@ const CartPage = () => {
         name: it.productName,
         price: it.price,
         qty: it.quantity,
-        image: it.image || "",
+        image: it.urlImg || it.image || "",
       }));
       setItems(mapped);
     } catch (_) {
@@ -169,11 +169,11 @@ const CartPage = () => {
           <Row gutter={[16, 16]}>
             <Col xs={24} md={16}>
               <div className={styles.itemsCard}>
-                <div className={styles.voucherBar}>
+                {/* <div className={styles.voucherBar}>
                   <Tag color="orange" style={{ margin: 0 }}>EGAFREESHIP</Tag>
                   <Text style={{ flex: 1 }}>Áp dụng mã freeship cho đơn hàng của bạn</Text>
                   <Button size="small">Sao chép</Button>
-                </div>
+                </div> */}
 
                 {items.map((item) => (
                   <div key={item.id} className={styles.itemRow}>
@@ -213,16 +213,16 @@ const CartPage = () => {
                   </div>
                 ))}
 
-                <div style={{ marginTop: 12 }}>
+                {/* <div style={{ marginTop: 12 }}>
                   <Text strong>Ghi chú đơn hàng</Text>
                   <TextArea rows={3} placeholder="Nhập ghi chú cho đơn hàng..." style={{ marginTop: 8 }} />
-                </div>
+                </div> */}
               </div>
             </Col>
 
             <Col xs={24} md={8}>
               <div className={styles.summaryCard}>
-                <div style={{ marginBottom: 12 }}>
+                {/* <div style={{ marginBottom: 12 }}>
                   <Text strong>HẸN GIỜ NHẬN HÀNG</Text>
                   <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
                     <DatePicker style={{ width: '100%' }} placeholder="Ngày nhận hàng" />
@@ -233,9 +233,9 @@ const CartPage = () => {
                     </Select>
                     <Checkbox>Xuất hóa đơn công ty</Checkbox>
                   </div>
-                </div>
+                </div> */}
 
-                <Divider style={{ margin: '12px 0' }} />
+                {/* <Divider style={{ margin: '12px 0' }} /> */}
 
                 <div style={{ display: 'grid', gap: 8 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -246,13 +246,13 @@ const CartPage = () => {
                     <Text>Giảm giá</Text>
                     <Text>- 0 đ</Text>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {/* <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Text>Mã giảm giá</Text>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <Input size="small" placeholder="Nhập mã" />
                       <Button size="small">Áp dụng</Button>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 <Divider style={{ margin: '12px 0' }} />
@@ -262,13 +262,13 @@ const CartPage = () => {
                   <Text strong style={{ color: '#ff4d4f', fontSize: 16 }}>{money(subtotal)}</Text>
                 </div>
                 <Space direction="vertical" style={{ width: '100%' }}>
-                  <Button type="primary" block size="large" onClick={() => message.success('Đi tới thanh toán...')} disabled={!items.length}>Thanh toán ngay</Button>
+                  <Button type="primary" block size="large" onClick={() => navigate('/checkout')} disabled={!items.length}>Thanh toán ngay</Button>
                   <Button block size="large" onClick={() => window.history.back()}>Tiếp tục mua hàng</Button>
                 </Space>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 10, opacity: .7 }}>
+                {/* <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 10, opacity: .7 }}>
                   <img alt="visa" src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" style={{ height: 16 }} />
                   <img alt="mc" src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" style={{ height: 16 }} />
-                </div>
+                </div> */}
               </div>
             </Col>
           </Row>

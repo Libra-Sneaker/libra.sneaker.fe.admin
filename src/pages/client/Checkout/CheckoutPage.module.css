@@ -1,0 +1,127 @@
+.layout {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 24px 24px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.paymentOption {
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  transition: all 0.3s;
+}
+
+.paymentOption:hover {
+  border-color: #1890ff;
+  background: #f0f7ff;
+}
+
+.paymentOption:last-child {
+  margin-bottom: 0;
+}
+
+.radioCustom {
+  width: 100%;
+}
+
+.paymentContent {
+  width: 100%;
+}
+
+.completeButton {
+  height: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  background: #000;
+  border-color: #000;
+  margin-top: 16px;
+}
+
+.completeButton:hover {
+  background: #333 !important;
+  border-color: #333 !important;
+}
+
+.summaryCard {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+  position: sticky;
+  top: 100px;
+}
+
+.summaryItem {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.summaryItem:last-of-type {
+  margin-bottom: 0;
+}
+
+.summaryImage {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+.discountSection {
+  margin-bottom: 16px;
+}
+
+.costBreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.costRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.totalSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 80px 16px 16px;
+  }
+
+  .summaryCard {
+    position: relative;
+    top: 0;
+    margin-top: 16px;
+  }
+}
+

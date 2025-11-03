@@ -25,6 +25,7 @@ import HomePage from "../pages/client/HomePage/HomePage";
 import ProductPage from "../pages/client/Product/ProductPage";
 import CartPage from "../pages/client/Cart/CartPage";
 import ProductDetailPage from "../pages/client/Product/ProductDetailPage";
+import CheckoutPage from "../pages/client/Checkout/CheckoutPage";
 import ReturnManagement from "../pages/returnManagement/ReturnManagement";
 import PromotionManagement from "../pages/promotionManagement/PromotionManagement";
 import AnalysisManagement from "../pages/analysisManagement/AnalysisManagement";
@@ -44,6 +45,7 @@ const publicRoutes = [
   { path: "/", element: <HomePage /> }, // Trang homepage
   { path: "/products", element: <ProductPage /> }, // Trang sản phẩm công khai
   { path: "/cart", element: <CartPage /> }, // Trang giỏ hàng
+  { path: "/checkout", element: <CheckoutPage /> }, // Trang thanh toán
   { path: "/products/:id", element: <ProductDetailPage /> }, // Trang chi tiết sản phẩm
   // { path: "/login", element: <Login /> }, // Trang đăng nhập (cần tạo component Login)
 ];
