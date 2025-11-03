@@ -1,4 +1,4 @@
-import { Button, Card, Col, Layout, Row, Typography, Input, Space, Collapse, Radio, Checkbox } from "antd";
+import { Button, Card, Col, Layout, Row, Typography, Input, Space, Collapse, Radio, Checkbox, Spin } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,6 +12,7 @@ import {
 import styles from "./ProductPage.module.css";
 import Header from "../HomePage/Header";
 import Footer from "../HomePage/Footer";
+import { HomeApi } from "../../../api/client/home/HomeApi";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -22,124 +23,97 @@ const ProductPage = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const [searchQuery, setSearchQuery] = useState('');
-  const [priceRange, setPriceRange] = useState('100-150');
+  const [priceRange, setPriceRange] = useState('');
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "NIKE AIR SF AIR FORCE 1 MID MEN'S",
-      price: 30.00,
-      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Nike"
-    },
-    {
-      id: 2,
-      name: "BLACK RUNNING SHOE",
-      price: 45.00,
-      image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Adidas"
-    },
-    {
-      id: 3,
-      name: "BLUE WHITE HIGH TOP",
-      price: 55.00,
-      image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Converse"
-    },
-    {
-      id: 4,
-      name: "RED WHITE HIGH TOP",
-      price: 65.00,
-      image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Nike"
-    },
-    {
-      id: 5,
-      name: "PUMA CLASSIC SNEAKER",
-      price: 40.00,
-      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Puma"
-    },
-    {
-      id: 6,
-      name: "CAT WORKING BOOT",
-      price: 80.00,
-      image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Cat"
-    },
-    {
-      id: 7,
-      name: "NIKE AIR SF AIR FORCE 1 MID MEN'S",
-      price: 30.00,
-      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Nike"
-    },
-    {
-      id: 8,
-      name: "BLACK RUNNING SHOE",
-      price: 45.00,
-      image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Adidas"
-    },
-    {
-      id: 9,
-      name: "BLUE WHITE HIGH TOP",
-      price: 55.00,
-      image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Converse"
-    },
-    {
-      id: 10,
-      name: "RED WHITE HIGH TOP",
-      price: 65.00,
-      image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Nike"
-    },
-    {
-      id: 11,
-      name: "PUMA CLASSIC SNEAKER",
-      price: 40.00,
-      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Puma"
-    },
-    {
-      id: 12,
-      name: "CAT WORKING BOOT",
-      price: 80.00,
-      image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Cat"
-    },
-    {
-      id: 13,
-      name: "BLUE WHITE HIGH TOP",
-      price: 55.00,
-      image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Converse"
-    },
-    {
-      id: 14,
-      name: "RED WHITE HIGH TOP",
-      price: 65.00,
-      image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Nike"
-    },
-    {
-      id: 15,
-      name: "PUMA CLASSIC SNEAKER",
-      price: 40.00,
-      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Puma"
-    },
-    {
-      id: 16,
-      name: "CAT WORKING BOOT",
-      price: 80.00,
-      image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Cat"
-    }
-  ]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [totalItems, setTotalItems] = useState(0);
+  const [newArrivals, setNewArrivals] = useState([]);
+  const [bestSellers, setBestSellers] = useState([]);
+  const getColorHex = (vnName) => {
+    const name = String(vnName || '').trim().toLowerCase();
+    const map = {
+      'đen': '#000000',
+      'trắng': '#FFFFFF',
+      'xám': '#808080',
+      'xám đậm': '#505050',
+      'xám nhạt': '#BFBFBF',
+      'ghi': '#9E9E9E',
+      'than': '#36454F',
+      'vàng': '#FFFF00',
+      'vàng chanh': '#DFFF00',
+      'vàng đồng': '#B8860B',
+      'cam': '#FFA500',
+      'cam đất': '#E77E23',
+      'cam nhạt': '#FFC187',
+      'nâu': '#A52A2A',
+      'nâu đậm': '#5C4033',
+      'nâu nhạt': '#C4A484',
+      'nâu đỏ': '#8B0000',
+      'nâu sữa': '#A68064',
+      'hồng': '#FFC0CB',
+      'hồng nhạt': '#FFD1DC',
+      'hồng đậm': '#FF69B4',
+      'tím': '#800080',
+      'tím than': '#301934',
+      'tím nhạt': '#C3B1E1',
+      'đỏ': '#FF0000',
+      'đỏ tươi': '#FF2400',
+      'đỏ đậm': '#8B0000',
+      'đỏ đô': '#800000',
+      'xanh lá': '#008000',
+      'xanh lục': '#228B22',
+      'xanh rêu': '#4F7942',
+      'xanh mint': '#98FF98',
+      'xanh dương': '#0000FF',
+      'xanh lam': '#1E90FF',
+      'xanh': '#00AEEF',
+      'xanh navy': '#001F3F',
+      'xanh coban': '#0047AB',
+      'xanh đen': '#003153',
+      'be': '#F5F5DC',
+      'be đậm': '#E5D1A7',
+      'be nhạt': '#FFF5D7',
+      'kem': '#FFFDD0',
+      'trắng sữa': '#FFFAF0',
+      'trắng ngà': '#FAF0E6',
+      'bạc': '#C0C0C0',
+      'vàng kim': '#FFD700',
+      'trong suốt': 'transparent',
+      // English fallbacks
+      'black': '#000000',
+      'white': '#FFFFFF',
+      'gray': '#808080',
+      'silver': '#C0C0C0',
+      'gold': '#FFD700',
+      'red': '#FF0000',
+      'blue': '#0000FF',
+      'green': '#008000',
+      'yellow': '#FFFF00',
+      'orange': '#FFA500',
+      'brown': '#A52A2A',
+      'pink': '#FFC0CB',
+      'purple': '#800080',
+      'navy': '#001F3F',
+      'transparent': 'transparent',
+    };
+    return map[name] || '#f0f0f0';
+  };
+  const [brandOptions, setBrandOptions] = useState([]);
+  const [materialOptions, setMaterialOptions] = useState([]);
+  const [typeOptions, setTypeOptions] = useState([]);
+  const [sizeOptions, setSizeOptions] = useState([]);
+  const [colorOptions, setColorOptions] = useState([]);
+  const [selectedBrandId, setSelectedBrandId] = useState();
+  const [selectedMaterialId, setSelectedMaterialId] = useState();
+  const [selectedTypeId, setSelectedTypeId] = useState();
+  const [selectedStatuses, setSelectedStatuses] = useState([]); // [1,0]
+  const [minPrice, setMinPrice] = useState();
+  const [maxPrice, setMaxPrice] = useState();
 
   // Filter data
   const categories = [
@@ -196,6 +170,129 @@ const ProductPage = () => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
 
+  const resetFilters = () => {
+    setSelectedBrandId(undefined);
+    setSelectedMaterialId(undefined);
+    setSelectedTypeId(undefined);
+    setSelectedColors([]);
+    setSelectedSizes([]);
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    setPriceRange('');
+    setPage(1);
+  };
+
+  // Fetch filter options (single endpoint)
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await HomeApi.getProductFilters();
+        setBrandOptions((data?.brands || []).map((b) => ({ label: b.name, value: b.id })));
+        setMaterialOptions((data?.materials || []).map((m) => ({ label: m.name, value: m.id })));
+        setTypeOptions((data?.types || []).map((t) => ({ label: t.name, value: t.id })));
+        setSizeOptions((data?.sizes || []).map((s) => ({ label: s, value: s })));
+        setColorOptions((data?.colors || []).map((c) => ({ label: c, value: c })));
+      } catch (e) {
+        // silent fail keeps local fallbacks
+      }
+    })();
+  }, []);
+
+  // Fetch new arrivals (last 30 days)
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await HomeApi.getNewArrivals({ page: 0, size: 8 });
+        const mapped = (data?.content || []).map((item) => ({
+          id: item.productId,
+          name: item.productName || item.productCode || `Product ${item.productId}`,
+          price: (() => {
+            if (!item.price) return 0;
+            const first = String(item.price).split(',')[0]?.trim();
+            const num = Number(first);
+            return isNaN(num) ? 0 : num;
+          })(),
+          image: item.urlImg || "https://via.placeholder.com/300",
+          brand: item.brand || "",
+          sold: item.totalSoldQuantity || 0,
+        }));
+        setNewArrivals(mapped);
+      } catch (_) {}
+    })();
+  }, []);
+
+  // Fetch best sellers (>5 sold)
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await HomeApi.getBestSellers({ minSold: 5 });
+        const mapped = (data || []).map((item) => ({
+          id: item.productId,
+          name: item.productName,
+          image: item.urlImg || "https://via.placeholder.com/300",
+          sold: item.totalSoldQuantity || 0,
+          price: (() => {
+            if (!item.price) return 0;
+            const num = Number(String(item.price).split(',')[0]?.trim());
+            return isNaN(num) ? 0 : num;
+          })(),
+        }));
+        setBestSellers(mapped);
+      } catch (_) {}
+    })();
+  }, []);
+
+  // Fetch products from API (paginated + filter by name)
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const params = {
+          page: page - 1,
+          size: pageSize,
+          name: searchQuery || undefined,
+          brandId: selectedBrandId || undefined,
+          materialId: selectedMaterialId || undefined,
+          typeId: selectedTypeId || undefined,
+          colors: selectedColors.length ? selectedColors : undefined,
+          sizes: selectedSizes.length ? selectedSizes : undefined,
+          minPrice: minPrice || undefined,
+          maxPrice: maxPrice || undefined,
+          status: selectedStatuses.length ? selectedStatuses : undefined,
+        };
+        const { data } = await HomeApi.getProductOverview(params);
+        const mapped = (data?.content || []).map((item) => ({
+          id: item.productId,
+          name: item.productName || item.productCode || `Product ${item.productId}`,
+          // price field is grouped string; show first or join
+          price: (() => {
+            if (!item.price) return 0;
+            const first = String(item.price).split(',')[0]?.trim();
+            const num = Number(first);
+            return isNaN(num) ? 0 : num;
+          })(),
+          image: item.urlImg || "https://via.placeholder.com/300",
+          brand: item.brand || "",
+          sold: item.totalSoldQuantity || 0,
+          colors: item.colors || "",
+          sizes: item.sizes || "",
+          colorsArr: (item.colors ? String(item.colors).split(',').map((c)=>c.trim()) : []),
+          sizesArr: (item.sizes ? String(item.sizes).split(',').map((s)=>s.trim()) : []),
+        }));
+        setProducts(mapped);
+        setTotalItems(data?.totalElements || 0);
+      } catch (error) {
+        console.error("Error fetching products: ", error);
+        setProducts([]);
+        setTotalItems(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [page, pageSize, searchQuery, selectedBrandId, selectedMaterialId, selectedTypeId, selectedColors, selectedSizes, minPrice, maxPrice]);
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -205,14 +302,36 @@ const ProductPage = () => {
 
   const handleAddToCart = (productId) => {
     const product = products.find(p => p.id === productId);
-    // Dispatch global event for header to update badge/cart
-    window.dispatchEvent(new CustomEvent('cart:add', { detail: {
-      id: productId,
-      name: product?.name,
-      price: Math.round(product?.price || 0) * 1000,
-      image: product?.image,
-      qty: 1,
-    }}));
+    // Try add to backend by picking first product_detail of this product
+    (async () => {
+      try {
+        const { ProductDetailManagementApi } = await import("../../../api/admin/productDetailManagement/productDetailManagementApi");
+        const { data } = await ProductDetailManagementApi.getProductDetails({ id: productId, page: 0, size: 1 });
+        const line = data?.content?.[0];
+        if (line?.productDetailId || line?.id) {
+          const { CartApi } = await import("../../../api/client/cart/CartApi");
+          await CartApi.add({ productDetailId: line.productDetailId || line.id, quantity: 1 });
+          window.dispatchEvent(new CustomEvent('cart:refresh'));
+        } else {
+          // Fallback to local header add if no detail
+          window.dispatchEvent(new CustomEvent('cart:add', { detail: {
+            id: productId,
+            name: product?.name,
+            price: Math.round(product?.price || 0),
+            image: product?.image,
+            qty: 1,
+          }}));
+        }
+      } catch (_) {
+        window.dispatchEvent(new CustomEvent('cart:add', { detail: {
+          id: productId,
+          name: product?.name,
+          price: Math.round(product?.price || 0),
+          image: product?.image,
+          qty: 1,
+        }}));
+      }
+    })();
 
     // Fly-to-cart animation
     const cartEl = document.getElementById('header-cart-anchor');
@@ -257,6 +376,53 @@ const ProductPage = () => {
         <div className={styles.pageHeaderContent}>
           <Title level={1} className={styles.pageTitle}>Men's Shoes</Title>
         </div>
+          {newArrivals.length > 0 && (
+            <div style={{ margin: '16px 0' }}>
+              <Title level={4}>SẢN PHẨM MỚI VỀ</Title>
+              <Row gutter={[16, 16]}>
+                {newArrivals.map((p) => (
+                  <Col xs={12} sm={12} md={8} lg={6} key={`new-${p.id}`}>
+                    <Card className={styles.productCard} onClick={() => navigate(`/products/${p.id}`)} hoverable>
+                      <div className={styles.productImageContainer}>
+                        <img src={p.image} alt={p.name} className={styles.productImage} />
+                      </div>
+                      <div className={styles.productInfo}>
+                        <Text className={styles.productName}>{p.name}</Text>
+                        <div className={styles.priceRow}>
+                          <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}</Text>
+                          <Text className={styles.soldCount}>Đã bán: {p.sold || 0}</Text>
+                        </div>
+                      </div>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          )}
+
+          {bestSellers.length > 0 && (
+            <div style={{ margin: '24px 0' }}>
+              <Title level={4}>SẢN PHẨM BÁN CHẠY</Title>
+              <Row gutter={[16, 16]}>
+                {bestSellers.map((p) => (
+                  <Col xs={12} sm={12} md={8} lg={6} key={`best-${p.id}`}>
+                    <Card className={styles.productCard} onClick={() => navigate(`/products/${p.id}`)} hoverable>
+                      <div className={styles.productImageContainer}>
+                        <img src={p.image} alt={p.name} className={styles.productImage} />
+                      </div>
+                      <div className={styles.productInfo}>
+                        <Text className={styles.productName}>{p.name}</Text>
+                        <div className={styles.priceRow}>
+                          <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}</Text>
+                          <Text className={styles.soldCount}>Đã bán: {p.sold || 0}</Text>
+                        </div>
+                      </div>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          )}
       </Content> */}
 
       {/* Main Content */}
@@ -266,10 +432,10 @@ const ProductPage = () => {
           {/* Sidebar */}
           <Col xs={24} lg={5} className={styles.sidebar}>
             <div className={styles.sidebarContent}>
-              <Title level={4} className={styles.sidebarTitle}>Men's Shoes & Sneakers</Title>
+              <Title level={4} className={styles.sidebarTitle}>Libra Sneakers</Title>
 
               {/* Sort Options */}
-              <div className={styles.sortSection}>
+              {/* <div className={styles.sortSection}>
                 <Space size="small" className={styles.sortButtons}>
                   <Button
                     type={sortBy === 'newest' ? 'primary' : 'default'}
@@ -300,73 +466,110 @@ const ProductPage = () => {
                     High Price to Low
                   </Button>
                 </Space>
-              </div>
+              </div> */}
 
-              {/* Categories */}
+              {/* Thương hiệu / Chất liệu / Loại */}
               <div className={styles.filterSection}>
                 <div className={styles.filterHeader}>
-                  <Title level={5} className={styles.filterTitle}>Categories</Title>
-                  <UpIcon className={styles.filterIcon} />
+                  <Title level={5} className={styles.filterTitle}>Thương hiệu</Title>
                 </div>
-                <div className={styles.filterContent}>
-                  {categories.map((category) => (
-                    <div key={category.name} className={styles.categoryItem}>
-                      <Checkbox
-                        checked={selectedCategories.includes(category.name)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedCategories([...selectedCategories, category.name]);
-                          } else {
-                            setSelectedCategories(selectedCategories.filter(c => c !== category.name));
-                          }
-                        }}
-                      />
-                      <span className={styles.categoryName}>{category.name}</span>
-                      <span className={styles.categoryCount}>({category.count})</span>
+                <div className={styles.sizeGrid}>
+                  {(brandOptions || []).map((b) => (
+                    <Button
+                      key={b.value}
+                      type={selectedBrandId === b.value ? 'primary' : 'default'}
+                      className={styles.sizeButton}
+                      onClick={() => { setSelectedBrandId(selectedBrandId === b.value ? undefined : b.value); setPage(1); }}
+                    >
+                      {b.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className={styles.filterSection}>
+                <div className={styles.filterHeader}>
+                  <Title level={5} className={styles.filterTitle}>Chất liệu</Title>
+                </div>
+                <div className={styles.sizeGrid}>
+                  {(materialOptions || []).map((m) => (
+                    <Button
+                      key={m.value}
+                      type={selectedMaterialId === m.value ? 'primary' : 'default'}
+                      className={styles.sizeButton}
+                      onClick={() => { setSelectedMaterialId(selectedMaterialId === m.value ? undefined : m.value); setPage(1); }}
+                    >
+                      {m.label}
+                    </Button>
+                  ))}
+                </div>
                     </div>
+              <div className={styles.filterSection}>
+                <div className={styles.filterHeader}>
+                  <Title level={5} className={styles.filterTitle}>Loại</Title>
+                </div>
+                <div className={styles.sizeGrid}>
+                  {(typeOptions || []).map((t) => (
+                    <Button
+                      key={t.value}
+                      type={selectedTypeId === t.value ? 'primary' : 'default'}
+                      className={styles.sizeButton}
+                      onClick={() => { setSelectedTypeId(selectedTypeId === t.value ? undefined : t.value); setPage(1); }}
+                    >
+                      {t.label}
+                    </Button>
                   ))}
                 </div>
               </div>
 
-              {/* Price */}
+              {/* Giá */}
               <div className={styles.filterSection}>
                 <div className={styles.filterHeader}>
-                  <Title level={5} className={styles.filterTitle}>Price</Title>
-                  <UpIcon className={styles.filterIcon} />
+                  <Title level={5} className={styles.filterTitle}>Giá</Title>
                 </div>
                 <div className={styles.filterContent}>
-                  <Radio.Group
-                    value={priceRange}
-                    onChange={(e) => setPriceRange(e.target.value)}
-                    className={styles.priceGroup}
-                  >
-                    {priceRanges.map((range) => (
-                      <Radio key={range.value} value={range.value} className={styles.priceRadio}>
-                        {range.label}
-                      </Radio>
+                  <Space wrap>
+                    {[
+                      { label: 'Dưới 500K', min: 0, max: 500000 },
+                      { label: '500K - 1M', min: 500000, max: 1000000 },
+                      { label: '1M - 2M', min: 1000000, max: 2000000 },
+                      { label: 'Trên 2M', min: 2000000, max: undefined },
+                    ].map((opt) => (
+                      <Button
+                        key={opt.label}
+                        type={(minPrice === opt.min && maxPrice === opt.max) ? 'primary' : 'default'}
+                        onClick={() => {
+                          setMinPrice(opt.min);
+                          setMaxPrice(opt.max);
+                          setPriceRange(opt.label);
+                          setPage(1);
+                        }}
+                      >
+                        {opt.label}
+                      </Button>
                     ))}
-                  </Radio.Group>
+                  </Space>
                 </div>
               </div>
 
-              {/* Colors */}
+              {/* Màu sắc */}
               <div className={styles.filterSection}>
                 <div className={styles.filterHeader}>
-                  <Title level={5} className={styles.filterTitle}>Colors</Title>
+                  <Title level={5} className={styles.filterTitle}>Màu sắc</Title>
                   <UpIcon className={styles.filterIcon} />
                 </div>
                 <div className={styles.filterContent}>
                   <div className={styles.colorGrid}>
-                    {colors.map((color) => (
+                    {(colorOptions.length ? colorOptions : colors).map((color) => (
                       <div
-                        key={color.name}
-                        className={`${styles.colorSwatch} ${selectedColors.includes(color.name) ? styles.selected : ''}`}
-                        style={{ backgroundColor: color.color }}
+                        key={color.label || color.name}
+                        className={`${styles.colorSwatch} ${selectedColors.includes(color.label || color.name) ? styles.selected : ''}`}
+                        style={{ backgroundColor: color.color || getColorHex(color.label || color.name) }}
                         onClick={() => {
-                          if (selectedColors.includes(color.name)) {
-                            setSelectedColors(selectedColors.filter(c => c !== color.name));
+                          const val = color.label || color.name;
+                          if (selectedColors.includes(val)) {
+                            setSelectedColors(selectedColors.filter(c => c !== val)); setPage(1);
                           } else {
-                            setSelectedColors([...selectedColors, color.name]);
+                            setSelectedColors([...selectedColors, val]); setPage(1);
                           }
                         }}
                       />
@@ -375,24 +578,24 @@ const ProductPage = () => {
                 </div>
               </div>
 
-              {/* Sizes */}
+              {/* Kích cỡ */}
               <div className={styles.filterSection}>
                 <div className={styles.filterHeader}>
-                  <Title level={5} className={styles.filterTitle}>Size</Title>
+                  <Title level={5} className={styles.filterTitle}>Kích cỡ</Title>
                   <UpIcon className={styles.filterIcon} />
                 </div>
                 <div className={styles.filterContent}>
                   <div className={styles.sizeGrid}>
-                    {sizes.map((size) => (
+                    {(sizeOptions.length ? sizeOptions.map(s=>s.value) : sizes).map((size) => (
                       <Button
                         key={size}
                         type={selectedSizes.includes(size) ? 'primary' : 'default'}
                         className={styles.sizeButton}
                         onClick={() => {
                           if (selectedSizes.includes(size)) {
-                            setSelectedSizes(selectedSizes.filter(s => s !== size));
+                            setSelectedSizes(selectedSizes.filter(s => s !== size)); setPage(1);
                           } else {
-                            setSelectedSizes([...selectedSizes, size]);
+                            setSelectedSizes([...selectedSizes, size]); setPage(1);
                           }
                         }}
                       >
@@ -401,6 +604,17 @@ const ProductPage = () => {
                     ))}
                   </div>
                 </div>
+              </div>
+
+              
+
+              <div className={styles.filterSection}>
+                {/* <Button type="primary" block onClick={() => { setPage(1); }}>
+                  Apply Filters
+                </Button> */}
+                <Button style={{ marginTop: 8 }} block onClick={resetFilters}>
+                  Reset bộ lọc
+                </Button>
               </div>
             </div>
           </Col>
@@ -419,6 +633,15 @@ const ProductPage = () => {
                 size="large"
               />
             </div>
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '50px' }}>
+                <Spin size="large" />
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '50px' }}>
+                <Text>Không tìm thấy sản phẩm nào</Text>
+              </div>
+            ) : (
             <Row gutter={[16, 16]} className={styles.productsGrid}>
               {filteredProducts.map((product) => (
                 <Col xs={12} sm={12} md={8} lg={6} key={product.id}>
@@ -442,7 +665,7 @@ const ProductPage = () => {
                       <Text className={styles.productName}>{product.name}</Text>
                       {/* <Text className={styles.productDescription}>Men's Shoe</Text> */}
                       <div className={styles.priceRow}>
-                        <Text className={styles.productPrice}>${product.price.toFixed(0)}</Text>
+                        <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Text>
                         <Text className={styles.soldCount}>Đã bán: {product.sold || 0}</Text>
                       </div>
                     </div>
@@ -450,6 +673,7 @@ const ProductPage = () => {
                 </Col>
               ))}
             </Row>
+            )}
           </Col>
         </Row>
       </Content>

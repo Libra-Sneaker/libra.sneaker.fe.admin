@@ -35,9 +35,29 @@ const handleErrorNotification = (status, data) => {
   }
 };
 
+const serializeParams = (params) => {
+  const usp = new URLSearchParams();
+  if (!params) return usp.toString();
+  Object.keys(params).forEach((key) => {
+    const value = params[key];
+    if (value === undefined || value === null) return;
+    if (Array.isArray(value)) {
+      value.forEach((v) => {
+        if (v !== undefined && v !== null) usp.append(key, v);
+      });
+    } else {
+      usp.append(key, value);
+    }
+  });
+  return usp.toString();
+};
+
 export const request = axios.create({
   baseURL: AppConfig.apiUrl,
   withCredentials: true, // Enable for CSRF protection
+  paramsSerializer: {
+    serialize: serializeParams,
+  },
 });
 
 // Interceptor request

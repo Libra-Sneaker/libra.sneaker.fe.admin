@@ -11,6 +11,7 @@ import styles from "./Header.module.css";
 import LoginModal from "../../homePage/LoginModal";
 import CustomerRegisterModal from "../../homePage/CustomerRegisterModal";
 import { SCREEN } from "../../../router/screen";
+import { CartApi } from "../../../api/client/cart/CartApi";
 
 const { Title } = Typography;
 
@@ -18,10 +19,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [registerModalVisible, setRegisterModalVisible] = useState(false);
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: "NIKE AIR SF AIR FORCE 1 MID MEN'S", price: 1990000, qty: 1, image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=200&q=60" },
-    { id: 2, name: "ADIDAS ULTRA BOOST 22", price: 2500000, qty: 2, image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&w=200&q=60" }
-  ]);
+  const [cartCount, setCartCount] = useState(0);
   const [cartVisible, setCartVisible] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -62,17 +60,11 @@ const Header = () => {
     setUserInfo(null);
   };
 
-  const handleAddToCart = (productId) => {
-    // TODO: Implement add to cart functionality
-    console.log('Add to cart:', productId);
-    // demo: push item with id/price; in real app, pass actual product data
-    setCartItems(prev => {
-      const exist = prev.find(i => i.id === productId);
-      if (exist) {
-        return prev.map(i => i.id === productId ? { ...i, qty: (i.qty || 1) + 1 } : i);
-      }
-      return [...prev, { id: productId, name: `Sản phẩm #${productId}`, price: 100000, qty: 1 }];
-    });
+  const refreshCartCount = async () => {
+    try {
+      const { data } = await CartApi.count();
+      setCartCount(Number(data) || 0);
+    } catch (_) {}
   };
 
   const openLoginModal = () => {
@@ -107,22 +99,18 @@ const Header = () => {
 
   // Listen for global cart add events from other pages
   useEffect(() => {
-    const onAdd = (e) => {
-      const { id, name, price, image, qty = 1 } = e.detail || {};
-      setCartItems(prev => {
-        const exist = prev.find(i => i.id === id);
-        if (exist) return prev.map(i => i.id === id ? { ...i, qty: (i.qty || 1) + qty } : i);
-        return [...prev, { id, name, price, image, qty }];
-      });
-    };
+    const onAdd = () => { refreshCartCount(); };
+    const onRefresh = () => { refreshCartCount(); };
     window.addEventListener('cart:add', onAdd);
-    return () => window.removeEventListener('cart:add', onAdd);
+    window.addEventListener('cart:refresh', onRefresh);
+    refreshCartCount();
+    return () => {
+      window.removeEventListener('cart:add', onAdd);
+      window.removeEventListener('cart:refresh', onRefresh);
+    };
   }, []);
 
-  // Persist cart items for CartPage
-  useEffect(() => {
-    try { localStorage.setItem('cartItems', JSON.stringify(cartItems)); } catch (_) {}
-  }, [cartItems]);
+  // No local persistence; count comes from backend
 
   return (
     <>
@@ -188,7 +176,7 @@ const Header = () => {
                   </Button>
                 </div>
               )}
-              <Badge count={cartItems.reduce((sum,i)=>sum+(i.qty||1),0)} showZero>
+              <Badge count={cartCount} showZero>
                 <Button 
                   type="text" 
                   icon={<ShoppingCartOutlined />}

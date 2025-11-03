@@ -10,6 +10,9 @@ import {
 import styles from "./HomePage.module.css";
 import Header from "./Header";
 import Footer from "./Footer";
+import { HomeApi } from "../../../api/client/home/HomeApi";
+import { ProductDetailManagementApi } from "../../../api/admin/productDetailManagement/productDetailManagementApi";
+import { CartApi } from "../../../api/client/cart/CartApi";
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -22,96 +25,8 @@ const HomePage = () => {
   const newProductsRef = useRef(null);
   const bestsellerProductsRef = useRef(null);
 
-  // Sample data for products
-  const newProducts = [
-    {
-      id: 1,
-      name: "NIKE AIR JORDAN 1 RETRO HIGH",
-      price: 120.00,
-      originalPrice: 150.00,
-      image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Nike",
-      isNew: true,
-      discount: 20
-    },
-    {
-      id: 2,
-      name: "ADIDAS ULTRA BOOST 22",
-      price: 180.00,
-      originalPrice: 200.00,
-      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Adidas",
-      isNew: true,
-      discount: 10
-    },
-    {
-      id: 3,
-      name: "CONVERSE CHUCK TAYLOR ALL STAR",
-      price: 65.00,
-      originalPrice: 75.00,
-      image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Converse",
-      isNew: true,
-      discount: 13
-    },
-    {
-      id: 4,
-      name: "PUMA RS-X REINVENTION",
-      price: 90.00,
-      originalPrice: 110.00,
-      image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Puma",
-      isNew: true,
-      discount: 18
-    }
-  ];
-
-  const bestsellerProducts = [
-    {
-      id: 5,
-      name: "NIKE AIR FORCE 1 '07",
-      price: 90.00,
-      originalPrice: 110.00,
-      image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Nike",
-      isBestseller: true,
-      discount: 18,
-      sold: 1250
-    },
-    {
-      id: 6,
-      name: "ADIDAS STAN SMITH",
-      price: 80.00,
-      originalPrice: 95.00,
-      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Adidas",
-      isBestseller: true,
-      discount: 16,
-      sold: 980
-    },
-    {
-      id: 7,
-      name: "VANS OLD SKOOL",
-      price: 70.00,
-      originalPrice: 85.00,
-      image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "Vans",
-      isBestseller: true,
-      discount: 18,
-      sold: 1150
-    },
-    {
-      id: 8,
-      name: "NEW BALANCE 574",
-      price: 85.00,
-      originalPrice: 100.00,
-      image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
-      brand: "New Balance",
-      isBestseller: true,
-      discount: 15,
-      sold: 890
-    }
-  ];
+  const [newProducts, setNewProducts] = useState([]);
+  const [bestsellerProducts, setBestsellerProducts] = useState([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -128,6 +43,54 @@ const HomePage = () => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, []);
 
+  // Fetch new products (last 30 days)
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await HomeApi.getNewArrivals({ page: 0, size: 12 });
+        const mapped = (data?.content || []).map((item) => ({
+          id: item.productId,
+          name: item.productName || item.productCode || `Product ${item.productId}`,
+          price: (() => {
+            if (!item.price) return 0;
+            const first = String(item.price).split(',')[0]?.trim();
+            const num = Number(first);
+            return isNaN(num) ? 0 : num;
+          })(),
+          image: item.urlImg || "https://via.placeholder.com/300",
+          brand: item.brand || "",
+          discount: 0,
+        }));
+        setNewProducts(mapped);
+      } catch (_) {}
+    })();
+  }, []);
+
+  // Fetch bestsellers (>5 sold)
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await HomeApi.getBestSellers({ minSold: 5 });
+        const mapped = (data || []).map((item) => ({
+          id: item.productId,
+          name: item.productName,
+          price: (() => {
+            if (!item.price) return 0;
+            const first = String(item.price).split(',')[0]?.trim();
+            const num = Number(first);
+            return isNaN(num) ? 0 : num;
+          })(),
+          image: item.urlImg || "https://via.placeholder.com/300",
+          brand: '',
+          isBestseller: true,
+          discount: 0,
+          sold: item.totalSoldQuantity || 0,
+        }));
+        setBestsellerProducts(mapped);
+      } catch (_) {}
+    })();
+  }, []);
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -135,16 +98,32 @@ const HomePage = () => {
     });
   };
 
-  const handleAddToCart = (productId) => {
+  const handleAddToCart = async (productId) => {
     const product = [...newProducts, ...bestsellerProducts].find(p => p.id === productId);
-    // Inform header to update cart badge/items
-    window.dispatchEvent(new CustomEvent('cart:add', { detail: {
-      id: productId,
-      name: product?.name,
-      price: Math.round(product?.price || 0) * 1000,
-      image: product?.image,
-      qty: 1,
-    }}));
+    try {
+      const { data } = await ProductDetailManagementApi.getProductDetails({ id: productId, page: 0, size: 1 });
+      const line = data?.content?.[0];
+      if (line?.productDetailId || line?.id) {
+        await CartApi.add({ productDetailId: line.productDetailId || line.id, quantity: 1 });
+        window.dispatchEvent(new CustomEvent('cart:refresh'));
+      } else {
+        window.dispatchEvent(new CustomEvent('cart:add', { detail: {
+          id: productId,
+          name: product?.name,
+          price: Math.round(product?.price || 0),
+          image: product?.image,
+          qty: 1,
+        }}));
+      }
+    } catch (_) {
+      window.dispatchEvent(new CustomEvent('cart:add', { detail: {
+        id: productId,
+        name: product?.name,
+        price: Math.round(product?.price || 0),
+        image: product?.image,
+        qty: 1,
+      }}));
+    }
 
     // Fly-to-cart animation
     const cartEl = document.getElementById('header-cart-anchor');
@@ -380,8 +359,7 @@ const HomePage = () => {
                       <Text className={styles.productBrand}>{product.brand}</Text>
                       <Text className={styles.productName}>{product.name}</Text>
                       <div className={styles.productPriceContainer}>
-                        <Text className={styles.productPrice}>${product.price.toFixed(2)}</Text>
-                        <Text className={styles.originalPrice}>${product.originalPrice.toFixed(2)}</Text>
+                        <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Text>
                       </div>
                     </div>
                   </Card>
@@ -414,8 +392,7 @@ const HomePage = () => {
                       <Text className={styles.productBrand}>{product.brand}</Text>
                       <Text className={styles.productName}>{product.name}</Text>
                       <div className={styles.productPriceContainer}>
-                        <Text className={styles.productPrice}>${product.price.toFixed(2)}</Text>
-                        <Text className={styles.originalPrice}>${product.originalPrice.toFixed(2)}</Text>
+                        <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Text>
                       </div>
                     </div>
                   </Card>
@@ -490,8 +467,7 @@ const HomePage = () => {
                       <Text className={styles.productBrand}>{product.brand}</Text>
                       <Text className={styles.productName}>{product.name}</Text>
                       <div className={styles.productPriceContainer}>
-                        <Text className={styles.productPrice}>${product.price.toFixed(2)}</Text>
-                        <Text className={styles.originalPrice}>${product.originalPrice.toFixed(2)}</Text>
+                        <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Text>
                       </div>
                       <Text className={styles.soldCount}>Đã bán: {product.sold}</Text>
                     </div>
@@ -525,8 +501,7 @@ const HomePage = () => {
                       <Text className={styles.productBrand}>{product.brand}</Text>
                       <Text className={styles.productName}>{product.name}</Text>
                       <div className={styles.productPriceContainer}>
-                        <Text className={styles.productPrice}>${product.price.toFixed(2)}</Text>
-                        <Text className={styles.originalPrice}>${product.originalPrice.toFixed(2)}</Text>
+                        <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Text>
                       </div>
                       <Text className={styles.soldCount}>Đã bán: {product.sold}</Text>
                     </div>

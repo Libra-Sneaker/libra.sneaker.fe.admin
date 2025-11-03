@@ -7,6 +7,7 @@ import BestsellerSlider from "../Common/BestsellerSlider";
 import { ShoppingCartOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import styles from "./CartPage.module.css";
+import { CartApi } from "../../../api/client/cart/CartApi";
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -58,36 +59,53 @@ const CartPage = () => {
     },
   ];
 
-  // Load from localStorage
-  useEffect(() => {
+  const loadCart = async () => {
     try {
-      const raw = localStorage.getItem('cartItems');
-      if (raw) setItems(JSON.parse(raw));
-    } catch (_) {}
-  }, []);
+      const { data } = await CartApi.list();
+      // Map backend response to UI model
+      const mapped = (data || []).map(it => ({
+        id: it.cartDetailId || it.productDetailId,
+        productDetailId: it.productDetailId,
+        name: it.productName,
+        price: it.price,
+        qty: it.quantity,
+        image: it.image || "",
+      }));
+      setItems(mapped);
+    } catch (_) {
+      setItems([]);
+    }
+  };
 
-  // Persist changes
-  useEffect(() => {
-    try { localStorage.setItem('cartItems', JSON.stringify(items)); } catch (_) {}
-  }, [items]);
+  useEffect(() => { loadCart(); }, []);
 
-  // Listen to global add events (in case user adds while on cart page)
+  // Listen to global events: refresh when product added elsewhere
   useEffect(() => {
-    const onAdd = (e) => {
-      const { id, name, price, image, qty = 1 } = e.detail || {};
-      setItems((prev) => {
-        const exist = prev.find(i => i.id === id);
-        if (exist) return prev.map(i => i.id === id ? { ...i, qty: (i.qty || 1) + qty } : i);
-        return [...prev, { id, name, price, image, qty }];
-      });
-      message.success('Đã thêm vào giỏ hàng');
+    const onRefresh = () => { loadCart(); };
+    window.addEventListener('cart:refresh', onRefresh);
+    window.addEventListener('cart:add', onRefresh);
+    return () => {
+      window.removeEventListener('cart:refresh', onRefresh);
+      window.removeEventListener('cart:add', onRefresh);
     };
-    window.addEventListener('cart:add', onAdd);
-    return () => window.removeEventListener('cart:add', onAdd);
   }, []);
 
-  const onChangeQty = (id, qty) => setItems(prev => prev.map(i => i.id === id ? { ...i, qty } : i));
-  const onRemove = (id) => setItems(prev => prev.filter(i => i.id !== id));
+  const onChangeQty = async (id, qty) => {
+    const line = items.find(i => i.id === id);
+    if (!line) return;
+    try {
+      await CartApi.update({ productDetailId: line.productDetailId || id, quantity: qty });
+      await loadCart();
+      window.dispatchEvent(new CustomEvent('cart:refresh'));
+    } catch (_) {}
+  };
+  const onRemove = async (id) => {
+    try {
+      await CartApi.remove(id);
+      await loadCart();
+      window.dispatchEvent(new CustomEvent('cart:refresh'));
+    } catch (_) {}
+  };
 
   const subtotal = items.reduce((sum, it) => sum + (it.price || 0) * (it.qty || 1), 0);
   const shipFreeThreshold = 500000;
@@ -160,12 +178,24 @@ const CartPage = () => {
                 {items.map((item) => (
                   <div key={item.id} className={styles.itemRow}>
                     {item.image ? (
-                      <img src={item.image} alt={item.name} className={styles.itemImage} />
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className={styles.itemImage}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate(`/products/${item.id}`)}
+                      />
                     ) : (
                       <div className={styles.itemPlaceholder} />
                     )}
                     <div style={{ flex: 1 }}>
-                      <Text strong>{item.name || `Sản phẩm #${item.id}`}</Text>
+                      <Text
+                        strong
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate(`/products/${item.id}`)}
+                      >
+                        {item.name || `Sản phẩm #${item.id}`}
+                      </Text>
                       <div className={styles.itemMeta}>Phân loại: Mặc định</div>
                     </div>
                     <div style={{ minWidth: 120, textAlign: 'right' }}>

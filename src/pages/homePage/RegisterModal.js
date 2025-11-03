@@ -28,28 +28,38 @@ import {
 const RegisterModal = ({ visible, onCancel, onSwitchToLogin }) => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [employeeData, setEmployeeData] = useState({});
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
+      // Validate toàn bộ các trường trong form
       const values = await form.validateFields();
+
+      // Nếu không có lỗi, tiếp tục xử lý dữ liệu
       const employeeData = {
         ...values,
-        dateOfBirth: dateOfBirth,
+        dateOfBirth: dateOfBirth, // Đã là chuỗi định dạng "YYYY-MM-DD"
       };
 
+      // Gửi dữ liệu lên server
       await EmployeeManagementApi.create(employeeData);
       message.success("Nhân viên được thêm thành công!");
+
+      // Xóa dữ liệu trong form sau khi thành công
       form.resetFields();
       setDateOfBirth("");
+
+      // Điều hướng về trang quản lý nhân viên
       navigate("/employee-management");
     } catch (errorInfo) {
+      // Nếu là lỗi từ validate phía frontend
       if (errorInfo?.errorFields?.length > 0) {
         form.scrollToField(errorInfo.errorFields[0].name);
       }
+
+      // Nếu lỗi là từ phía backend
       if (errorInfo.response?.status === 400) {
         message.error("Email này đã tồn tại. Vui lòng sử dụng email khác.");
       } else {
@@ -63,7 +73,7 @@ const RegisterModal = ({ visible, onCancel, onSwitchToLogin }) => {
 
   const handleDateChange = (date, dateString) => {
     if (date) {
-      setDateOfBirth(dateString);
+      setDateOfBirth(dateString); // Đã là chuỗi định dạng "YYYY-MM-DD"
     } else {
       setDateOfBirth("");
     }

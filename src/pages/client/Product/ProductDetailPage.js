@@ -1,6 +1,7 @@
 import { Button, Col, Layout, Row, Typography, Space, Radio, InputNumber, Tag } from "antd";
 import { LeftOutlined, RightOutlined, ShoppingCartOutlined, ArrowUpOutlined as UpOutlined } from "@ant-design/icons";
 import React from "react";
+import { ProductDetailManagementApi } from "../../../api/admin/productDetailManagement/productDetailManagementApi";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../HomePage/Header";
 import Footer from "../HomePage/Footer";
@@ -9,36 +10,85 @@ import styles from "./ProductDetailPage.module.css";
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
-const mockProducts = {
-  1: {
-    id: 1,
-    name: "NIKE AIR SF AIR FORCE 1 MID MEN'S",
-    price: 199,
-    brand: "Nike",
-    category: "Men's Shoes",
-    material: "Leather / Mesh",
-    colors: [
-      { name: "White", code: "#f5f5f5" },
-      { name: "Gray", code: "#bfbfbf" },
-      { name: "Black", code: "#1f1f1f" },
-    ],
-    sizes: ["40", "40.5", "41", "42", "43"],
-    stock: 25,
-    images: [
-      "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&w=600&q=80",
-    ],
-  },
+const emptyProduct = { id: "", name: "", price: 0, brand: "", category: "", material: "", colors: [], sizes: [], stock: 0, images: [], colorToImage: {} };
+
+const getColorHex = (vnName) => {
+  const name = String(vnName || '').trim().toLowerCase();
+  const map = {
+    'đen': '#000000',
+    'trắng': '#FFFFFF',
+    'xám': '#808080',
+    'xám đậm': '#505050',
+    'xám nhạt': '#BFBFBF',
+    'ghi': '#9E9E9E',
+    'than': '#36454F',
+    'vàng': '#FFFF00',
+    'vàng chanh': '#DFFF00',
+    'vàng đồng': '#B8860B',
+    'cam': '#FFA500',
+    'cam đất': '#E77E23',
+    'cam nhạt': '#FFC187',
+    'nâu': '#A52A2A',
+    'nâu đậm': '#5C4033',
+    'nâu nhạt': '#C4A484',
+    'nâu đỏ': '#8B0000',
+    'nâu sữa': '#A68064',
+    'hồng': '#FFC0CB',
+    'hồng nhạt': '#FFD1DC',
+    'hồng đậm': '#FF69B4',
+    'tím': '#800080',
+    'tím than': '#301934',
+    'tím nhạt': '#C3B1E1',
+    'đỏ': '#FF0000',
+    'đỏ tươi': '#FF2400',
+    'đỏ đậm': '#8B0000',
+    'đỏ đô': '#800000',
+    'xanh lá': '#008000',
+    'xanh lục': '#228B22',
+    'xanh rêu': '#4F7942',
+    'xanh mint': '#98FF98',
+    'xanh dương': '#0000FF',
+    'xanh lam': '#1E90FF',
+    'xanh': '#00AEEF',
+    'xanh navy': '#001F3F',
+    'xanh coban': '#0047AB',
+    'xanh đen': '#003153',
+    'be': '#F5F5DC',
+    'be đậm': '#E5D1A7',
+    'be nhạt': '#FFF5D7',
+    'kem': '#FFFDD0',
+    'trắng sữa': '#FFFAF0',
+    'trắng ngà': '#FAF0E6',
+    'bạc': '#C0C0C0',
+    'vàng kim': '#FFD700',
+    'trong suốt': 'transparent',
+    // English fallbacks
+    'black': '#000000',
+    'white': '#FFFFFF',
+    'gray': '#808080',
+    'silver': '#C0C0C0',
+    'gold': '#FFD700',
+    'red': '#FF0000',
+    'blue': '#0000FF',
+    'green': '#008000',
+    'yellow': '#FFFF00',
+    'orange': '#FFA500',
+    'brown': '#A52A2A',
+    'pink': '#FFC0CB',
+    'purple': '#800080',
+    'navy': '#001F3F',
+    'transparent': 'transparent',
+  };
+  return map[name] || '#f0f0f0';
 };
 
 const ProductDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const product = mockProducts[id] || mockProducts[1];
-  const [mainImage, setMainImage] = React.useState(product.images?.[0]);
-  const [selectedColor, setSelectedColor] = React.useState(product.colors?.[0]?.name);
-  const [selectedSize, setSelectedSize] = React.useState(product.sizes?.[0]);
+  const [product, setProduct] = React.useState(emptyProduct);
+  const [mainImage, setMainImage] = React.useState();
+  const [selectedColor, setSelectedColor] = React.useState();
+  const [selectedSize, setSelectedSize] = React.useState();
   const [quantity, setQuantity] = React.useState(1);
   const [showScrollTop, setShowScrollTop] = React.useState(false);
   const bestRef = React.useRef(null);
@@ -56,22 +106,33 @@ const ProductDetailPage = () => {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  const handleAddToCart = (productId) => {
-    const p = mockProducts[id] || mockProducts[1];
-    // Dispatch global add-to-cart for header badge/cart
-    window.dispatchEvent(new CustomEvent('cart:add', { detail: {
-      id: productId,
-      name: p?.name,
-      price: Math.round(p?.price || 0) * 1000,
-      image: p?.images?.[0],
-      qty: 1,
-    }}));
+   const handleAddToCart = async () => {
+    const p = product;
+     try {
+       // Determine variant to add (by color/size), use product details
+       const { data } = await ProductDetailManagementApi.getProductDetails({ id, page: 0, size: 200 });
+       const list = data?.content || [];
+       const line = list.find((it) => {
+         const colorName = it.colorName || it.color;
+         const sizeName = it.sizeName || it.size;
+         return (!selectedColor || colorName === selectedColor) && (!selectedSize || sizeName === selectedSize);
+       }) || list[0];
+       if (!line) return;
 
-    // Fly-to-cart animation using current card image
+       // Call backend to add
+       await (await import("../../../api/client/cart/CartApi")).CartApi.add({
+         productDetailId: line.productDetailId || line.id,
+         quantity: quantity || 1,
+       });
+
+       // Notify header to refresh count
+       window.dispatchEvent(new CustomEvent('cart:refresh'));
+     } catch (_) {}
+
+    // Fly-to-cart animation using current main image
     const cartEl = document.getElementById('header-cart-anchor');
-    if (!cartEl) return;
-    const imgEl = document.querySelector(`[data-product-img="detail-best-${productId}"]`);
-    if (!imgEl) return;
+    const imgEl = document.querySelector('[data-product-img="detail-main"]');
+    if (!cartEl || !imgEl) return;
     const imgRect = imgEl.getBoundingClientRect();
     const cartRect = cartEl.getBoundingClientRect();
     const flyImg = imgEl.cloneNode(true);
@@ -100,6 +161,64 @@ const ProductDetailPage = () => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [id]);
 
+  // Fetch product details by productId
+  React.useEffect(() => {
+    if (!id) return;
+    (async () => {
+      try {
+        const params = { id, page: 0, size: 100 };
+        const { data } = await ProductDetailManagementApi.getProductDetails(params);
+        const list = data?.content || [];
+        if (list.length === 0) return;
+        // Derive product info from first item and aggregates
+        const first = list[0];
+        // Build color -> first image map (one image per color)
+        const colorImageMap = new Map();
+        list.forEach((it) => {
+          const colorName = it.colorName || it.color;
+          const img = it.urlImg;
+          if (colorName && img && !colorImageMap.has(colorName)) {
+            colorImageMap.set(colorName, img);
+          }
+        });
+        const images = Array.from(colorImageMap.values());
+        const sizeSet = new Set(list.map((it) => it.sizeName || it.size).filter(Boolean));
+        const toNum = (s) => {
+          const n = Number(String(s).replace(/[^0-9.]/g, ''));
+          return isNaN(n) ? Number.POSITIVE_INFINITY : n;
+        };
+        const sizes = Array.from(sizeSet).sort((a, b) => {
+          const da = toNum(a);
+          const db = toNum(b);
+          if (da !== db) return da - db;
+          return String(a).localeCompare(String(b));
+        });
+        const colors = Array.from(colorImageMap.keys()).map((name) => ({ name, code: getColorHex(name) }));
+        const stock = list.reduce((sum, it) => sum + (it.quantity || 0), 0);
+        const nextProduct = {
+          id: first.productId || id,
+          name: first.productName || first.product || '',
+          price: Number(first.price) || 0,
+          brand: first.brandName || first.brand || '',
+          category: first.typeName || first.type || '',
+          material: first.materialName || first.material || '',
+          colors,
+          sizes,
+          stock,
+          images: images.length ? images : ["https://via.placeholder.com/600x600"],
+          colorToImage: Object.fromEntries(colorImageMap),
+        };
+        setProduct(nextProduct);
+        const firstColor = nextProduct.colors[0]?.name;
+        setSelectedColor(firstColor);
+        setMainImage(firstColor ? nextProduct.colorToImage[firstColor] : nextProduct.images[0]);
+        setSelectedSize(nextProduct.sizes[0]);
+      } catch (e) {
+        // silent
+      }
+    })();
+  }, [id]);
+
   return (
     <Layout className={styles.layout}>
       <Header />
@@ -108,7 +227,7 @@ const ProductDetailPage = () => {
           <Col xs={24} lg={12}>
             <div className={styles.gallery}>
               <div className={styles.mainImageWrap}>
-                <img key={mainImage} src={mainImage} alt={product.name} className={styles.mainImage} />
+                {mainImage && <img key={mainImage} src={mainImage} alt={product.name} className={styles.mainImage} data-product-img="detail-main" />}
               </div>
               <div className={styles.thumbRow}>
                 {product.images.map((src, idx) => (
@@ -127,7 +246,7 @@ const ProductDetailPage = () => {
             <div className={styles.info}>
               <Text className={styles.brand}>{product.brand}</Text>
               <Title level={2} className={styles.title}>{product.name}</Title>
-              <Title level={2} className={styles.price}>${product.price.toFixed(2)}</Title>
+              <Title level={2} className={styles.price}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Title>
 
               <div className={styles.metaRow}>
                 <span className={styles.metaLabel}>Danh mục:</span>
@@ -146,7 +265,7 @@ const ProductDetailPage = () => {
                       key={c.name}
                       className={`${styles.colorDot} ${selectedColor === c.name ? styles.active : ''}`}
                       style={{ backgroundColor: c.code }}
-                      onClick={() => setSelectedColor(c.name)}
+                      onClick={() => { setSelectedColor(c.name); const img = product.colorToImage?.[c.name]; if (img) setMainImage(img); }}
                     />
                   ))}
                 </div>
@@ -169,7 +288,7 @@ const ProductDetailPage = () => {
                 <span className={styles.stockNote}>Còn {product.stock} sản phẩm</span>
               </div>
               <Space size="middle">
-                <Button type="primary" size="large">Add to cart</Button>
+                <Button type="primary" size="large" onClick={handleAddToCart}>Add to cart</Button>
                 <Button size="large" onClick={() => console.log('Mua Ngay')}>Mua Ngay</Button>
               </Space>
             </div>
@@ -199,7 +318,7 @@ const ProductDetailPage = () => {
               <div className={styles.hsContent}>
                 {[1,2,3,4,5,6].map((idx) => {
                   const idToGo = String(idx);
-                  const p = mockProducts[1];
+                  const p = product;
                   return (
                     <div key={idx} className={styles.horizontalProductCard}>
                       <div className={styles.productCard} onClick={() => navigate(`/products/${idToGo}`)}>
@@ -214,8 +333,7 @@ const ProductDetailPage = () => {
                           <Text className={styles.productBrand}>Nike</Text>
                           <Text className={styles.productName}>{p.name}</Text>
                           <div className={styles.productPriceContainer}>
-                            <Text className={styles.productPrice}>${p.price.toFixed(2)}</Text>
-                            <Text className={styles.originalPrice}>$220.00</Text>
+                            <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}</Text>
                           </div>
                         </div>
                       </div>
@@ -224,7 +342,7 @@ const ProductDetailPage = () => {
                 })}
                 {[1,2,3,4,5,6].map((idx) => {
                   const idToGo = String(idx);
-                  const p = mockProducts[1];
+                  const p = product;
                   return (
                     <div key={`dup-${idx}`} className={styles.horizontalProductCard}>
                       <div className={styles.productCard} onClick={() => navigate(`/products/${idToGo}`)}>
@@ -239,8 +357,7 @@ const ProductDetailPage = () => {
                           <Text className={styles.productBrand}>Nike</Text>
                           <Text className={styles.productName}>{p.name}</Text>
                           <div className={styles.productPriceContainer}>
-                            <Text className={styles.productPrice}>${p.price.toFixed(2)}</Text>
-                            <Text className={styles.originalPrice}>$220.00</Text>
+                            <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}</Text>
                           </div>
                         </div>
                       </div>

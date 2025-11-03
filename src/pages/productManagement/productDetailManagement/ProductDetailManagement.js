@@ -683,7 +683,7 @@ const ProductDetailManagement = () => {
               ></Select>
             </div>
             <div>
-              <label>Danh mục: </label>
+              <label>Loại giày: </label>
               <Select
                 placeholder="Loại giày..."
                 options={typeOptions}
