@@ -1,10 +1,30 @@
-import { Button, Col, DatePicker, Divider, Input, InputNumber, Row, Select, Space, Tag, Typography, Checkbox, Progress, Empty, message } from "antd";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Divider,
+  Input,
+  InputNumber,
+  Row,
+  Select,
+  Space,
+  Tag,
+  Typography,
+  Checkbox,
+  Progress,
+  Empty,
+  message,
+} from "antd";
 import React, { useEffect, useState } from "react";
 import Header from "../HomePage/Header";
 import Footer from "../HomePage/Footer";
 import pdStyles from "../Product/ProductDetailPage.module.css";
 import BestsellerSlider from "../Common/BestsellerSlider";
-import { ShoppingCartOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+import {
+  ShoppingCartOutlined,
+  LeftOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import styles from "./CartPage.module.css";
 import { CartApi } from "../../../api/client/cart/CartApi";
@@ -63,8 +83,9 @@ const CartPage = () => {
     try {
       const { data } = await CartApi.list();
       // Map backend response to UI model
-      const mapped = (data || []).map(it => ({
-        id: it.cartDetailId || it.productDetailId,
+      const mapped = (data || []).map((it) => ({
+        id: it.cartDetailId, // always use cartDetailId as unique id
+        cartDetailId: it.cartDetailId,
         productDetailId: it.productDetailId,
         name: it.productName,
         price: it.price,
@@ -77,82 +98,108 @@ const CartPage = () => {
     }
   };
 
-  useEffect(() => { loadCart(); }, []);
+  useEffect(() => {
+    loadCart();
+  }, []);
 
   // Listen to global events: refresh when product added elsewhere
   useEffect(() => {
-    const onRefresh = () => { loadCart(); };
-    window.addEventListener('cart:refresh', onRefresh);
-    window.addEventListener('cart:add', onRefresh);
+    const onRefresh = () => {
+      loadCart();
+    };
+    window.addEventListener("cart:refresh", onRefresh);
+    window.addEventListener("cart:add", onRefresh);
     return () => {
-      window.removeEventListener('cart:refresh', onRefresh);
-      window.removeEventListener('cart:add', onRefresh);
+      window.removeEventListener("cart:refresh", onRefresh);
+      window.removeEventListener("cart:add", onRefresh);
     };
   }, []);
 
   const onChangeQty = async (id, qty) => {
-    const line = items.find(i => i.id === id);
-    if (!line) return;
     try {
-      await CartApi.update({ productDetailId: line.productDetailId || id, quantity: qty });
+      console.log({ productDetailId: id, quantity: qty });
+      await CartApi.update({
+        productDetailId: id,
+        quantity: qty,
+      });
       await loadCart();
-      window.dispatchEvent(new CustomEvent('cart:refresh'));
+      window.dispatchEvent(new CustomEvent("cart:refresh"));
     } catch (_) {}
   };
   const onRemove = async (id) => {
     try {
       await CartApi.remove(id);
       await loadCart();
-      window.dispatchEvent(new CustomEvent('cart:refresh'));
+      window.dispatchEvent(new CustomEvent("cart:refresh"));
     } catch (_) {}
   };
 
-  const subtotal = items.reduce((sum, it) => sum + (it.price || 0) * (it.qty || 1), 0);
+  const subtotal = items.reduce(
+    (sum, it) => sum + (it.price || 0) * (it.qty || 1),
+    0
+  );
   const shipFreeThreshold = 500000;
-  const freePercent = Math.min(100, Math.round((subtotal / shipFreeThreshold) * 100));
+  const freePercent = Math.min(
+    100,
+    Math.round((subtotal / shipFreeThreshold) * 100)
+  );
 
   const handleAddToCart = (product) => {
     // let header update and persist
-    window.dispatchEvent(new CustomEvent('cart:add', { detail: {
-      id: product.id,
-      name: product.name,
-      price: Math.round(product.price || 0) * 1000,
-      image: product.image,
-      qty: 1,
-    }}));
+    window.dispatchEvent(
+      new CustomEvent("cart:add", {
+        detail: {
+          id: product.id,
+          name: product.name,
+          price: Math.round(product.price || 0) * 1000,
+          image: product.image,
+          qty: 1,
+        },
+      })
+    );
 
     // fly animation from suggestion image
-    const cartEl = document.getElementById('header-cart-anchor');
+    const cartEl = document.getElementById("header-cart-anchor");
     if (!cartEl) return;
-    const imgEl = document.querySelector(`[data-product-img="cart-suggest-${product.id}"]`);
+    const imgEl = document.querySelector(
+      `[data-product-img="cart-suggest-${product.id}"]`
+    );
     if (!imgEl) return;
     const imgRect = imgEl.getBoundingClientRect();
     const cartRect = cartEl.getBoundingClientRect();
     const flyImg = imgEl.cloneNode(true);
-    flyImg.style.position = 'fixed';
-    flyImg.style.left = imgRect.left + 'px';
-    flyImg.style.top = imgRect.top + 'px';
-    flyImg.style.width = imgRect.width + 'px';
-    flyImg.style.height = imgRect.height + 'px';
-    flyImg.style.borderRadius = '8px';
+    flyImg.style.position = "fixed";
+    flyImg.style.left = imgRect.left + "px";
+    flyImg.style.top = imgRect.top + "px";
+    flyImg.style.width = imgRect.width + "px";
+    flyImg.style.height = imgRect.height + "px";
+    flyImg.style.borderRadius = "8px";
     flyImg.style.zIndex = 2000;
-    flyImg.style.transition = 'transform 0.8s ease, opacity 0.8s ease, left 0.8s ease, top 0.8s ease, width 0.8s ease, height 0.8s ease';
+    flyImg.style.transition =
+      "transform 0.8s ease, opacity 0.8s ease, left 0.8s ease, top 0.8s ease, width 0.8s ease, height 0.8s ease";
     document.body.appendChild(flyImg);
     requestAnimationFrame(() => {
-      flyImg.style.left = cartRect.left + 'px';
-      flyImg.style.top = cartRect.top + 'px';
-      flyImg.style.width = '24px';
-      flyImg.style.height = '24px';
-      flyImg.style.opacity = '0.2';
-      flyImg.style.transform = 'translate(0, -20px) scale(0.5)';
+      flyImg.style.left = cartRect.left + "px";
+      flyImg.style.top = cartRect.top + "px";
+      flyImg.style.width = "24px";
+      flyImg.style.height = "24px";
+      flyImg.style.opacity = "0.2";
+      flyImg.style.transform = "translate(0, -20px) scale(0.5)";
     });
-    setTimeout(() => { try { document.body.removeChild(flyImg); } catch (_) {} }, 850);
+    setTimeout(() => {
+      try {
+        document.body.removeChild(flyImg);
+      } catch (_) {}
+    }, 850);
   };
 
   const scrollSuggest = (dir) => {
     if (!suggestRef.current) return;
     const amount = 300;
-    suggestRef.current.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
+    suggestRef.current.scrollBy({
+      left: dir === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
   };
 
   return (
@@ -160,8 +207,9 @@ const CartPage = () => {
       <Header />
 
       <div className={styles.container}>
-        <Title level={2} style={{ marginBottom: 12 }}>Giỏ hàng</Title>
-        
+        <Title level={2} style={{ marginBottom: 12 }}>
+          Giỏ hàng
+        </Title>
 
         {items.length === 0 ? (
           <Empty description="Giỏ hàng trống" />
@@ -182,7 +230,7 @@ const CartPage = () => {
                         src={item.image}
                         alt={item.name}
                         className={styles.itemImage}
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor: "pointer" }}
                         onClick={() => navigate(`/products/${item.id}`)}
                       />
                     ) : (
@@ -191,25 +239,54 @@ const CartPage = () => {
                     <div style={{ flex: 1 }}>
                       <Text
                         strong
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor: "pointer" }}
                         onClick={() => navigate(`/products/${item.id}`)}
                       >
                         {item.name || `Sản phẩm #${item.id}`}
                       </Text>
                       <div className={styles.itemMeta}>Phân loại: Mặc định</div>
                     </div>
-                    <div style={{ minWidth: 120, textAlign: 'right' }}>
+                    <div style={{ minWidth: 120, textAlign: "right" }}>
                       <Text>{money(item.price)}</Text>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Button size="small" onClick={() => onChangeQty(item.id, Math.max(1, (item.qty || 1) - 1))}>-</Button>
-                      <InputNumber min={1} value={item.qty || 1} onChange={(v) => onChangeQty(item.id, v || 1)} size="small" />
-                      <Button size="small" onClick={() => onChangeQty(item.id, (item.qty || 1) + 1)}>+</Button>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    >
+                      <Button
+                        size="small"
+                        onClick={() =>
+                          onChangeQty(item.productDetailId, Math.max(1, (item.qty || 1) - 1))
+                        }
+                      >
+                        -
+                      </Button>
+                      <InputNumber
+                        min={1}
+                        value={item.qty || 1}
+                        onChange={(v) => onChangeQty(item.productDetailId, v || 1)}
+                        size="small"
+                      />
+                      <Button
+                        size="small"
+                        onClick={() =>
+                          onChangeQty(item.productDetailId, (item.qty || 1) + 1)
+                        }
+                      >
+                        +
+                      </Button>
                     </div>
-                    <div style={{ minWidth: 130, textAlign: 'right' }}>
-                      <Text strong style={{ color: '#ff4d4f' }}>{money((item.price || 0) * (item.qty || 1))}</Text>
+                    <div style={{ minWidth: 130, textAlign: "right" }}>
+                      <Text strong style={{ color: "#ff4d4f" }}>
+                        {money((item.price || 0) * (item.qty || 1))}
+                      </Text>
                     </div>
-                    <Button type="text" danger onClick={() => onRemove(item.id)}>X</Button>
+                    <Button
+                      type="text"
+                      danger
+                      onClick={() => onRemove(item.id)}
+                    >
+                      X
+                    </Button>
                   </div>
                 ))}
 
@@ -237,12 +314,16 @@ const CartPage = () => {
 
                 {/* <Divider style={{ margin: '12px 0' }} /> */}
 
-                <div style={{ display: 'grid', gap: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ display: "grid", gap: 8 }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <Text>Tạm tính</Text>
                     <Text>{money(subtotal)}</Text>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <Text>Giảm giá</Text>
                     <Text>- 0 đ</Text>
                   </div>
@@ -255,15 +336,37 @@ const CartPage = () => {
                   </div> */}
                 </div>
 
-                <Divider style={{ margin: '12px 0' }} />
+                <Divider style={{ margin: "12px 0" }} />
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: 12,
+                  }}
+                >
                   <Text strong>TỔNG CỘNG</Text>
-                  <Text strong style={{ color: '#ff4d4f', fontSize: 16 }}>{money(subtotal)}</Text>
+                  <Text strong style={{ color: "#ff4d4f", fontSize: 16 }}>
+                    {money(subtotal)}
+                  </Text>
                 </div>
-                <Space direction="vertical" style={{ width: '100%' }}>
-                  <Button type="primary" block size="large" onClick={() => navigate('/checkout')} disabled={!items.length}>Thanh toán ngay</Button>
-                  <Button block size="large" onClick={() => window.history.back()}>Tiếp tục mua hàng</Button>
+                <Space direction="vertical" style={{ width: "100%" }}>
+                  <Button
+                    type="primary"
+                    block
+                    size="large"
+                    onClick={() => navigate("/checkout")}
+                    disabled={!items.length}
+                  >
+                    Thanh toán ngay
+                  </Button>
+                  <Button
+                    block
+                    size="large"
+                    onClick={() => window.history.back()}
+                  >
+                    Tiếp tục mua hàng
+                  </Button>
                 </Space>
                 {/* <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 10, opacity: .7 }}>
                   <img alt="visa" src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" style={{ height: 16 }} />
@@ -273,7 +376,6 @@ const CartPage = () => {
             </Col>
           </Row>
         )}
-
       </div>
 
       {/* Suggestion within container */}
@@ -293,5 +395,3 @@ const CartPage = () => {
 };
 
 export default CartPage;
-
-

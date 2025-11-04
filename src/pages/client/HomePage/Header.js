@@ -61,6 +61,11 @@ const Header = () => {
   };
 
   const refreshCartCount = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setCartCount(0);
+      return;
+    }
     try {
       const { data } = await CartApi.count();
       setCartCount(Number(data) || 0);
