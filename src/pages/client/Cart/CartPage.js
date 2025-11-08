@@ -91,6 +91,7 @@ const CartPage = () => {
         price: it.price,
         qty: it.quantity,
         image: it.urlImg || it.image || "",
+        maxQuantity: it.maxQuantity ?? 99, // default maxQuantity if not provided
       }));
       setItems(mapped);
     } catch (_) {
@@ -116,8 +117,13 @@ const CartPage = () => {
   }, []);
 
   const onChangeQty = async (id, qty) => {
+    const item = items.find((i) => i.productDetailId === id);
+    if (!item) return;
+    if (qty > item.maxQuantity) {
+      message.warning(`Số lượng tối đa cho sản phẩm này là ${item.maxQuantity}`);
+      qty = item.maxQuantity;
+    }
     try {
-      console.log({ productDetailId: id, quantity: qty });
       await CartApi.update({
         productDetailId: id,
         quantity: qty,
@@ -257,11 +263,13 @@ const CartPage = () => {
                         onClick={() =>
                           onChangeQty(item.productDetailId, Math.max(1, (item.qty || 1) - 1))
                         }
+                        disabled={item.qty <= 1}
                       >
                         -
                       </Button>
                       <InputNumber
                         min={1}
+                        max={item.maxQuantity}
                         value={item.qty || 1}
                         onChange={(v) => onChangeQty(item.productDetailId, v || 1)}
                         size="small"
@@ -269,8 +277,9 @@ const CartPage = () => {
                       <Button
                         size="small"
                         onClick={() =>
-                          onChangeQty(item.productDetailId, (item.qty || 1) + 1)
+                          onChangeQty(item.productDetailId, Math.min(item.maxQuantity, (item.qty || 1) + 1))
                         }
+                        disabled={item.qty >= item.maxQuantity}
                       >
                         +
                       </Button>

@@ -12,6 +12,7 @@ import LoginModal from "../../homePage/LoginModal";
 import CustomerRegisterModal from "../../homePage/CustomerRegisterModal";
 import { SCREEN } from "../../../router/screen";
 import { CartApi } from "../../../api/client/cart/CartApi";
+import { isTokenExpired } from "../../../util/common/utils";
 
 const { Title } = Typography;
 
@@ -62,7 +63,7 @@ const Header = () => {
 
   const refreshCartCount = async () => {
     const token = localStorage.getItem('token');
-    if (!token) {
+    if (isTokenExpired(token)) {
       setCartCount(0);
       return;
     }

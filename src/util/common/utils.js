@@ -1,3 +1,5 @@
+import jwt_decode from "jwt-decode";
+
 export const filterOptions = (input, option) => {
   return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
 };
@@ -9,5 +11,18 @@ export const rowClassName = (record, index) => {
 export const handleKeyPress = (event, customFunction) => {
   if (event.key === "Enter") {
     customFunction();
+  }
+};
+
+export const isTokenExpired = (token) => {
+  try {
+    const decodedToken = jwt_decode(token);
+    if (decodedToken.exp === undefined) {
+      return false;
+    }
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decodedToken.exp < currentTime;
+  } catch (error) {
+    return true;
   }
 };
