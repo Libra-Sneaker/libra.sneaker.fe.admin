@@ -33,6 +33,8 @@ import PromotionManagement from "../pages/promotionManagement/PromotionManagemen
 import AnalysisManagement from "../pages/analysisManagement/AnalysisManagement";
 import CreateCouponManagement from "../pages/promotionManagement/CreateCoupon/CreateCouponManagement";
 import CouponDetailManagement from "../pages/promotionManagement/CouponDetail/CouponDetailManagement";
+import ProfilePage from "../pages/client/ProfilePage/ProfilePage";
+import MyOrderPage from "../pages/client/MyOrder/MyOrder";
 
 const generalRoutes = [
   { path: "*", element: <NotFound /> },
@@ -51,6 +53,8 @@ const publicRoutes = [
   { path: "/products/:id", element: <ProductDetailPage /> }, // Trang chi tiết sản phẩm
   { path: "/about", element: <AboutPage /> }, // Trang giới thiệu
   { path: "/contact", element: <ContactPage /> }, // Trang liên hệ
+  { path: "/profile", element: <ProfilePage /> }, // Trang cá nhân
+  { path: "/my-orders", element: <MyOrderPage /> }, // Trang đơn hàng của tôi
   // { path: "/login", element: <Login /> }, // Trang đăng nhập (cần tạo component Login)
 ];
 

@@ -1,4 +1,12 @@
-import { Button, Typography, Badge, Modal, message } from "antd";
+import {
+  Button,
+  Typography,
+  Badge,
+  Modal,
+  message,
+  Dropdown,
+  Menu,
+} from "antd";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -27,11 +35,11 @@ const Header = () => {
 
   // Check if user is logged in on component mount
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const name = localStorage.getItem('name');
-    const email = localStorage.getItem('email');
-    const role = localStorage.getItem('role');
-    
+    const token = localStorage.getItem("token");
+    const name = localStorage.getItem("name");
+    const email = localStorage.getItem("email");
+    const role = localStorage.getItem("role");
+
     if (token && name && email) {
       setIsLoggedIn(true);
       setUserInfo({ name, email, role });
@@ -40,29 +48,30 @@ const Header = () => {
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-    const name = localStorage.getItem('name');
-    const email = localStorage.getItem('email');
-    const role = localStorage.getItem('role');
+    const name = localStorage.getItem("name");
+    const email = localStorage.getItem("email");
+    const role = localStorage.getItem("role");
     setUserInfo({ name, email, role });
     setLoginModalVisible(false);
-    
+
     // Navigate to admin page if user is admin
-    if (role === 'ADMIN' || role === 'EMPLOYEE') { // Admin or Employee
+    if (role === "ADMIN" || role === "EMPLOYEE") {
+      // Admin or Employee
       navigate(SCREEN.productManagement.path);
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('email');
-    localStorage.removeItem('name');
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("email");
+    localStorage.removeItem("name");
     setIsLoggedIn(false);
     setUserInfo(null);
   };
 
   const refreshCartCount = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (isTokenExpired(token)) {
       setCartCount(0);
       return;
@@ -105,17 +114,23 @@ const Header = () => {
 
   // Listen for global cart add events from other pages
   useEffect(() => {
-    const onAdd = () => { refreshCartCount(); };
-    const onRefresh = () => { refreshCartCount(); };
-    const onOpenLogin = () => { setLoginModalVisible(true); };
-    window.addEventListener('cart:add', onAdd);
-    window.addEventListener('cart:refresh', onRefresh);
-    window.addEventListener('open:login', onOpenLogin);
+    const onAdd = () => {
+      refreshCartCount();
+    };
+    const onRefresh = () => {
+      refreshCartCount();
+    };
+    const onOpenLogin = () => {
+      setLoginModalVisible(true);
+    };
+    window.addEventListener("cart:add", onAdd);
+    window.addEventListener("cart:refresh", onRefresh);
+    window.addEventListener("open:login", onOpenLogin);
     refreshCartCount();
     return () => {
-      window.removeEventListener('cart:add', onAdd);
-      window.removeEventListener('cart:refresh', onRefresh);
-      window.removeEventListener('open:login', onOpenLogin);
+      window.removeEventListener("cart:add", onAdd);
+      window.removeEventListener("cart:refresh", onRefresh);
+      window.removeEventListener("open:login", onOpenLogin);
     };
   }, []);
 
@@ -127,29 +142,61 @@ const Header = () => {
         <div className={styles.headerContent}>
           <div className={styles.logo}>
             <Link to="/" className={styles.logoLink}>
-              <Title level={2} className={styles.logoText}>LIBRA SNEAKER</Title>
+              <Title level={2} className={styles.logoText}>
+                LIBRA SNEAKER
+              </Title>
             </Link>
           </div>
           <nav className={styles.nav}>
-            <Link to="/" className={styles.navLink}>Trang chủ</Link>
-            <Link to="/products" className={styles.navLink}>Sản phẩm</Link>
-            <Link to="/about" className={styles.navLink}>Giới thiệu</Link>
-            <Link to="/contact" className={styles.navLink}>Liên hệ</Link>
+            <Link to="/" className={styles.navLink}>
+              Trang chủ
+            </Link>
+            <Link to="/products" className={styles.navLink}>
+              Sản phẩm
+            </Link>
+            <Link to="/about" className={styles.navLink}>
+              Giới thiệu
+            </Link>
+            <Link to="/contact" className={styles.navLink}>
+              Liên hệ
+            </Link>
           </nav>
           <div className={styles.headerActions}>
             <div className={styles.authButtons}>
               {isLoggedIn ? (
                 <div className={styles.userInfo}>
-                  <Button 
-                    type="text" 
-                    icon={<UserOutlined />}
-                    className={styles.userButton}
+                  <Dropdown
+                    overlay={
+                      <Menu>
+                        <Menu.Item
+                          key="profile"
+                          onClick={() => navigate("/profile")}
+                        >
+                          Thông tin cá nhân
+                        </Menu.Item>
+                        <Menu.Item
+                          key="orders"
+                          onClick={() => navigate("/my-orders")}
+                        >
+                          Đơn hàng của tôi
+                        </Menu.Item>
+                      </Menu>
+                    }
+                    placement="bottomRight"
+                    trigger={["click"]}
                   >
-                    {userInfo?.name}
-                  </Button>
-                  {(userInfo?.role === 'ADMIN' || userInfo?.role === 'EMPLOYEE') && (
-                    <Button 
-                      type="primary" 
+                    <Button
+                      type="text"
+                      icon={<UserOutlined />}
+                      className={styles.userButton}
+                    >
+                      {userInfo?.email}
+                    </Button>
+                  </Dropdown>
+                  {(userInfo?.role === "ADMIN" ||
+                    userInfo?.role === "EMPLOYEE") && (
+                    <Button
+                      type="primary"
                       size="small"
                       onClick={() => navigate(SCREEN.productManagement.path)}
                       className={styles.adminButton}
@@ -157,8 +204,8 @@ const Header = () => {
                       Admin Panel
                     </Button>
                   )}
-                  <Button 
-                    type="text" 
+                  <Button
+                    type="text"
                     onClick={handleLogout}
                     className={styles.logoutButton}
                   >
@@ -167,16 +214,16 @@ const Header = () => {
                 </div>
               ) : (
                 <div className={styles.authButtonsGroup}>
-                  <Button 
-                    type="text" 
+                  <Button
+                    type="text"
                     icon={<LoginOutlined />}
                     onClick={openLoginModal}
                     className={styles.loginButton}
                   >
                     Đăng nhập
                   </Button>
-                  <Button 
-                    type="primary" 
+                  <Button
+                    type="primary"
                     icon={<UserAddOutlined />}
                     onClick={openRegisterModal}
                     className={styles.registerButton}
@@ -186,17 +233,18 @@ const Header = () => {
                 </div>
               )}
               <Badge count={cartCount} showZero>
-                <Button 
-                  type="text" 
+                <Button
+                  type="text"
                   icon={<ShoppingCartOutlined />}
                   className={styles.cartButton}
                   id="header-cart-anchor"
                   onClick={() => {
-                    const token = localStorage.getItem('token');
+                    const token = localStorage.getItem("token");
                     if (!token || isTokenExpired(token) || !isLoggedIn) {
                       Modal.confirm({
                         title: "Yêu cầu đăng nhập",
-                        content: "Bạn cần đăng nhập để xem giỏ hàng và mua hàng.",
+                        content:
+                          "Bạn cần đăng nhập để xem giỏ hàng và mua hàng.",
                         okText: "Đăng nhập",
                         cancelText: "Hủy",
                         onOk: () => {
@@ -205,7 +253,7 @@ const Header = () => {
                       });
                       return;
                     }
-                    navigate('/cart');
+                    navigate("/cart");
                   }}
                 >
                   Giỏ hàng
@@ -217,7 +265,7 @@ const Header = () => {
       </div>
 
       {/* Login Modal */}
-      <LoginModal 
+      <LoginModal
         visible={loginModalVisible}
         onClose={() => setLoginModalVisible(false)}
         onSwitchToRegister={openRegisterModal}
@@ -225,7 +273,7 @@ const Header = () => {
       />
 
       {/* Register Modal */}
-      <CustomerRegisterModal 
+      <CustomerRegisterModal
         visible={registerModalVisible}
         onClose={() => setRegisterModalVisible(false)}
         onSwitchToLogin={openLoginModal}
