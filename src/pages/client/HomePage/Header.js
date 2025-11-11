@@ -107,12 +107,15 @@ const Header = () => {
   useEffect(() => {
     const onAdd = () => { refreshCartCount(); };
     const onRefresh = () => { refreshCartCount(); };
+    const onOpenLogin = () => { setLoginModalVisible(true); };
     window.addEventListener('cart:add', onAdd);
     window.addEventListener('cart:refresh', onRefresh);
+    window.addEventListener('open:login', onOpenLogin);
     refreshCartCount();
     return () => {
       window.removeEventListener('cart:add', onAdd);
       window.removeEventListener('cart:refresh', onRefresh);
+      window.removeEventListener('open:login', onOpenLogin);
     };
   }, []);
 
@@ -130,8 +133,8 @@ const Header = () => {
           <nav className={styles.nav}>
             <Link to="/" className={styles.navLink}>Trang chủ</Link>
             <Link to="/products" className={styles.navLink}>Sản phẩm</Link>
-            <a href="#collection" className={styles.navLink}>Bộ sưu tập</a>
-            <a href="#contact" className={styles.navLink}>Liên hệ</a>
+            <Link to="/about" className={styles.navLink}>Giới thiệu</Link>
+            <Link to="/contact" className={styles.navLink}>Liên hệ</Link>
           </nav>
           <div className={styles.headerActions}>
             <div className={styles.authButtons}>
@@ -188,7 +191,22 @@ const Header = () => {
                   icon={<ShoppingCartOutlined />}
                   className={styles.cartButton}
                   id="header-cart-anchor"
-                  onClick={() => navigate('/cart')}
+                  onClick={() => {
+                    const token = localStorage.getItem('token');
+                    if (!token || isTokenExpired(token) || !isLoggedIn) {
+                      Modal.confirm({
+                        title: "Yêu cầu đăng nhập",
+                        content: "Bạn cần đăng nhập để xem giỏ hàng và mua hàng.",
+                        okText: "Đăng nhập",
+                        cancelText: "Hủy",
+                        onOk: () => {
+                          setLoginModalVisible(true);
+                        },
+                      });
+                      return;
+                    }
+                    navigate('/cart');
+                  }}
                 >
                   Giỏ hàng
                 </Button>

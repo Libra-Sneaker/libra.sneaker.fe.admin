@@ -1,10 +1,14 @@
-import { Button, Col, Layout, Row, Typography, Space, Radio, InputNumber, Tag } from "antd";
+import { Button, Card, Col, Layout, Row, Typography, Space, Radio, InputNumber, Tag, Modal } from "antd";
 import { LeftOutlined, RightOutlined, ShoppingCartOutlined, ArrowUpOutlined as UpOutlined } from "@ant-design/icons";
 import React from "react";
 import { ProductDetailManagementApi } from "../../../api/admin/productDetailManagement/productDetailManagementApi";
+import { HomeApi } from "../../../api/client/home/HomeApi";
+import { CartApi } from "../../../api/client/cart/CartApi";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../HomePage/Header";
 import Footer from "../HomePage/Footer";
+import LoginModal from "../../homePage/LoginModal";
+import { isTokenExpired } from "../../../util/common/utils";
 import styles from "./ProductDetailPage.module.css";
 
 const { Content } = Layout;
@@ -91,11 +95,19 @@ const ProductDetailPage = () => {
   const [selectedSize, setSelectedSize] = React.useState();
   const [quantity, setQuantity] = React.useState(1);
   const [showScrollTop, setShowScrollTop] = React.useState(false);
-  const bestRef = React.useRef(null);
-  const scrollBest = (dir) => {
-    if (!bestRef.current) return;
-    const amount = 300;
-    bestRef.current.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
+  const [bestsellerProducts, setBestsellerProducts] = React.useState([]);
+  const [loginModalVisible, setLoginModalVisible] = React.useState(false);
+  const bestsellerProductsRef = React.useRef(null);
+  
+  const scrollProducts = (direction, ref) => {
+    if (ref.current) {
+      const scrollAmount = 300;
+      if (direction === 'left') {
+        ref.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      } else {
+        ref.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }
   };
 
   React.useEffect(() => {
@@ -106,7 +118,24 @@ const ProductDetailPage = () => {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-   const handleAddToCart = async () => {
+  const handleAddToCart = async () => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    const isLoggedIn = token && !isTokenExpired(token);
+    
+    if (!isLoggedIn) {
+      Modal.confirm({
+        title: "Yêu cầu đăng nhập",
+        content: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.",
+        okText: "Đăng nhập",
+        cancelText: "Hủy",
+        onOk: () => {
+          setLoginModalVisible(true);
+        },
+      });
+      return;
+    }
+
     const p = product;
      try {
        // Determine variant to add (by color/size), use product details
@@ -120,7 +149,7 @@ const ProductDetailPage = () => {
        if (!line) return;
 
        // Call backend to add
-       await (await import("../../../api/client/cart/CartApi")).CartApi.add({
+       await CartApi.add({
          productDetailId: line.productDetailId || line.id,
          quantity: quantity || 1,
        });
@@ -133,6 +162,78 @@ const ProductDetailPage = () => {
     const cartEl = document.getElementById('header-cart-anchor');
     const imgEl = document.querySelector('[data-product-img="detail-main"]');
     if (!cartEl || !imgEl) return;
+    const imgRect = imgEl.getBoundingClientRect();
+    const cartRect = cartEl.getBoundingClientRect();
+    const flyImg = imgEl.cloneNode(true);
+    flyImg.style.position = 'fixed';
+    flyImg.style.left = imgRect.left + 'px';
+    flyImg.style.top = imgRect.top + 'px';
+    flyImg.style.width = imgRect.width + 'px';
+    flyImg.style.height = imgRect.height + 'px';
+    flyImg.style.borderRadius = '8px';
+    flyImg.style.zIndex = 2000;
+    flyImg.style.transition = 'transform 0.8s ease, opacity 0.8s ease, left 0.8s ease, top 0.8s ease, width 0.8s ease, height 0.8s ease';
+    document.body.appendChild(flyImg);
+    requestAnimationFrame(() => {
+      flyImg.style.left = cartRect.left + 'px';
+      flyImg.style.top = cartRect.top + 'px';
+      flyImg.style.width = '24px';
+      flyImg.style.height = '24px';
+      flyImg.style.opacity = '0.2';
+      flyImg.style.transform = 'translate(0, -20px) scale(0.5)';
+    });
+    setTimeout(() => { try { document.body.removeChild(flyImg); } catch (_) {} }, 850);
+  };
+
+  const handleAddToCartFromBestseller = async (productId) => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    const isLoggedIn = token && !isTokenExpired(token);
+    
+    if (!isLoggedIn) {
+      Modal.confirm({
+        title: "Yêu cầu đăng nhập",
+        content: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.",
+        okText: "Đăng nhập",
+        cancelText: "Hủy",
+        onOk: () => {
+          setLoginModalVisible(true);
+        },
+      });
+      return;
+    }
+
+    const product = bestsellerProducts.find(p => p.id === productId);
+    try {
+      const { data } = await ProductDetailManagementApi.getProductDetails({ id: productId, page: 0, size: 1 });
+      const line = data?.content?.[0];
+      if (line?.productDetailId || line?.id) {
+        await CartApi.add({ productDetailId: line.productDetailId || line.id, quantity: 1 });
+        window.dispatchEvent(new CustomEvent('cart:refresh'));
+      } else {
+        window.dispatchEvent(new CustomEvent('cart:add', { detail: {
+          id: productId,
+          name: product?.name,
+          price: Math.round(product?.price || 0),
+          image: product?.image,
+          qty: 1,
+        }}));
+      }
+    } catch (_) {
+      window.dispatchEvent(new CustomEvent('cart:add', { detail: {
+        id: productId,
+        name: product?.name,
+        price: Math.round(product?.price || 0),
+        image: product?.image,
+        qty: 1,
+      }}));
+    }
+
+    // Fly-to-cart animation
+    const cartEl = document.getElementById('header-cart-anchor');
+    if (!cartEl) return;
+    const imgEl = document.querySelector(`[data-product-img="img-${productId}"]`);
+    if (!imgEl) return;
     const imgRect = imgEl.getBoundingClientRect();
     const cartRect = cartEl.getBoundingClientRect();
     const flyImg = imgEl.cloneNode(true);
@@ -219,6 +320,31 @@ const ProductDetailPage = () => {
     })();
   }, [id]);
 
+  // Fetch bestseller products
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await HomeApi.getBestSellers({ minSold: 5 });
+        const mapped = (data || []).map((item) => ({
+          id: item.productId,
+          name: item.productName,
+          price: (() => {
+            if (!item.price) return 0;
+            const first = String(item.price).split(',')[0]?.trim();
+            const num = Number(first);
+            return isNaN(num) ? 0 : num;
+          })(),
+          image: item.urlImg || "https://via.placeholder.com/300",
+          brand: '',
+          isBestseller: true,
+          discount: 0,
+          sold: item.totalSoldQuantity || 0,
+        }));
+        setBestsellerProducts(mapped);
+      } catch (_) {}
+    })();
+  }, []);
+
   return (
     <Layout className={styles.layout}>
       <Header />
@@ -289,7 +415,7 @@ const ProductDetailPage = () => {
               </div>
               <Space size="middle">
                 <Button type="primary" size="large" onClick={handleAddToCart}>Add to cart</Button>
-                <Button size="large" onClick={() => console.log('Mua Ngay')}>Mua Ngay</Button>
+                {/* <Button size="large" onClick={() => console.log('Mua Ngay')}>Mua Ngay</Button> */}
               </Space>
             </div>
           </Col>
@@ -311,66 +437,118 @@ const ProductDetailPage = () => {
 
         {/* Sản phẩm bán chạy */}
         <div className={styles.bestsellerSection}>
-          <Title level={3} className={styles.sectionTitle}>SẢN PHẨM BÁN CHẠY</Title>
-          <div className={styles.hsContainer}>
-            <Button className={styles.hsNavBtn} icon={<LeftOutlined />} onClick={() => scrollBest('left')} />
-            <div className={styles.hsWrapper} ref={bestRef}>
-              <div className={styles.hsContent}>
-                {[1,2,3,4,5,6].map((idx) => {
-                  const idToGo = String(idx);
-                  const p = product;
-                  return (
-                    <div key={idx} className={styles.horizontalProductCard}>
-                      <div className={styles.productCard} onClick={() => navigate(`/products/${idToGo}`)}>
-                        <div className={styles.productImageContainer} onClick={() => navigate(`/products/${idToGo}`)}>
-                          <img src={p.images[0]} alt={p.name} className={styles.productImage} data-product-img={`detail-best-${idToGo}`} />
-                          <div className={styles.productBadges}>
-                            <div className={styles.bestsellerBadge}>BÁN CHẠY</div>
-                          </div>
-                          <Button type="default" shape="circle" icon={<ShoppingCartOutlined />} className={`${styles.addToCartButton} ${styles.addToCartFixed}`} onClick={(e)=>{ e.stopPropagation(); handleAddToCart(idToGo); }} />
+          <div className={styles.sectionHeader}>
+            <Title level={2} className={styles.sectionTitle}>
+              SẢN PHẨM BÁN CHẠY
+            </Title>
+            <Text className={styles.sectionSubtitle}>
+              Những đôi giày được yêu thích nhất hiện tại
+            </Text>
+          </div>
+          
+          <div className={styles.horizontalScrollContainer}>
+            <Button 
+              className={styles.scrollButton}
+              icon={<LeftOutlined />}
+              onClick={() => scrollProducts('left', bestsellerProductsRef)}
+            />
+            
+            <div className={styles.horizontalScrollWrapper} ref={bestsellerProductsRef}>
+              <div className={styles.horizontalScrollContent}>
+                {/* First set of products */}
+                {bestsellerProducts.map((product) => (
+                  <div key={product.id} className={styles.horizontalProductCard}>
+                    <Card className={styles.productCard} hoverable onClick={() => navigate(`/products/${product.id}`)}>
+                      <div className={styles.productImageContainer}>
+                        <img 
+                          src={product.image}
+                          alt={product.name}
+                          className={styles.productImage}
+                          data-product-img={`img-${product.id}`}
+                        />
+                        <div className={styles.productBadges}>
+                          <div className={styles.bestsellerBadge}>BÁN CHẠY</div>
+                          {/* <div className={styles.discountBadge}>-{product.discount}%</div> */}
                         </div>
-                        <div className={styles.productInfo} onClick={() => navigate(`/products/${idToGo}`)}>
-                          <Text className={styles.productBrand}>Nike</Text>
-                          <Text className={styles.productName}>{p.name}</Text>
-                          <div className={styles.productPriceContainer}>
-                            <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}</Text>
-                          </div>
-                        </div>
+                        <Button 
+                          type="default" 
+                          shape="circle" 
+                          icon={<ShoppingCartOutlined />} 
+                          className={`${styles.addToCartButton} ${styles.addToCartFixed}`}
+                          onClick={(e) => { e.stopPropagation(); handleAddToCartFromBestseller(product.id); }}
+                        />
                       </div>
-                    </div>
-                  );
-                })}
-                {[1,2,3,4,5,6].map((idx) => {
-                  const idToGo = String(idx);
-                  const p = product;
-                  return (
-                    <div key={`dup-${idx}`} className={styles.horizontalProductCard}>
-                      <div className={styles.productCard} onClick={() => navigate(`/products/${idToGo}`)}>
-                        <div className={styles.productImageContainer} onClick={() => navigate(`/products/${idToGo}`)}>
-                          <img src={p.images[0]} alt={p.name} className={styles.productImage} data-product-img={`detail-best-${idToGo}`} />
-                          <div className={styles.productBadges}>
-                            <div className={styles.bestsellerBadge}>BÁN CHẠY</div>
-                          </div>
-                          <Button type="default" shape="circle" icon={<ShoppingCartOutlined />} className={`${styles.addToCartButton} ${styles.addToCartFixed}`} onClick={(e)=>{ e.stopPropagation(); handleAddToCart(idToGo); }} />
+                      <div className={styles.productInfo}>
+                        <Text className={styles.productBrand}>{product.brand}</Text>
+                        <Text className={styles.productName}>{product.name}</Text>
+                        <div className={styles.productPriceContainer}>
+                          <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Text>
                         </div>
-                        <div className={styles.productInfo} onClick={() => navigate(`/products/${idToGo}`)}>
-                          <Text className={styles.productBrand}>Nike</Text>
-                          <Text className={styles.productName}>{p.name}</Text>
-                          <div className={styles.productPriceContainer}>
-                            <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}</Text>
-                          </div>
-                        </div>
+                        <Text className={styles.soldCount}>Đã bán: {product.sold}</Text>
                       </div>
-                    </div>
-                  );
-                })}
+                    </Card>
+                  </div>
+                ))}
+                {/* Duplicate set for seamless loop */}
+                {bestsellerProducts.map((product) => (
+                  <div key={`duplicate-${product.id}`} className={styles.horizontalProductCard}>
+                    <Card className={styles.productCard} hoverable onClick={() => navigate(`/products/${product.id}`)}>
+                      <div className={styles.productImageContainer}>
+                        <img 
+                          src={product.image}
+                          alt={product.name}
+                          className={styles.productImage}
+                          data-product-img={`img-${product.id}`}
+                        />
+                        <div className={styles.productBadges}>
+                          <div className={styles.bestsellerBadge}>BÁN CHẠY</div>
+                          {/* <div className={styles.discountBadge}>-{product.discount}%</div> */}
+                        </div>
+                        <Button 
+                          type="default" 
+                          shape="circle" 
+                          icon={<ShoppingCartOutlined />} 
+                          className={`${styles.addToCartButton} ${styles.addToCartFixed}`}
+                          onClick={(e) => { e.stopPropagation(); handleAddToCartFromBestseller(product.id); }}
+                        />
+                      </div>
+                      <div className={styles.productInfo}>
+                        <Text className={styles.productBrand}>{product.brand}</Text>
+                        <Text className={styles.productName}>{product.name}</Text>
+                        <div className={styles.productPriceContainer}>
+                          <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Text>
+                        </div>
+                        <Text className={styles.soldCount}>Đã bán: {product.sold}</Text>
+                      </div>
+                    </Card>
+                  </div>
+                ))}
               </div>
             </div>
-            <Button className={styles.hsNavBtn} icon={<RightOutlined />} onClick={() => scrollBest('right')} />
+            
+            <Button 
+              className={styles.scrollButton}
+              icon={<RightOutlined />}
+              onClick={() => scrollProducts('right', bestsellerProductsRef)}
+            />
           </div>
         </div>
       </Content>
       <Footer />
+
+      {/* Login Modal */}
+      <LoginModal 
+        visible={loginModalVisible}
+        onClose={() => setLoginModalVisible(false)}
+        onSwitchToRegister={() => {
+          setLoginModalVisible(false);
+          // Could add register modal here if needed
+        }}
+        onLoginSuccess={() => {
+          setLoginModalVisible(false);
+          window.dispatchEvent(new CustomEvent('cart:refresh'));
+        }}
+      />
 
       {/* Scroll to Top */}
       <div className={`${styles.scrollToTop} ${showScrollTop ? styles.visible : ''}`} onClick={scrollToTop}>

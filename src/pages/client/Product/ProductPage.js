@@ -1,4 +1,4 @@
-import { Button, Card, Col, Layout, Row, Typography, Input, Space, Collapse, Radio, Checkbox, Spin } from "antd";
+import { Button, Card, Col, Layout, Row, Typography, Input, Space, Collapse, Radio, Checkbox, Spin, Modal } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -13,6 +13,8 @@ import styles from "./ProductPage.module.css";
 import Header from "../HomePage/Header";
 import Footer from "../HomePage/Footer";
 import { HomeApi } from "../../../api/client/home/HomeApi";
+import { isTokenExpired } from "../../../util/common/utils";
+import LoginModal from "../../homePage/LoginModal";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -34,6 +36,7 @@ const ProductPage = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [newArrivals, setNewArrivals] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
   const getColorHex = (vnName) => {
     const name = String(vnName || '').trim().toLowerCase();
     const map = {
@@ -301,6 +304,23 @@ const ProductPage = () => {
   };
 
   const handleAddToCart = (productId) => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    const isLoggedIn = token && !isTokenExpired(token);
+    
+    if (!isLoggedIn) {
+      Modal.confirm({
+        title: "Yêu cầu đăng nhập",
+        content: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.",
+        okText: "Đăng nhập",
+        cancelText: "Hủy",
+        onOk: () => {
+          setLoginModalVisible(true);
+        },
+      });
+      return;
+    }
+
     const product = products.find(p => p.id === productId);
     // Try add to backend by picking first product_detail of this product
     (async () => {
@@ -682,6 +702,20 @@ const ProductPage = () => {
 
       {/* Scroll to Top Button */}
       <Footer className={styles.footer} />
+
+      {/* Login Modal */}
+      <LoginModal 
+        visible={loginModalVisible}
+        onClose={() => setLoginModalVisible(false)}
+        onSwitchToRegister={() => {
+          setLoginModalVisible(false);
+          // Could add register modal here if needed
+        }}
+        onLoginSuccess={() => {
+          setLoginModalVisible(false);
+          window.dispatchEvent(new CustomEvent('cart:refresh'));
+        }}
+      />
 
       <div
         className={`${styles.scrollToTop} ${showScrollTop ? styles.visible : ''}`}

@@ -1,0 +1,335 @@
+.layout {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding-top: 80px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.content {
+  width: 100%;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Hero Section */
+.heroSection {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 120px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroContent {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.brandText {
+  color: #20B2AA !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  margin-bottom: 16px !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  color: #333 !important;
+  font-size: 48px !important;
+  font-weight: 900 !important;
+  margin-bottom: 24px !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.highlight {
+  color: #20B2AA !important;
+  font-weight: 900 !important;
+}
+
+.heroSubtitle {
+  font-size: 20px;
+  margin-bottom: 32px;
+  color: #666;
+  line-height: 1.6;
+  font-weight: 400;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.exploreButton {
+  background: #20B2AA !important;
+  border-color: #20B2AA !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  padding: 16px 32px !important;
+  height: auto !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+}
+
+.exploreButton:hover {
+  background: #1a9b94 !important;
+  border-color: #1a9b94 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.3);
+}
+
+/* Section */
+.section {
+  padding: 80px 0;
+  background: white;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.sectionTitle {
+  color: #333;
+  font-size: 36px !important;
+  font-weight: 700 !important;
+  margin-bottom: 16px !important;
+}
+
+.sectionSubtitle {
+  color: #666;
+  font-size: 16px;
+  display: block;
+  margin-top: 8px;
+}
+
+.paragraph {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.imageContainer {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.imageContainer:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.aboutImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* Features Section */
+.featuresSection {
+  padding: 80px 0;
+  background: #f8f9fa;
+}
+
+.featureCard {
+  text-align: center;
+  height: 100%;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid #e8e8e8;
+  background: white;
+  padding: 24px;
+}
+
+.featureCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  border-color: #20B2AA;
+}
+
+.featureIcon {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.featureTitle {
+  color: #333;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+}
+
+.featureDescription {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+  display: block;
+}
+
+/* Values Section */
+.valuesSection {
+  padding: 80px 0;
+  background: white;
+}
+
+.valueItem {
+  display: flex;
+  align-items: flex-start;
+  padding: 20px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.valueItem:hover {
+  background: #e8f5f4;
+  transform: translateX(8px);
+}
+
+.valueTitle {
+  color: #333 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  margin-bottom: 8px !important;
+}
+
+.valueDescription {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+  display: block;
+}
+
+/* Mission Section */
+.missionSection {
+  padding: 80px 0;
+  background: #f8f9fa;
+}
+
+.missionCard {
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: none;
+  background: white;
+  padding: 48px;
+}
+
+.missionText {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #666;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.missionText strong {
+  color: #20B2AA;
+  font-weight: 600;
+}
+
+/* Stats Section */
+.statsSection {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #20B2AA 0%, #1a9b96 100%);
+  color: white;
+}
+
+.statsTitle {
+  color: white !important;
+  font-size: 36px !important;
+  font-weight: 700 !important;
+  text-align: center;
+  margin-bottom: 48px !important;
+}
+
+.statItem {
+  text-align: center;
+  padding: 24px;
+}
+
+.statNumber {
+  color: white !important;
+  font-size: 48px !important;
+  font-weight: 900 !important;
+  margin-bottom: 12px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statLabel {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-weight: 500;
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .heroSection {
+    padding: 80px 24px;
+  }
+
+  .heroTitle {
+    font-size: 32px !important;
+  }
+
+  .heroSubtitle {
+    font-size: 16px;
+  }
+
+  .sectionTitle {
+    font-size: 28px !important;
+  }
+
+  .section,
+  .featuresSection,
+  .valuesSection,
+  .missionSection,
+  .statsSection {
+    padding: 48px 0;
+  }
+
+  .container {
+    padding: 0 16px;
+  }
+
+  .statNumber {
+    font-size: 36px !important;
+  }
+
+  .missionCard {
+    padding: 24px;
+  }
+
+  .valueItem {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .heroTitle {
+    font-size: 28px !important;
+  }
+
+  .sectionTitle {
+    font-size: 24px !important;
+  }
+
+  .statNumber {
+    font-size: 32px !important;
+  }
+}

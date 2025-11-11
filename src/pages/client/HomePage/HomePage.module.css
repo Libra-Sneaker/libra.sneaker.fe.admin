@@ -34,6 +34,9 @@
 .heroText {
   flex: 1;
   max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .brandText {
@@ -48,7 +51,7 @@
   color: #333 !important;
   font-size: 64px !important;
   font-weight: 900 !important;
-  margin-bottom: 24px !important;
+  margin: 0 !important;
   line-height: 1.1 !important;
   letter-spacing: -0.02em !important;
 }
@@ -62,11 +65,19 @@
 
 .heroSubtitle {
   font-size: 20px;
-  margin-bottom: 32px;
+  margin: 0;
   opacity: 0.8;
   line-height: 1.6;
   font-weight: 400;
   color: #666;
+}
+
+.heroActions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin: 0;
+  flex-wrap: wrap;
 }
 
 .buyNowButton {
@@ -78,13 +89,34 @@
   height: auto !important;
   border-radius: 8px !important;
   font-size: 16px !important;
-  margin-bottom: 24px;
+  transition: all 0.3s ease;
 }
 
 .buyNowButton:hover {
   background: #1a9b94 !important;
   border-color: #1a9b94 !important;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.3);
+}
+
+.exploreButton {
+  background: transparent !important;
+  border-color: #20B2AA !important;
+  color: #20B2AA !important;
+  font-weight: 600 !important;
+  padding: 16px 32px !important;
+  height: auto !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  transition: all 0.3s ease;
+}
+
+.exploreButton:hover {
+  background: #20B2AA !important;
+  border-color: #20B2AA !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.3);
 }
 
 .colorOptions {
@@ -644,8 +676,15 @@
     flex-direction: column;
   }
 
+  .heroActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+
   .buyNowButton,
-  .learnMoreButton {
+  .learnMoreButton,
+  .exploreButton {
     width: 100%;
   }
 
@@ -673,6 +712,19 @@
 
   .heroSubtitle {
     font-size: 16px;
+  }
+
+  .heroActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .buyNowButton,
+  .exploreButton {
+    width: 100%;
+    padding: 14px 24px !important;
+    font-size: 14px !important;
   }
 
   .mainSneakerImg {

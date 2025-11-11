@@ -13,21 +13,22 @@ const Footer = () => {
       <Row gutter={[32, 32]} align="middle">
         <Col xs={24} md={12}>
           <div className={homeStyles.aboutContent}>
-            <Text className={homeStyles.aboutLabel}>ABOUT US</Text>
+            <Text className={homeStyles.aboutLabel}>VỀ CHÚNG TÔI</Text>
             <Title className={homeStyles.aboutTitle}>
-              ELEVATE YOUR LOOK WITH <span className={homeStyles.highlight}>SHOES</span>
+              NÂNG TẦM PHONG CÁCH CỦA BẠN VỚI <span className={homeStyles.highlight}>GIÀY</span>
             </Title>
             <Paragraph className={homeStyles.aboutDescription}>
-              We believe that great shoes can transform not just your outfit, but your entire day. 
-              Our carefully curated collection features the latest trends and timeless classics, 
-              all designed to help you step confidently into whatever comes next.
+              Chúng tôi tin rằng những đôi giày tuyệt vời có thể thay đổi không chỉ trang phục của bạn, 
+              mà còn cả ngày của bạn. Bộ sưu tập được chọn lọc cẩn thận của chúng tôi có những xu hướng 
+              mới nhất và những mẫu cổ điển vượt thời gian, tất cả được thiết kế để giúp bạn bước đi tự tin 
+              vào bất cứ điều gì sắp tới.
             </Paragraph>
             <Space className={homeStyles.aboutButtons}>
               <Button type="primary" size="large" className={homeStyles.buyNowButton} onClick={() => navigate('/products')}>
-                BUY NOW
+                MUA NGAY
               </Button>
-              <Button size="large" className={homeStyles.learnMoreButton}>
-                LEARN MORE
+              <Button size="large" className={homeStyles.learnMoreButton} onClick={() => navigate('/about')}>
+                TÌM HIỂU THÊM
               </Button>
             </Space>
           </div>

@@ -210,14 +210,14 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
           </Menu.Item>
         </Menu.SubMenu>
 
-        <Menu.Item
+        {/* <Menu.Item
           // key="/brand-management"
           className="menu_custom"
           style={{ color: "white" }}
           icon={<FontAwesomeIcon icon={faReply} />}
         >
           <Link to="/return-management">Trả hàng</Link>
-        </Menu.Item>
+        </Menu.Item> */}
 
         {/* <Menu.Item
           // key="/brand-management"
@@ -229,7 +229,7 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
         </Menu.Item> */}
 
         {/* Promotion Management */}
-        <Menu.SubMenu
+        {/* <Menu.SubMenu
           key="/promotion-management-options"
           title="Khuyến mãi"
           icon={
@@ -254,7 +254,7 @@ const SidebarComponent = ({ collapsed, toggleCollapsed }) => {
           >
             <Link to="/big-promotion-management">Đợt khuyến mãi </Link>
           </Menu.Item>
-        </Menu.SubMenu>
+        </Menu.SubMenu> */}
 
         {/* Nút Đăng xuất */}
         <Menu.Item

@@ -1,4 +1,4 @@
-import { Button, Card, Col, Layout, Row, Space, Typography, Input } from "antd";
+import { Button, Card, Col, Layout, Row, Space, Typography, Input, Modal } from "antd";
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -13,6 +13,8 @@ import Footer from "./Footer";
 import { HomeApi } from "../../../api/client/home/HomeApi";
 import { ProductDetailManagementApi } from "../../../api/admin/productDetailManagement/productDetailManagementApi";
 import { CartApi } from "../../../api/client/cart/CartApi";
+import { isTokenExpired } from "../../../util/common/utils";
+import LoginModal from "../../homePage/LoginModal";
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -27,6 +29,7 @@ const HomePage = () => {
 
   const [newProducts, setNewProducts] = useState([]);
   const [bestsellerProducts, setBestsellerProducts] = useState([]);
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -99,6 +102,23 @@ const HomePage = () => {
   };
 
   const handleAddToCart = async (productId) => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    const isLoggedIn = token && !isTokenExpired(token);
+    
+    if (!isLoggedIn) {
+      Modal.confirm({
+        title: "Yêu cầu đăng nhập",
+        content: "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.",
+        okText: "Đăng nhập",
+        cancelText: "Hủy",
+        onOk: () => {
+          setLoginModalVisible(true);
+        },
+      });
+      return;
+    }
+
     const product = [...newProducts, ...bestsellerProducts].find(p => p.id === productId);
     try {
       const { data } = await ProductDetailManagementApi.getProductDetails({ id: productId, page: 0, size: 1 });
@@ -205,26 +225,30 @@ const HomePage = () => {
       <Content id="hero-section" className={styles.heroSection}>
         <div className={styles.heroContent}>
           <div className={styles.heroText}>
-            <Text className={styles.brandText}>LIBRA SNEAKER</Text>
             <Title className={styles.heroTitle}>
-              THE ULTIMATE <span className={styles.highlight}>SNEAK</span> SHOE PARADISE
+              LIBRA SNEAKER
             </Title>
             <Paragraph className={styles.heroSubtitle}>
-              Discover the latest collection of premium sneakers from top brands. 
-              Quality, style, and comfort combined in every pair.
+              Khám phá bộ sưu tập giày sneaker cao cấp mới nhất từ các thương hiệu hàng đầu. 
+              Chất lượng, phong cách và sự thoải mái được kết hợp trong từng đôi giày.
             </Paragraph>
-            <Button type="primary" size="large" className={styles.buyNowButton} onClick={() => navigate('/products')}>
-              BUY NOW
-            </Button>
-            {/* <div className={styles.colorOptions}>
-              <Text className={styles.colorLabel}>COLOR:</Text>
-              <div className={styles.colorSwatches}>
-                <div className={`${styles.colorSwatch} ${styles.orange}`}></div>
-                <div className={`${styles.colorSwatch} ${styles.blue}`}></div>
-                <div className={`${styles.colorSwatch} ${styles.teal}`}></div>
-                <div className={`${styles.colorSwatch} ${styles.gray}`}></div>
-              </div>
-            </div> */}
+            <div className={styles.heroActions}>
+              <Button 
+                type="primary" 
+                size="large" 
+                className={styles.buyNowButton} 
+                onClick={() => navigate('/products')}
+              >
+                MUA NGAY
+              </Button>
+              <Button 
+                size="large" 
+                className={styles.exploreButton}
+                onClick={() => navigate('/about')}
+              >
+                TÌM HIỂU THÊM
+              </Button>
+            </div>
           </div>
           <div className={styles.heroImage}>
             <div className={styles.mainSneaker}>
@@ -270,7 +294,7 @@ const HomePage = () => {
                   className={styles.bannerImage}
                 />
                 <div className={styles.bannerOverlay}>
-                  <Title level={4} className={styles.bannerCardTitle}>PREMIUM COLLECTION</Title>
+                  <Title level={4} className={styles.bannerCardTitle}>BỘ SƯU TẬP CAO CẤP</Title>
                   <Text className={styles.bannerCardText}>Những đôi giày cao cấp nhất</Text>
                 </div>
               </div>
@@ -286,7 +310,7 @@ const HomePage = () => {
                   className={styles.bannerImage}
                 />
                 <div className={styles.bannerOverlay}>
-                  <Title level={4} className={styles.bannerCardTitle}>LIMITED EDITION</Title>
+                  <Title level={4} className={styles.bannerCardTitle}>PHIÊN BẢN GIỚI HẠN</Title>
                   <Text className={styles.bannerCardText}>Phiên bản giới hạn độc quyền</Text>
                 </div>
               </div>
@@ -302,7 +326,7 @@ const HomePage = () => {
                   className={styles.bannerImage}
                 />
                 <div className={styles.bannerOverlay}>
-                  <Title level={4} className={styles.bannerCardTitle}>CLASSIC STYLE</Title>
+                  <Title level={4} className={styles.bannerCardTitle}>PHONG CÁCH CỔ ĐIỂN</Title>
                   <Text className={styles.bannerCardText}>Phong cách cổ điển vượt thời gian</Text>
                 </div>
               </div>
@@ -534,6 +558,19 @@ const HomePage = () => {
 
       <Footer />
 
+      {/* Login Modal */}
+      <LoginModal 
+        visible={loginModalVisible}
+        onClose={() => setLoginModalVisible(false)}
+        onSwitchToRegister={() => {
+          setLoginModalVisible(false);
+          // Could add register modal here if needed
+        }}
+        onLoginSuccess={() => {
+          setLoginModalVisible(false);
+          window.dispatchEvent(new CustomEvent('cart:refresh'));
+        }}
+      />
 
       {/* Scroll to Top Button */}
       <div 

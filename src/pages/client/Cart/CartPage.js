@@ -14,12 +14,14 @@ import {
   Progress,
   Empty,
   message,
+  Modal,
 } from "antd";
 import React, { useEffect, useState } from "react";
 import Header from "../HomePage/Header";
 import Footer from "../HomePage/Footer";
 import pdStyles from "../Product/ProductDetailPage.module.css";
 import BestsellerSlider from "../Common/BestsellerSlider";
+import LoginModal from "../../homePage/LoginModal";
 import {
   ShoppingCartOutlined,
   LeftOutlined,
@@ -28,6 +30,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import styles from "./CartPage.module.css";
 import { CartApi } from "../../../api/client/cart/CartApi";
+import { isTokenExpired } from "../../../util/common/utils";
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -36,6 +39,7 @@ const money = (v) => (v || 0).toLocaleString() + " đ";
 
 const CartPage = () => {
   const [items, setItems] = useState([]);
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
   const navigate = useNavigate();
   const suggestRef = React.useRef(null);
 
@@ -87,6 +91,7 @@ const CartPage = () => {
         id: it.cartDetailId, // always use cartDetailId as unique id
         cartDetailId: it.cartDetailId,
         productDetailId: it.productDetailId,
+        productId: it.productId, // productId for navigation to product detail page
         name: it.productName,
         price: it.price,
         qty: it.quantity,
@@ -100,8 +105,28 @@ const CartPage = () => {
   };
 
   useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    const isLoggedIn = token && !isTokenExpired(token);
+    
+    if (!isLoggedIn) {
+      Modal.confirm({
+        title: "Yêu cầu đăng nhập",
+        content: "Bạn cần đăng nhập để xem giỏ hàng và mua hàng.",
+        okText: "Đăng nhập",
+        cancelText: "Về trang chủ",
+        onOk: () => {
+          setLoginModalVisible(true);
+        },
+        onCancel: () => {
+          navigate('/');
+        },
+      });
+      return;
+    }
+    
     loadCart();
-  }, []);
+  }, [navigate]);
 
   // Listen to global events: refresh when product added elsewhere
   useEffect(() => {
@@ -237,7 +262,7 @@ const CartPage = () => {
                         alt={item.name}
                         className={styles.itemImage}
                         style={{ cursor: "pointer" }}
-                        onClick={() => navigate(`/products/${item.id}`)}
+                        onClick={() => navigate(`/products/${item.productId || item.id}`)}
                       />
                     ) : (
                       <div className={styles.itemPlaceholder} />
@@ -246,7 +271,7 @@ const CartPage = () => {
                       <Text
                         strong
                         style={{ cursor: "pointer" }}
-                        onClick={() => navigate(`/products/${item.id}`)}
+                        onClick={() => navigate(`/products/${item.productId || item.id}`)}
                       >
                         {item.name || `Sản phẩm #${item.id}`}
                       </Text>
@@ -388,7 +413,7 @@ const CartPage = () => {
       </div>
 
       {/* Suggestion within container */}
-      <div className={styles.container} style={{ marginTop: 24 }}>
+      {/* <div className={styles.container} style={{ marginTop: 24 }}>
         <BestsellerSlider
           title="Có thể bạn thích"
           products={bestsellerProducts}
@@ -396,9 +421,24 @@ const CartPage = () => {
           onAdd={(p) => handleAddToCart(p)}
           dataImgPrefix="cart-suggest"
         />
-      </div>
+      </div> */}
 
       <Footer />
+
+      {/* Login Modal */}
+      <LoginModal 
+        visible={loginModalVisible}
+        onClose={() => setLoginModalVisible(false)}
+        onSwitchToRegister={() => {
+          setLoginModalVisible(false);
+          // Could add register modal here if needed
+        }}
+        onLoginSuccess={() => {
+          setLoginModalVisible(false);
+          // Reload cart after successful login
+          loadCart();
+        }}
+      />
     </div>
   );
 };
