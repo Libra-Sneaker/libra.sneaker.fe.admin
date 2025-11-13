@@ -1,10 +1,18 @@
+import axios from "axios";
+import { AppConfig } from "../../../AppConfig";
 import { request } from "../../../util/axios/request.helper";
 
 const baseUrl = `/auth`;
 
+// Tạo axios riêng cho login, không interceptor
+const loginAxios = axios.create({
+  baseURL: AppConfig.apiUrl,
+  withCredentials: true,
+});
+
 export class LoginApi {
   static login = (data) => {
-    return request({
+    return loginAxios({
       method: "POST",
       url: `${baseUrl}/login`,
       data: data,

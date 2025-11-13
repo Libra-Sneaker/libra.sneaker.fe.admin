@@ -4,22 +4,32 @@ import { useAppDispatch } from "../app/hook";
 import { SetUserCurrent } from "../app/reducer/common/UserCurrent.reducer";
 import { useEffect } from "react";
 
+const clearUserInfo = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  localStorage.removeItem("email");
+  localStorage.removeItem("name");
+  localStorage.removeItem("userCode");
+  localStorage.removeItem("theme");
+};
+
 const checkAuth = () => {
-  // const token = Cookies.get("token");
   const token = localStorage.getItem("token");
-
-  if (!token) return false;
-
+  if (!token) {
+    clearUserInfo();
+    return false;
+  }
   try {
     const decodedToken = jwt_decode(token);
     const currentTime = Date.now() / 1000;
-    return decodedToken.exp && decodedToken.exp > currentTime;
+    if (decodedToken.exp && decodedToken.exp > currentTime) {
+      return true;
+    } else {
+      clearUserInfo();
+      return false;
+    }
   } catch {
-    // Nếu token không hợp lệ, xóa token và thông tin người dùng
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("email");
-    localStorage.removeItem("name");
+    clearUserInfo();
     return false;
   }
 };
@@ -40,6 +50,7 @@ const MiddlewareRouter = ({ children }) => {
   }, [isAuthenticated, dispatch]);
 
   if (!isAuthenticated || role !== "ADMIN") {
+    clearUserInfo();
     return <Navigate to="/" replace />; // Chuyển hướng về trang chủ
   }
 

@@ -51,7 +51,7 @@ const LoginModal = ({ visible, onClose, onSwitchToRegister, onLoginSuccess }) =>
         if (status === 400) {
           message.error(data.message || "Đăng nhập thất bại!");
         } else {
-          message.error("Đã có lỗi xảy ra! Vui lòng thử lại.");
+          message.error("Tài khoản hoặc mật khẩu không đúng!");
         }
       } else {
         message.error(

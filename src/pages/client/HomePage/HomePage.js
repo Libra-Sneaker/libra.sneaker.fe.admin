@@ -31,6 +31,15 @@ const HomePage = () => {
   const [bestsellerProducts, setBestsellerProducts] = useState([]);
   const [loginModalVisible, setLoginModalVisible] = useState(false);
 
+  // Check token validity on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token && isTokenExpired(token)) {
+      localStorage.clear();
+      setLoginModalVisible(true);
+    }
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
@@ -553,9 +562,6 @@ const HomePage = () => {
           </Button>
         </div> */}
       </Content>
-
-    
-
       <Footer />
 
       {/* Login Modal */}
