@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Button,
   Col,
   DatePicker,
@@ -8,6 +9,7 @@ import {
   Row,
   Select,
 } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import styles from "./ModalCustomerDetail.module.css";
 import { useNavigate } from "react-router";
@@ -25,6 +27,7 @@ const ModalCustomerDetail = ({ isModalOpen, handleCancel, customerDetail }) => {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [deleteFlag, setDeleteFlag] = useState("");
   const [errors, setErrors] = useState({});
+  const [avatarUrl, setAvatarUrl] = useState("");
 
   const navigate = useNavigate();
 
@@ -53,8 +56,14 @@ const ModalCustomerDetail = ({ isModalOpen, handleCancel, customerDetail }) => {
       setAddress(customerDetail.address);
       setDateOfBirth(customerDetail.dateOfBirth);
       setDeleteFlag(customerDetail.deleteFlag + "");
+      // Set avatar URL - check both avatar and avatarUrl fields
+      const avatar = customerDetail.avatar || customerDetail.avatarUrl || "";
+      setAvatarUrl(avatar);
+    } else {
+      // Reset all fields when customerDetail is null
+      setAvatarUrl("");
     }
-  }, [isModalOpen]);
+  }, [customerDetail, isModalOpen]);
 
   // **Kiểm tra giá trị khi chọn ngày sinh**
   const handleDateChange = (date, dateString) => {
@@ -126,13 +135,21 @@ const ModalCustomerDetail = ({ isModalOpen, handleCancel, customerDetail }) => {
           </Button>,
         ]}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <div className={styles.imgContainer}>Img</div>
+        {/* Ảnh đại diện - chỉ hiển thị, không upload */}
+        <div className={styles.avatarContainer}>
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="avatar"
+              className={styles.avatarImage}
+            />
+          ) : (
+            <Avatar
+              size={120}
+              icon={<UserOutlined />}
+              className={styles.avatar}
+            />
+          )}
         </div>
 
         <div className={styles.modalDetailContainer}>

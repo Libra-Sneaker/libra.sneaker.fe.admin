@@ -77,11 +77,24 @@
 
 .formActions {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-top: 32px;
-  padding-bottom: 24px;
+  margin-top: 24px;
+}
+
+.loginLink {
+  background: none;
+  border: none;
+  color: #1890ff;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.loginLink:hover {
+  color: #40a9ff;
+  text-decoration: underline;
 }
 
 .actionButtons {
@@ -167,6 +180,20 @@
   .submitButton,
   .cancelButton {
     width: 100%;
+  }
+
+  .formActions {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .submitButton {
+    width: 100%;
+  }
+
+  .loginLink {
+    text-align: center;
   }
 
   .modalTitle h2 {

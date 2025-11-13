@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Button,
   Col,
   DatePicker,
@@ -7,15 +8,20 @@ import {
   Modal,
   Row,
   Select,
+  Spin,
+  Upload,
 } from "antd";
+import { CameraOutlined, UserOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import styles from "./ModalEmployeeDetail.module.css";
 import dayjs from "dayjs";
 import { EmployeeManagementApi } from "../../../api/admin/employeeManagement/EmployeeManagementApi";
+import { FileUploadApi } from "../../../api/admin/fileUpload/FileUploadApi";
 import { useNavigate } from "react-router";
 import { Option } from "antd/es/mentions";
 
 const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
+  const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [sex, setSex] = useState("");
@@ -26,6 +32,8 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
   const [role, setRole] = useState("");
   const [deleteFlag, setDeleteFlag] = useState("");
   const [errors, setErrors] = useState({});
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const navigate = useNavigate();
 
@@ -46,10 +54,12 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
 
   // Khi nhận dữ liệu employeeDetail, cập nhật trạng thái
   useEffect(() => {
-    console.log(employeeDetail);
+    console.log("employeeDetail received:", employeeDetail);
+    console.log("employeeDetail.avatar:", employeeDetail?.avatar);
 
     if (employeeDetail) {
-      setCode(employeeDetail.employeeCode);
+      setId(employeeDetail.id || employeeDetail.employeeId || "");
+      setCode(employeeDetail.employeeCode || "");
       setName(employeeDetail.name || "");
       setSex(employeeDetail.sex + "" || "");
       setPhoneNumber(employeeDetail.phoneNumber || "");
@@ -58,6 +68,19 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
       setDateOfBirth(employeeDetail.dateOfBirth || "");
       setRole(employeeDetail.role + "" || "");
       setDeleteFlag(employeeDetail.deleteFlag + "" || "");
+      // Set avatar URL - check both avatar and avatarUrl fields
+      const avatar = employeeDetail.avatar || employeeDetail.avatarUrl || "";
+      console.log("=== LOAD EMPLOYEE DETAIL ===");
+      console.log("employeeDetail.avatar:", employeeDetail.avatar);
+      console.log("employeeDetail.avatarUrl:", employeeDetail.avatarUrl);
+      console.log("Final avatar value:", avatar);
+      console.log("Avatar is empty?", !avatar || avatar.trim() === "");
+      setAvatarUrl(avatar);
+    } else {
+      // Reset all fields when employeeDetail is null
+      setId("");
+      setCode("");
+      setAvatarUrl("");
     }
   }, [employeeDetail]);
 
@@ -71,6 +94,138 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
       console.log("No date selected");
       setDateOfBirth(""); // Đặt lại giá trị nếu không có ngày
     }
+  };
+
+  // **Xử lý upload ảnh đại diện**
+  const handleFileChange = async (file) => {
+    console.log("handleFileChange called with:", file);
+    
+    // Get file object - same pattern as ProductDetailManagement
+    const fileObj = file.originFileObj || file.file?.originFileObj || file.file || file;
+    
+    console.log("Extracted fileObj:", {
+      hasFileObj: !!fileObj,
+      name: fileObj?.name,
+      size: fileObj?.size,
+      type: fileObj?.type,
+      isFile: fileObj instanceof File
+    });
+    
+    if (!fileObj) {
+      console.error("No file object found");
+      message.error("Không tìm thấy file. Vui lòng thử lại.");
+      return;
+    }
+
+    // Validate file type
+    if (!fileObj.type || !fileObj.type.startsWith('image/')) {
+      message.error("Vui lòng chọn file ảnh");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (fileObj.size > maxSize) {
+      message.error("Kích thước file không được vượt quá 5MB");
+      return;
+    }
+
+    // Show loading state for upload
+    setUploadingAvatar(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("multipartFile", fileObj);
+      
+      console.log("Uploading file...", {
+        name: fileObj.name,
+        size: fileObj.size,
+        type: fileObj.type
+      });
+      
+      const response = await FileUploadApi.uploadFileImage(formData);
+      
+      console.log("Upload response:", response);
+      
+      // Backend returns String (URL) directly in response body
+      const url = response?.data;
+      
+      if (url && typeof url === 'string' && url.trim().length > 0) {
+        setAvatarUrl(url);
+        message.success("Upload ảnh đại diện thành công");
+      } else {
+        console.error("Invalid URL response:", url);
+        throw new Error("Không nhận được URL từ server");
+      }
+    } catch (error) {
+      console.error("Upload error details:", {
+        message: error.message,
+        response: error.response,
+        data: error.response?.data
+      });
+      
+      let errorMessage = "Không thể upload ảnh. Vui lòng thử lại.";
+      
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        if (status === 400) {
+          errorMessage = data?.message || "File không hợp lệ";
+        } else if (status === 401) {
+          errorMessage = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+        } else if (status === 413) {
+          errorMessage = "File quá lớn";
+        } else if (status >= 500) {
+          errorMessage = "Lỗi server. Vui lòng thử lại sau.";
+        } else {
+          errorMessage = data?.message || error.message || errorMessage;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      message.error(errorMessage);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const uploadProps = {
+    name: "file",
+    listType: "picture-card",
+    className: "avatar-uploader",
+    maxCount: 1,
+    showUploadList: false,
+    accept: "image/*",
+    beforeUpload: (file) => {
+      // Validate before upload
+      const isImage = file.type?.startsWith('image/');
+      if (!isImage) {
+        message.error('Vui lòng chọn file ảnh!');
+        return Upload.LIST_IGNORE;
+      }
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        message.error('Kích thước file không được vượt quá 5MB!');
+        return Upload.LIST_IGNORE;
+      }
+      return false; // Prevent auto upload
+    },
+    onChange: (info) => {
+      console.log("Upload onChange event:", info);
+      const { file } = info;
+      
+      // Only handle when file is selected (not removed)
+      if (file.status === 'removed') {
+        return;
+      }
+      
+      // Call handleFileChange when file is selected
+      if (file.originFileObj || file) {
+        handleFileChange(file);
+      }
+    },
   };
 
   // **Kiểm tra và lưu thay đổi**
@@ -88,22 +243,31 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
     }
 
     const updatedEmployee = {
+      id: id || employeeDetail?.id || employeeDetail?.employeeId || "", // Required by backend
       code,
       name,
-      sex,
+      sex: sex !== "" ? parseInt(sex, 10) : undefined, // Convert to number
       phoneNumber,
       email,
       address,
       dateOfBirth,
-      role,
-      deleteFlag,
+      role: role !== "" ? parseInt(role, 10) : undefined, // Convert to number - need to check Role enum
+      deleteFlag: deleteFlag !== "" ? parseInt(deleteFlag, 10) : undefined, // Convert to number
+      avatar: avatarUrl && avatarUrl.trim() !== "" ? avatarUrl.trim() : null, // Send null if empty
     };
 
-    console.log("Employee Updated:", updatedEmployee);
+    console.log("=== SAVE EMPLOYEE DEBUG ===");
+    console.log("avatarUrl state:", avatarUrl);
+    console.log("avatarUrl type:", typeof avatarUrl);
+    console.log("avatarUrl length:", avatarUrl?.length);
+    console.log("Employee Updated:", JSON.stringify(updatedEmployee, null, 2));
+    console.log("Avatar in updatedEmployee:", updatedEmployee.avatar);
 
     try {
       // API call to update the employee
-      await EmployeeManagementApi.update(updatedEmployee);
+      const response = await EmployeeManagementApi.update(updatedEmployee);
+      console.log("Update response:", response);
+      console.log("=== SAVE SUCCESS ===");
       message.success("Nhân viên được cập nhật thành công!");
       handleCancel(true); // Close the modal on success
     } catch (error) {
@@ -131,14 +295,26 @@ const ModalEmployeeDetail = ({ isModalOpen, handleCancel, employeeDetail }) => {
         </Button>,
       ]}
     >
-       {/* Ảnh */}
-       <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <div className={styles.imgContainer}>Img</div>
+       {/* Ảnh đại diện */}
+       <div className={styles.avatarContainer}>
+        <Upload {...uploadProps}>
+          {uploadingAvatar ? (
+            <div className={styles.uploadLoading}>
+              <Spin />
+            </div>
+          ) : avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="avatar"
+              className={styles.avatarImage}
+            />
+          ) : (
+            <div className={styles.uploadPlaceholder}>
+              <CameraOutlined className={styles.uploadIcon} />
+              <div className={styles.uploadText}>Upload ảnh</div>
+            </div>
+          )}
+        </Upload>
       </div>
 
       {/* Họ và tên */}

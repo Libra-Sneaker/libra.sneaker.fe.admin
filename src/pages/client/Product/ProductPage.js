@@ -1,4 +1,4 @@
-import { Button, Card, Col, Layout, Row, Typography, Input, Space, Collapse, Radio, Checkbox, Spin, Modal } from "antd";
+import { Button, Card, Col, Layout, Row, Typography, Input, Space, Collapse, Radio, Checkbox, Spin, Modal, Pagination } from "antd";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -381,10 +381,15 @@ const ProductPage = () => {
     setTimeout(() => { try { document.body.removeChild(flyImg); } catch (_) {} }, 850);
   };
 
-  // Filter products by name
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
-  );
+  // Handle pagination change
+  const handlePageChange = (newPage, newPageSize) => {
+    setPage(newPage);
+    if (newPageSize !== pageSize) {
+      setPageSize(newPageSize);
+    }
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <Layout className={styles.layout}>
@@ -647,8 +652,15 @@ const ProductPage = () => {
                 placeholder="Tìm kiếm theo tên sản phẩm"
                 allowClear
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onSearch={(value) => setSearchQuery(value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  // Reset to first page when typing (optional - you can remove this if you want search only on Enter)
+                  // setPage(1);
+                }}
+                onSearch={(value) => {
+                  setSearchQuery(value);
+                  setPage(1); // Reset to first page when searching
+                }}
                 enterButton
                 size="large"
               />
@@ -657,42 +669,58 @@ const ProductPage = () => {
               <div style={{ textAlign: 'center', padding: '50px' }}>
                 <Spin size="large" />
               </div>
-            ) : filteredProducts.length === 0 ? (
+            ) : products.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '50px' }}>
                 <Text>Không tìm thấy sản phẩm nào</Text>
               </div>
             ) : (
-            <Row gutter={[16, 16]} className={styles.productsGrid}>
-              {filteredProducts.map((product) => (
-                <Col xs={12} sm={12} md={8} lg={6} key={product.id}>
-                  <Card className={styles.productCard} onClick={() => navigate(`/products/${product.id}`)} hoverable>
-                    <div className={styles.productImageContainer}>
-                      <img 
-                        src={product.image}
-                        alt={product.name}
-                        className={styles.productImage}
-                        data-product-img={`img-${product.id}`}
-                      />
-                      <Button
-                        type="default"
-                        shape="circle"
-                        icon={<ShoppingCartOutlined />}
-                        className={`${styles.addToCartButton} ${styles.addToCartFixed}`}
-                        onClick={(e) => { e.stopPropagation(); handleAddToCart(product.id); }}
-                      />
-                    </div>
-                    <div className={styles.productInfo}>
-                      <Text className={styles.productName}>{product.name}</Text>
-                      {/* <Text className={styles.productDescription}>Men's Shoe</Text> */}
-                      <div className={styles.priceRow}>
-                        <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Text>
-                        <Text className={styles.soldCount}>Đã bán: {product.sold || 0}</Text>
-                      </div>
-                    </div>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+              <>
+                <Row gutter={[16, 16]} className={styles.productsGrid}>
+                  {products.map((product) => (
+                    <Col xs={12} sm={12} md={8} lg={6} key={product.id}>
+                      <Card className={styles.productCard} onClick={() => navigate(`/products/${product.id}`)} hoverable>
+                        <div className={styles.productImageContainer}>
+                          <img 
+                            src={product.image}
+                            alt={product.name}
+                            className={styles.productImage}
+                            data-product-img={`img-${product.id}`}
+                          />
+                          <Button
+                            type="default"
+                            shape="circle"
+                            icon={<ShoppingCartOutlined />}
+                            className={`${styles.addToCartButton} ${styles.addToCartFixed}`}
+                            onClick={(e) => { e.stopPropagation(); handleAddToCart(product.id); }}
+                          />
+                        </div>
+                        <div className={styles.productInfo}>
+                          <Text className={styles.productName}>{product.name}</Text>
+                          {/* <Text className={styles.productDescription}>Men's Shoe</Text> */}
+                          <div className={styles.priceRow}>
+                            <Text className={styles.productPrice}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Text>
+                            <Text className={styles.soldCount}>Đã bán: {product.sold || 0}</Text>
+                          </div>
+                        </div>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+                {/* Pagination */}
+                <div style={{ marginTop: '32px', display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+                  <Pagination
+                    current={page}
+                    total={totalItems}
+                    pageSize={pageSize}
+                    showSizeChanger
+                    showQuickJumper
+                    showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} sản phẩm`}
+                    pageSizeOptions={['12', '24', '36', '48']}
+                    onChange={handlePageChange}
+                    onShowSizeChange={handlePageChange}
+                  />
+                </div>
+              </>
             )}
           </Col>
         </Row>

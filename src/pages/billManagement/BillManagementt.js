@@ -213,14 +213,14 @@ const BillManagement = () => {
               ></Input>
             </div>
             <div>
-              <Button
+              {/* <Button
                 style={{
                   marginRight: "20px",
                 }}
               >
                 Quét mã QR
-              </Button>
-              <Button>Tạo hóa đơn</Button>
+              </Button> */}
+              {/* <Button>Tạo hóa đơn</Button> */}
             </div>
           </div>
 
@@ -254,7 +254,7 @@ const BillManagement = () => {
               >
                 Tìm kiếm
               </Button>
-              <Button>Export Excel</Button>
+              {/* <Button>Export Excel</Button> */}
             </div>
           </div>
         </div>

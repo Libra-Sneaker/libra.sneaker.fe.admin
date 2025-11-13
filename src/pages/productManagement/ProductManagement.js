@@ -92,9 +92,10 @@ const ProductManagement = () => {
       render: (status, record) =>
         editingProductId === record.id ? (
           <Select
-            value={editingStatus}
+            value={editingStatus !== null ? editingStatus : undefined}
             onChange={(value) => setEditingStatus(value)}
             style={{ width: "100%" }}
+            placeholder="Chọn trạng thái"
           >
             <Select.Option value={1}>Đang bán</Select.Option>
             <Select.Option value={0}>Dừng bán</Select.Option>
@@ -157,7 +158,11 @@ const ProductManagement = () => {
 
     setEditingProductId(record.id);
     setEditingName(record.productName);
-    setEditingStatus(record.status);
+    // Convert status to number to match Select.Option values (1 or 0)
+    const statusNumber = typeof record.status === 'string' 
+      ? parseInt(record.status, 10) 
+      : record.status;
+    setEditingStatus(statusNumber);
   };
 
   const handleSave = async (id) => {

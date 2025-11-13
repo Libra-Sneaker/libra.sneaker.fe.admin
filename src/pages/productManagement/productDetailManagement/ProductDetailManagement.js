@@ -216,25 +216,33 @@ const ProductDetailManagement = () => {
 
   // save list
   const handleSaveListProductDetails = async () => {
-    // Upload files and attach the URLs
+    // Upload any remaining files that haven't been uploaded yet
     const updatedDetails = await Promise.all(
       listProductDetails.map(async (product) => {
-        if (product.file) {
-          const urlImg = await handleUpload(product.file);
-          return { ...product, urlImg }; // Attach the uploaded image URL
+        // If file exists but urlImg hasn't been set, upload it now
+        if (product.file && !product.urlImg) {
+          try {
+            const urlImg = await handleUpload(product.file);
+            return { ...product, urlImg }; // Attach the uploaded image URL
+          } catch (error) {
+            console.error("Failed to upload file for product:", product.productDetailId, error);
+            return product; // Keep original if upload fails
+          }
         }
-        return product;
+        return product; // Already has urlImg or no file to upload
       })
     );
 
     // Prepare the data to send to the API
-    const productDetailsToSave = updatedDetails.map((item) => ({
-      id: item.productDetailId,
-      price: item.price,
-      quantity: item.quantity,
-      status: item.status,
-      urlImg: item.urlImg, // Updated image URL
-    }));
+    const productDetailsToSave = updatedDetails
+      .filter((item) => listSelectRow.includes(item.productDetailId)) // Only save selected items
+      .map((item) => ({
+        id: item.productDetailId,
+        price: item.price,
+        quantity: item.quantity,
+        status: item.status,
+        urlImg: item.urlImg || undefined, // Updated image URL (only if changed)
+      }));
 
     // Check if there is data to update
     if (productDetailsToSave.length === 0) {
@@ -281,31 +289,132 @@ const ProductDetailManagement = () => {
     );
   };
 
-  const handleFileChange = (file, record) => {
+  const handleFileChange = async (file, record) => {
+    console.log("handleFileChange called with:", { file, record: record?.productDetailId });
+    
+    // Upload file immediately when selected
+    // Try multiple ways to get file object (Ant Design Upload can return it in different formats)
+    const fileObj = file.originFileObj || file.file?.originFileObj || file.file || file;
+    
+    console.log("Extracted fileObj:", {
+      hasFileObj: !!fileObj,
+      name: fileObj?.name,
+      size: fileObj?.size,
+      type: fileObj?.type,
+      isFile: fileObj instanceof File
+    });
+    
+    if (!fileObj) {
+      console.error("No file object found");
+      message.error("Không tìm thấy file. Vui lòng thử lại.");
+      return;
+    }
+
+    // Validate file type
+    if (!fileObj.type || !fileObj.type.startsWith('image/')) {
+      message.error("Vui lòng chọn file ảnh");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (fileObj.size > maxSize) {
+      message.error("Kích thước file không được vượt quá 10MB");
+      return;
+    }
+
+    // Show loading state for this specific record
     setListProductDetails((prevList) =>
       prevList.map((item) =>
         item.productDetailId === record.productDetailId
-          ? { ...item, file: file.originFileObj }
+          ? { ...item, file: fileObj, uploading: true }
           : item
       )
     );
+
+    try {
+      const formData = new FormData();
+      formData.append("multipartFile", fileObj);
+
+      console.log("Uploading file...", {
+        name: fileObj.name,
+        size: fileObj.size,
+        type: fileObj.type,
+        productDetailId: record.productDetailId
+      });
+
+      const response = await FileUploadApi.uploadFileImage(formData);
+      
+      console.log("Upload response:", response);
+
+      const urlImg = response?.data;
+
+      if (urlImg && typeof urlImg === 'string' && urlImg.trim().length > 0) {
+        // Update the urlImg immediately after successful upload
+        setListProductDetails((prevList) =>
+          prevList.map((item) =>
+            item.productDetailId === record.productDetailId
+              ? { ...item, urlImg: urlImg, file: undefined, uploading: false }
+              : item
+          )
+        );
+        message.success("Upload ảnh thành công");
+      } else {
+        console.error("Invalid URL response:", urlImg);
+        throw new Error("Không nhận được URL từ server");
+      }
+    } catch (error) {
+      console.error("Upload failed:", {
+        message: error.message,
+        response: error.response,
+        data: error.response?.data,
+        status: error.response?.status
+      });
+      
+      let errorMessage = "Không thể upload ảnh. Vui lòng thử lại.";
+      
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        if (status === 400) {
+          errorMessage = data?.message || "File không hợp lệ";
+        } else if (status === 401) {
+          errorMessage = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+        } else if (status === 413) {
+          errorMessage = "File quá lớn";
+        } else if (status >= 500) {
+          errorMessage = "Lỗi server. Vui lòng thử lại sau.";
+        } else {
+          errorMessage = data?.message || error.message || errorMessage;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      message.error(errorMessage);
+      
+      // Remove uploading state on error
+      setListProductDetails((prevList) =>
+        prevList.map((item) =>
+          item.productDetailId === record.productDetailId
+            ? { ...item, uploading: false }
+            : item
+        )
+      );
+    }
   };
 
   const handleUpload = async (file) => {
     const formData = new FormData();
     formData.append("multipartFile", file);
 
-    // Bắt đầu quá trình upload
-    setLoading(true);
-
     try {
       const response = await FileUploadApi.uploadFileImage(formData);
-      setLoading(false);
-      return response.data; // Return image URL directly from response data
+      return response?.data; // Return image URL directly from response data
     } catch (error) {
-      setLoading(false);
       console.error("Upload failed:", error);
-      throw error; // Rethrow error to handle in handleAddProduct
+      throw error; // Rethrow error to handle in handleSaveListProductDetails
     }
   };
 
@@ -329,29 +438,60 @@ const ProductDetailManagement = () => {
       render: (value, record) =>
         listSelectRow.includes(record.productDetailId) ? (
           <Upload
-            name="avatar"
+            name="file"
             listType="picture-card"
             className="avatar-uploader"
-            action="/upload" // URL upload của bạn
             maxCount={1}
-            onChange={({ file }) => handleFileChange(file, record)}
+            showUploadList={false}
+            accept="image/*"
+            beforeUpload={(file) => {
+              // Validate before upload
+              const isImage = file.type?.startsWith('image/');
+              if (!isImage) {
+                message.error('Vui lòng chọn file ảnh!');
+                return Upload.LIST_IGNORE;
+              }
+              const isLt10M = file.size / 1024 / 1024 < 10;
+              if (!isLt10M) {
+                message.error('Kích thước file không được vượt quá 10MB!');
+                return Upload.LIST_IGNORE;
+              }
+              return false; // Prevent auto upload
+            }}
+            onChange={(info) => {
+              console.log("Upload onChange event:", info);
+              const { file } = info;
+              
+              // Only handle when file is selected (not removed)
+              if (file.status === 'removed') {
+                return;
+              }
+              
+              // Call handleFileChange when file is selected
+              if (file.originFileObj || file) {
+                handleFileChange(file, record);
+              }
+            }}
           >
-            {loading ? ( // Kiểm tra trạng thái loading
-              <div>
-                <Spin /> {/* Biểu tượng loading */}
+            {record.uploading ? (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
+                <Spin />
               </div>
             ) : value ? (
               <img
                 src={value}
                 alt="product-img"
-                style={{ width: "100%", height: "100%" }}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
             ) : (
-              <div>Upload</div>
+              <div>
+                <div style={{ fontSize: 24, color: "#999", marginBottom: 8 }}>+</div>
+                <div style={{ color: "#999" }}>Upload</div>
+              </div>
             )}
           </Upload>
         ) : (
-          <img src={value} width={150} />
+          <img src={value} alt="product" style={{ width: 150, height: 150, objectFit: "cover", borderRadius: 4 }} />
         ),
     },
     {

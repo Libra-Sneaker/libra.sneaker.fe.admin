@@ -7,6 +7,7 @@ import { AppConfig } from "./AppConfig";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Suspense } from "react";
 import routes from "./router/router";
+import ScrollToTop from "./component/ScrollToTop/ScrollToTop";
 
 function App() {
   const isLoading = useAppSelector(GetLoading);
@@ -16,6 +17,7 @@ function App() {
       <ToastContainer />
       {isLoading && <LoadingHamster />}
       <BrowserRouter basename={AppConfig.routerBase}>
+        <ScrollToTop />
         <Suspense>
           <Routes>
             {routes.map((route, index) => (

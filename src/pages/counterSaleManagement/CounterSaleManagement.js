@@ -97,7 +97,7 @@ const CounterSaleManagement = () => {
                     Đơn hàng {index + 1} - {bill.code}{" "}
                   </h2>
                   <div>
-                    <Button icon={<QrcodeOutlined />}>Quét QR sản phẩm</Button>
+                    {/* <Button icon={<QrcodeOutlined />}>Quét QR sản phẩm</Button> */}
                     <Button
                       icon={<PlusOutlined />}
                       className={styles.ButtonAdd}
@@ -165,7 +165,7 @@ const CounterSaleManagement = () => {
             <div className={styles.ContentContainer}>
               <h2>Sản phẩm</h2>
               <div>
-                <Button icon={<QrcodeOutlined />}>Quét QR sản phẩm</Button>
+                {/* <Button icon={<QrcodeOutlined />}>Quét QR sản phẩm</Button> */}
                 <Button
                   icon={<PlusOutlined />}
                   className={styles.ButtonAdd}
@@ -392,7 +392,7 @@ const CounterSaleManagement = () => {
     if (billId) {
       getBillDetails(); // Gọi API khi `billId` thay đổi
     }
-    handleCompleteBill();
+    // Không gọi handleCompleteBill() ở đây vì nó chỉ nên được gọi khi user click button "Tạo hóa đơn"
   }, [billId]); // Gọi lại khi `billId` thay đổi
 
   const handleDeleteBillDetails = (product) => {

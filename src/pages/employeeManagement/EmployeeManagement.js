@@ -75,10 +75,32 @@ const EmployeeManagement = () => {
     setIsModalOpen(true); // Mở modal
   };
 
-  const handleModalClose = (refresh = false) => {
+  const handleModalClose = async (refresh = false) => {
     setIsModalOpen(false);
     if (refresh) {
-      fetchData(currentPage, pageSize); // Gọi lại API để load dữ liệu mới
+      // Fetch lại data
+      const params = {
+        page: currentPage - 1,
+        size: pageSize,
+      };
+      try {
+        const response = await EmployeeManagementApi.searchByData(params);
+        setListEmployees(response.data.content);
+        setTotalItems(response.data.totalElements);
+        
+        // Update selectedEmployee với data mới từ response nếu có
+        if (selectedEmployee) {
+          const updatedEmployee = response.data.content.find(
+            (emp) => emp.employeeCode === selectedEmployee.employeeCode
+          );
+          if (updatedEmployee) {
+            setSelectedEmployee(updatedEmployee);
+            console.log("Updated selectedEmployee with new data:", updatedEmployee);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      }
     }
   };
 

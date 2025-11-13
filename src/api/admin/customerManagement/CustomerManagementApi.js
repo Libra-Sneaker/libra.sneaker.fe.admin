@@ -35,10 +35,11 @@ export class CustomerManagementApi {
     });
   };
 
-  static getLoyalCustomer = () => {
+  static getLoyalCustomer = (params = {}) => {
     return request({
       method: "GET",
       url: `${baseUrl}/statistics`,
+      params: params,
     });
   };
 }

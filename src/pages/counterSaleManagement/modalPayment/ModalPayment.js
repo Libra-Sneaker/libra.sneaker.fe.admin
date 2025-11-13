@@ -32,24 +32,39 @@ const ModalPayment = ({
   const [requiredTransferAmount, setRequiredTransferAmount] = useState(0); // Số tiền cần chuyển khoản
   const [loading, setLoading] = useState(false); // State để quản lý trạng thái loading
   const [transactionDetail, setTransactionDetail] = useState([]); // State để lưu chi tiết giao dịch
+  const [isPaymentCompleted, setIsPaymentCompleted] = useState(false); // State để track xem đã thanh toán thành công chưa
 
   // Cập nhật số tiền cần chuyển khoản khi bật/tắt Switch
   useEffect(() => {
+    // Chỉ tính toán khi modal đang mở và có giá trị hợp lệ
+    if (!isModalOpenPayment) {
+      return;
+    }
+    
     if (isTransferEnabled) {
       const totalPrice = calculateTotalPrice();
       const cashAmount = parseFloat(cashMethod) || 0;
-      const transferAmount = totalPrice - cashAmount;
-      if (transferAmount < 0) {
-        message.error("Số tiền mặt vượt quá tổng tiền!");
-        setRequiredTransferAmount(0);
-        setIsTransferEnabled(false);
+      
+      // Chỉ hiển thị lỗi nếu cashAmount > 0 và transferAmount < 0
+      // Không hiển thị lỗi khi cashAmount = 0 (chưa nhập)
+      if (cashAmount > 0) {
+        const transferAmount = totalPrice - cashAmount;
+        if (transferAmount < 0) {
+          message.error("Số tiền mặt vượt quá tổng tiền!");
+          setRequiredTransferAmount(0);
+          setIsTransferEnabled(false);
+          return;
+        } else {
+          setRequiredTransferAmount(transferAmount);
+        }
       } else {
-        setRequiredTransferAmount(transferAmount);
+        // Nếu chưa nhập tiền mặt, set requiredTransferAmount = totalPrice
+        setRequiredTransferAmount(totalPrice);
       }
     } else {
       setRequiredTransferAmount(0);
     }
-  }, [isTransferEnabled, cashMethod, calculateTotalPrice]);
+  }, [isTransferEnabled, cashMethod, calculateTotalPrice, isModalOpenPayment]);
 
   const handleOk = async () => {
     // Kiểm tra và lấy các giá trị
@@ -72,8 +87,15 @@ const ModalPayment = ({
       return;
     }
 
-    // Kiểm tra nếu số tiền mặt lớn hơn tổng hóa đơn
-    if (cashAmount > total) {
+    // Kiểm tra nếu số tiền mặt lớn hơn tổng hóa đơn (chỉ khi không dùng chuyển khoản)
+    // Nếu dùng cả tiền mặt và chuyển khoản, cashAmount có thể nhỏ hơn total
+    if (!isTransferEnabled && cashAmount > total) {
+      message.error("Số tiền mặt không thể lớn hơn tổng hóa đơn.");
+      return;
+    }
+
+    // Kiểm tra nếu số tiền mặt lớn hơn tổng hóa đơn khi dùng kết hợp
+    if (isTransferEnabled && cashAmount > total) {
       message.error("Số tiền mặt không thể lớn hơn tổng hóa đơn.");
       return;
     }
@@ -82,6 +104,14 @@ const ModalPayment = ({
     if (cashAmount + transferAmount < total) {
       message.error(
         "Tổng số tiền thanh toán (tiền mặt + chuyển khoản) không đủ."
+      );
+      return;
+    }
+    
+    // Kiểm tra nếu tổng tiền thanh toán vượt quá tổng hóa đơn
+    if (cashAmount + transferAmount > total) {
+      message.error(
+        "Tổng số tiền thanh toán không được vượt quá tổng hóa đơn."
       );
       return;
     }
@@ -118,6 +148,16 @@ const ModalPayment = ({
       console.log("API response:", response);
       setTransactionDetail(response.data.content);
       message.success("Thanh toán thành công!");
+      
+      // Đánh dấu đã thanh toán thành công để disable nút xác nhận
+      setIsPaymentCompleted(true);
+      
+      // Reset form sau khi thanh toán thành công để tránh validation error
+      setCashMethod("");
+      setTransferMethod("");
+      setIsTransferEnabled(false);
+      setRequiredTransferAmount(0);
+      setTransactionCode("");
     } catch (error) {
       console.error("Error during payment:", error);
       message.error("Lỗi khi thanh toán.");
@@ -147,6 +187,21 @@ const ModalPayment = ({
       const response = await TransactionManagementApi.getTransaction(billId); // API lấy chi tiết giao dịch
       console.log("API response:", response);
       setTransactionDetail(response.data);
+      
+      // Kiểm tra xem hóa đơn đã được thanh toán đủ chưa
+      if (response.data && Array.isArray(response.data)) {
+        const totalPaid = response.data.reduce((sum, transaction) => {
+          // Chỉ tính các giao dịch đã thanh toán (status = 1)
+          return sum + (transaction.status === 1 ? parseFloat(transaction.money) || 0 : 0);
+        }, 0);
+        
+        const totalPrice = parseFloat(calculateTotalPrice());
+        
+        // Nếu đã thanh toán đủ hoặc vượt quá tổng tiền, disable nút
+        if (totalPaid >= totalPrice && totalPrice > 0) {
+          setIsPaymentCompleted(true);
+        }
+      }
     } catch (error) {
       console.error("Error during get transaction detail:", error);
       message.error("Lỗi khi lấy chi tiết giao dịch.");
@@ -154,8 +209,24 @@ const ModalPayment = ({
   };
 
   useEffect(() => {
-    getTransactionDetail();
-  }, [billId]);
+    if (isModalOpenPayment && billId) {
+      // Reset trạng thái thanh toán khi mở modal mới (sẽ được cập nhật lại sau khi getTransactionDetail)
+      setIsPaymentCompleted(false);
+      getTransactionDetail();
+    }
+  }, [billId, isModalOpenPayment]);
+  
+  // Reset form khi modal đóng
+  useEffect(() => {
+    if (!isModalOpenPayment) {
+      setIsPaymentCompleted(false);
+      setCashMethod("");
+      setTransferMethod("");
+      setIsTransferEnabled(false);
+      setRequiredTransferAmount(0);
+      setTransactionCode("");
+    }
+  }, [isModalOpenPayment]);
 
   // thông tin cột đã thanh toántoán
   const columns = [
@@ -282,9 +353,15 @@ const ModalPayment = ({
           onConfirm={handleOk}
           okText="Vâng"
           cancelText="Hủy"
+          disabled={isPaymentCompleted}
         >
-          <Button key="ok" type="primary" loading={confirmLoading}>
-            Xác nhận
+          <Button 
+            key="ok" 
+            type="primary" 
+            loading={confirmLoading}
+            disabled={isPaymentCompleted}
+          >
+            {isPaymentCompleted ? "Đã thanh toán" : "Xác nhận"}
           </Button>
         </Popconfirm>,
       ]}

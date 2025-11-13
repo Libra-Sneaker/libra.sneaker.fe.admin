@@ -1,0 +1,157 @@
+.layout {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding-top: 80px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.pageHeader {
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  margin-bottom: 8px !important;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.filterBar {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.filterInput {
+  min-width: 220px;
+}
+
+.filterSelect {
+  min-width: 200px;
+}
+
+.refreshButton {
+  border-radius: 6px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.emptyCard {
+  text-align: center;
+  padding: 60px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.orderCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid #e8e8e8;
+}
+
+.orderCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.orderCode {
+  font-size: 18px;
+  color: #1a1a1a;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.orderDate {
+  font-size: 14px;
+}
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.orderAmount {
+  font-size: 20px;
+  color: #1890ff;
+}
+
+.orderActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.productList {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.productCard {
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+}
+
+.productCard:hover {
+  border-color: #1890ff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 16px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .orderHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .orderCode {
+    font-size: 16px;
+  }
+
+  .orderAmount {
+    font-size: 18px;
+  }
+}
+
