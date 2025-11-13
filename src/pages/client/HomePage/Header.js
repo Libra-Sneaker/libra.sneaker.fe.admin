@@ -68,6 +68,7 @@ const Header = () => {
     localStorage.removeItem("name");
     setIsLoggedIn(false);
     setUserInfo(null);
+    navigate("/");
   };
 
   const refreshCartCount = async () => {

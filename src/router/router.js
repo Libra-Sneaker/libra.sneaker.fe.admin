@@ -35,6 +35,7 @@ import CreateCouponManagement from "../pages/promotionManagement/CreateCoupon/Cr
 import CouponDetailManagement from "../pages/promotionManagement/CouponDetail/CouponDetailManagement";
 import ProfilePage from "../pages/client/ProfilePage/ProfilePage";
 import MyOrderPage from "../pages/client/MyOrder/MyOrder";
+import DetailOrder from "../pages/client/MyOrder/DetailOrder";
 
 const generalRoutes = [
   { path: "*", element: <NotFound /> },
@@ -55,6 +56,7 @@ const publicRoutes = [
   { path: "/contact", element: <ContactPage /> }, // Trang liên hệ
   { path: "/profile", element: <ProfilePage /> }, // Trang cá nhân
   { path: "/my-orders", element: <MyOrderPage /> }, // Trang đơn hàng của tôi
+  { path: "/my-orders/detail/:id", element: <DetailOrder /> }, // Trang đơn hàng của tôi
   // { path: "/login", element: <Login /> }, // Trang đăng nhập (cần tạo component Login)
 ];
 

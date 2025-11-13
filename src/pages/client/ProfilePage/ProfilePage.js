@@ -34,6 +34,7 @@ import dayjs from "dayjs";
 import Header from "../HomePage/Header";
 import Footer from "../HomePage/Footer";
 import { UserApi } from "../../../api/client/user/UserApi";
+import { ProfileApi } from "../../../api/client/profile/ProfileApi";
 import { isTokenExpired } from "../../../util/common/utils";
 import styles from "./ProfilePage.module.css";
 
@@ -53,6 +54,8 @@ const ProfilePage = () => {
   const [passwordForm] = Form.useForm();
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [otpRequested, setOtpRequested] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -64,6 +67,7 @@ const ProfilePage = () => {
     }
 
     fetchUserInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   const fetchUserInfo = async () => {
@@ -71,31 +75,31 @@ const ProfilePage = () => {
     try {
       const response = await UserApi.getInfo();
       const data = response?.data || response;
-      
+
       if (!data) {
         message.warning("Không tìm thấy thông tin người dùng");
         return;
       }
 
       console.log("User info fetched:", data); // Debug log
-      
+
       setUserInfo(data);
       setAvatarUrl(data?.avatar || "");
-      
+
       // Parse dateOfBirth - handle both string and Date object
       let parsedDateOfBirth = null;
       if (data?.dateOfBirth) {
-        if (typeof data.dateOfBirth === 'string') {
+        if (typeof data.dateOfBirth === "string") {
           // Handle ISO string format
           parsedDateOfBirth = dayjs(data.dateOfBirth);
         } else if (data.dateOfBirth instanceof Date) {
           parsedDateOfBirth = dayjs(data.dateOfBirth);
-        } else if (typeof data.dateOfBirth === 'number') {
+        } else if (typeof data.dateOfBirth === "number") {
           // Handle timestamp
           parsedDateOfBirth = dayjs(data.dateOfBirth);
         }
       }
-      
+
       // Set form values with all user information
       const formValues = {
         name: data?.name || "",
@@ -103,9 +107,10 @@ const ProfilePage = () => {
         phoneNumber: data?.phoneNumber || "",
         address: data?.address || "",
         dateOfBirth: parsedDateOfBirth,
-        sex: data?.sex !== undefined && data?.sex !== null ? data.sex : undefined,
+        sex:
+          data?.sex !== undefined && data?.sex !== null ? data.sex : undefined,
       };
-      
+
       console.log("Setting form values:", formValues); // Debug log
       form.setFieldsValue(formValues);
     } catch (error) {
@@ -152,14 +157,17 @@ const ProfilePage = () => {
         phoneNumber: values.phoneNumber,
         address: values.address || null,
         sex: values.sex !== undefined ? values.sex : null,
-        dateOfBirth: values.dateOfBirth ? values.dateOfBirth.toISOString() : null,
+        dateOfBirth: values.dateOfBirth
+          ? values.dateOfBirth.toISOString()
+          : null,
         avatar: avatarUrl || null,
       };
-      
+
       // Try to update
       try {
         const response = await UserApi.updateInfo(updateData);
-        const messageText = response?.data || response || "Cập nhật thông tin thành công";
+        const messageText =
+          response?.data || response || "Cập nhật thông tin thành công";
         message.success(messageText);
         setEditing(false);
         await fetchUserInfo(); // Refresh data
@@ -167,9 +175,15 @@ const ProfilePage = () => {
         // Handle different error cases
         const status = error.response?.status;
         const errorMessage = error.response?.data?.message || error.message;
-        
-        if (status === 404 || status === 405 || errorMessage?.includes("No static resource")) {
-          message.warning("Chức năng cập nhật thông tin đang được phát triển. Vui lòng thử lại sau.");
+
+        if (
+          status === 404 ||
+          status === 405 ||
+          errorMessage?.includes("No static resource")
+        ) {
+          message.warning(
+            "Chức năng cập nhật thông tin đang được phát triển. Vui lòng thử lại sau."
+          );
           setEditing(false); // Still exit edit mode
         } else if (status === 400) {
           message.error(errorMessage || "Dữ liệu không hợp lệ");
@@ -194,12 +208,13 @@ const ProfilePage = () => {
 
   const handleFileChange = async (file) => {
     console.log("handleFileChange called with:", file);
-    
+
     // Get file object - same pattern as ProductDetailManagement
-    const fileObj = file.originFileObj || file.file?.originFileObj || file.file || file;
-    
+    const fileObj =
+      file.originFileObj || file.file?.originFileObj || file.file || file;
+
     console.log("Extracted fileObj:", fileObj);
-    
+
     if (!fileObj) {
       console.error("No file object found");
       message.error("Không tìm thấy file. Vui lòng thử lại.");
@@ -207,7 +222,7 @@ const ProfilePage = () => {
     }
 
     // Validate file type
-    if (!fileObj.type || !fileObj.type.startsWith('image/')) {
+    if (!fileObj.type || !fileObj.type.startsWith("image/")) {
       message.error("Vui lòng chọn file ảnh");
       return;
     }
@@ -225,22 +240,24 @@ const ProfilePage = () => {
     try {
       const formData = new FormData();
       formData.append("multipartFile", fileObj); // Use "multipartFile" to match ProductDetailManagement pattern
-      
+
       console.log("Uploading file...", {
         name: fileObj.name,
         size: fileObj.size,
-        type: fileObj.type
+        type: fileObj.type,
       });
-      
-      const { FileUploadApi } = await import("../../../api/admin/fileUpload/FileUploadApi");
+
+      const { FileUploadApi } = await import(
+        "../../../api/admin/fileUpload/FileUploadApi"
+      );
       const response = await FileUploadApi.uploadFileImage(formData);
-      
+
       console.log("Upload response:", response);
-      
+
       // Backend returns String (URL) directly in response body
       const url = response?.data;
-      
-      if (url && typeof url === 'string' && url.trim().length > 0) {
+
+      if (url && typeof url === "string" && url.trim().length > 0) {
         setAvatarUrl(url);
         message.success("Upload ảnh đại diện thành công");
         // Avatar URL will be saved when user clicks "Lưu thay đổi"
@@ -252,15 +269,15 @@ const ProfilePage = () => {
       console.error("Upload error details:", {
         message: error.message,
         response: error.response,
-        data: error.response?.data
+        data: error.response?.data,
       });
-      
+
       let errorMessage = "Không thể upload ảnh. Vui lòng thử lại.";
-      
+
       if (error.response) {
         const status = error.response.status;
         const data = error.response.data;
-        
+
         if (status === 400) {
           errorMessage = data?.message || "File không hợp lệ";
         } else if (status === 401) {
@@ -277,7 +294,7 @@ const ProfilePage = () => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       message.error(errorMessage);
     } finally {
       setUploadingAvatar(false);
@@ -293,14 +310,14 @@ const ProfilePage = () => {
     accept: "image/*",
     beforeUpload: (file) => {
       // Validate before upload
-      const isImage = file.type?.startsWith('image/');
+      const isImage = file.type?.startsWith("image/");
       if (!isImage) {
-        message.error('Vui lòng chọn file ảnh!');
+        message.error("Vui lòng chọn file ảnh!");
         return Upload.LIST_IGNORE;
       }
       const isLt5M = file.size / 1024 / 1024 < 5;
       if (!isLt5M) {
-        message.error('Kích thước file không được vượt quá 5MB!');
+        message.error("Kích thước file không được vượt quá 5MB!");
         return Upload.LIST_IGNORE;
       }
       return false; // Prevent auto upload - same as ProductDetailManagement
@@ -308,12 +325,12 @@ const ProfilePage = () => {
     onChange: (info) => {
       console.log("Upload onChange event:", info);
       const { file } = info;
-      
+
       // Only handle when file status changes
-      if (file.status === 'removed') {
+      if (file.status === "removed") {
         return;
       }
-      
+
       // Call handleFileChange when file is selected
       if (file.originFileObj || file) {
         handleFileChange(file);
@@ -321,44 +338,73 @@ const ProfilePage = () => {
     },
   };
 
-  const handleChangePassword = async (values) => {
-    setChangingPassword(true);
-    try {
-      const passwordData = {
-        oldPassword: values.oldPassword,
-        newPassword: values.newPassword,
-      };
-
-      try {
-        await UserApi.changePassword(passwordData);
-        message.success("Đổi mật khẩu thành công");
-        setPasswordModalVisible(false);
-        passwordForm.resetFields();
-      } catch (error) {
-        if (error.response?.status === 404) {
-          message.info("Chức năng đổi mật khẩu đang được phát triển");
-        } else if (error.response?.status === 400) {
-          message.error(error.response?.data?.message || "Mật khẩu cũ không đúng");
-        } else {
-          throw error;
-        }
-      }
-    } catch (error) {
-      console.error("Error changing password:", error);
-      message.error("Không thể đổi mật khẩu. Vui lòng thử lại.");
-    } finally {
-      setChangingPassword(false);
-    }
-  };
-
   const openPasswordModal = () => {
     setPasswordModalVisible(true);
     passwordForm.resetFields();
+    setOtpRequested(false); // Reset OTP state when opening modal
   };
 
   const closePasswordModal = () => {
     setPasswordModalVisible(false);
     passwordForm.resetFields();
+    setOtpRequested(false); // Reset OTP state when closing modal
+  };
+
+  // Gửi OTP về email
+  const handleRequestOtp = async () => {
+    if (!userInfo?.id) {
+      message.error("Không tìm thấy thông tin tài khoản");
+      return;
+    }
+    setOtpLoading(true);
+    try {
+      await ProfileApi.requestChangePasswordOtp(userInfo.id);
+      message.success("Đã gửi mã OTP về email của bạn");
+      setOtpRequested(true);
+      // Trigger validate lại trường OTP nếu đã nhập
+      setTimeout(() => {
+        passwordForm.validateFields(["otp"]);
+      }, 0);
+    } catch (error) {
+      message.error(
+        error?.response?.data || "Không thể gửi OTP. Vui lòng thử lại."
+      );
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // Đổi mật khẩu với OTP
+  const handleChangePassword = async (values) => {
+    setChangingPassword(true);
+    try {
+      if (!userInfo?.id) {
+        message.error("Không tìm thấy thông tin tài khoản");
+        return;
+      }
+      if (!otpRequested) {
+        message.error("Vui lòng nhận mã OTP trước khi đổi mật khẩu");
+        return;
+      }
+      const passwordData = {
+        customerId: userInfo.id,
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+        otp: values.otp,
+      };
+
+      await ProfileApi.changePassword(passwordData);
+      message.success("Đổi mật khẩu thành công");
+      setPasswordModalVisible(false);
+      passwordForm.resetFields();
+      setOtpRequested(false);
+    } catch (error) {
+      message.error(
+        error?.response?.data || "Không thể đổi mật khẩu. Vui lòng thử lại."
+      );
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   if (loading) {
@@ -384,19 +430,36 @@ const ProfilePage = () => {
                 {editing ? (
                   <Upload {...uploadProps}>
                     {uploadingAvatar ? (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", width: "100%" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "100%",
+                          width: "100%",
+                        }}
+                      >
                         <Spin />
                       </div>
                     ) : avatarUrl ? (
                       <img
                         src={avatarUrl}
                         alt="avatar"
-                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          borderRadius: "50%",
+                        }}
                       />
                     ) : (
                       <div>
-                        <CameraOutlined style={{ fontSize: 24, color: "#999" }} />
-                        <div style={{ marginTop: 8, color: "#999" }}>Đổi ảnh</div>
+                        <CameraOutlined
+                          style={{ fontSize: 24, color: "#999" }}
+                        />
+                        <div style={{ marginTop: 8, color: "#999" }}>
+                          Đổi ảnh
+                        </div>
                       </div>
                     )}
                   </Upload>
@@ -411,7 +474,9 @@ const ProfilePage = () => {
               </div>
               <div className={styles.userInfoHeader}>
                 <Title level={2} className={styles.userName}>
-                  {userInfo?.name || localStorage.getItem("name") || "Người dùng"}
+                  {userInfo?.name ||
+                    localStorage.getItem("name") ||
+                    "Người dùng"}
                 </Title>
                 <Text className={styles.userCode}>
                   Mã: {userInfo?.code || "N/A"}
@@ -452,7 +517,10 @@ const ProfilePage = () => {
                     name="name"
                     rules={[
                       { required: true, message: "Vui lòng nhập họ và tên" },
-                      { max: 100, message: "Họ và tên không được vượt quá 100 ký tự" },
+                      {
+                        max: 100,
+                        message: "Họ và tên không được vượt quá 100 ký tự",
+                      },
                     ]}
                   >
                     <Input
@@ -495,7 +563,10 @@ const ProfilePage = () => {
                     }
                     name="phoneNumber"
                     rules={[
-                      { required: true, message: "Vui lòng nhập số điện thoại" },
+                      {
+                        required: true,
+                        message: "Vui lòng nhập số điện thoại",
+                      },
                       {
                         pattern: /^[0-9]{10,11}$/,
                         message: "Số điện thoại không hợp lệ",
@@ -565,7 +636,10 @@ const ProfilePage = () => {
                     }
                     name="address"
                     rules={[
-                      { max: 500, message: "Địa chỉ không được vượt quá 500 ký tự" },
+                      {
+                        max: 500,
+                        message: "Địa chỉ không được vượt quá 500 ký tự",
+                      },
                     ]}
                   >
                     <TextArea
@@ -582,10 +656,7 @@ const ProfilePage = () => {
               {editing && (
                 <div className={styles.actionButtons}>
                   <Space>
-                    <Button
-                      onClick={handleCancel}
-                      size="large"
-                    >
+                    <Button onClick={handleCancel} size="large">
                       Hủy
                     </Button>
                     <Button
@@ -614,7 +685,8 @@ const ProfilePage = () => {
               </Space>
             </div>
             <Text className={styles.passwordCardDescription}>
-              Để bảo mật tài khoản, vui lòng sử dụng mật khẩu mạnh và không chia sẻ với người khác.
+              Để bảo mật tài khoản, vui lòng sử dụng mật khẩu mạnh và không chia
+              sẻ với người khác.
             </Text>
             <Button
               type="primary"
@@ -664,6 +736,29 @@ const ProfilePage = () => {
           </Form.Item>
 
           <Form.Item
+            label="Mã OTP"
+            name="otp"
+            rules={[{ required: true, message: "Vui lòng nhập mã OTP" }]}
+          >
+            <Input
+              placeholder="Nhập mã OTP gửi về email"
+              size="large"
+              maxLength={6}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+          <div style={{ marginBottom: 24 }}>
+            <Button
+              type="primary"
+              onClick={handleRequestOtp}
+              loading={otpLoading}
+              disabled={otpRequested}
+            >
+              {otpRequested ? "Đã gửi OTP" : "Nhận mã OTP"}
+            </Button>
+          </div>
+
+          <Form.Item
             label="Mật khẩu mới"
             name="newPassword"
             rules={[
@@ -690,21 +785,25 @@ const ProfilePage = () => {
             dependencies={["newPassword"]}
             rules={[
               { required: true, message: "Vui lòng xác nhận mật khẩu mới" },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("newPassword") === value) {
+              {
+                validator: (_, value) => {
+                  // Use passwordForm to get the value of newPassword
+                  if (
+                    !value ||
+                    passwordForm.getFieldValue("newPassword") === value
+                  ) {
                     return Promise.resolve();
                   }
                   return Promise.reject(
                     new Error("Mật khẩu xác nhận không khớp")
                   );
                 },
-              }),
+              },
             ]}
             hasFeedback
           >
             <Input.Password
-              placeholder="Nhập lại mật khẩu mới"
+              placeholder="Xác nhận mật khẩu mới"
               size="large"
               prefix={<LockOutlined />}
             />
@@ -712,7 +811,10 @@ const ProfilePage = () => {
 
           <div className={styles.passwordModalActions}>
             <Space>
-              <Button onClick={closePasswordModal} size="large">
+              <Button
+                onClick={() => setPasswordModalVisible(false)}
+                size="large"
+              >
                 Hủy
               </Button>
               <Button
