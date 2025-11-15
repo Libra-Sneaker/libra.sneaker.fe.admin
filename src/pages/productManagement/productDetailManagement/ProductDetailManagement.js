@@ -208,7 +208,22 @@ const ProductDetailManagement = () => {
     setListProductDetails((prev) =>
       prev.map((item) =>
         item.productDetailId === record.productDetailId
-          ? { ...item, [field]: value } // Cập nhật giá trị trường
+          ? (() => {
+              const updatedItem = { ...item, [field]: value };
+
+              if (field === "quantity") {
+                const numericValue =
+                  value === "" || value === null || value === undefined
+                    ? 0
+                    : Number(value);
+                updatedItem.quantity = isNaN(numericValue) ? 0 : numericValue;
+                if (updatedItem.quantity <= 0) {
+                  updatedItem.status = 0;
+                }
+              }
+
+              return updatedItem;
+            })()
           : item
       )
     );
@@ -219,30 +234,46 @@ const ProductDetailManagement = () => {
     // Upload any remaining files that haven't been uploaded yet
     const updatedDetails = await Promise.all(
       listProductDetails.map(async (product) => {
+        const normalizedStatus =
+          product.quantity === undefined || product.quantity === null
+            ? product.status
+            : product.quantity <= 0
+            ? 0
+            : product.status;
+
         // If file exists but urlImg hasn't been set, upload it now
         if (product.file && !product.urlImg) {
           try {
             const urlImg = await handleUpload(product.file);
-            return { ...product, urlImg }; // Attach the uploaded image URL
+            return { ...product, urlImg, status: normalizedStatus }; // Attach the uploaded image URL
           } catch (error) {
             console.error("Failed to upload file for product:", product.productDetailId, error);
-            return product; // Keep original if upload fails
+            return { ...product, status: normalizedStatus }; // Keep original if upload fails
           }
         }
-        return product; // Already has urlImg or no file to upload
+        return { ...product, status: normalizedStatus }; // Already has urlImg or no file to upload
       })
     );
 
     // Prepare the data to send to the API
     const productDetailsToSave = updatedDetails
       .filter((item) => listSelectRow.includes(item.productDetailId)) // Only save selected items
-      .map((item) => ({
-        id: item.productDetailId,
-        price: item.price,
-        quantity: item.quantity,
-        status: item.status,
-        urlImg: item.urlImg || undefined, // Updated image URL (only if changed)
-      }));
+      .map((item) => {
+        const statusValue =
+          item.quantity === undefined || item.quantity === null
+            ? item.status
+            : item.quantity <= 0
+            ? 0
+            : item.status;
+
+        return {
+          id: item.productDetailId,
+          price: item.price,
+          quantity: item.quantity,
+          status: statusValue,
+          urlImg: item.urlImg || undefined, // Updated image URL (only if changed)
+        };
+      });
 
     // Check if there is data to update
     if (productDetailsToSave.length === 0) {
@@ -283,7 +314,22 @@ const ProductDetailManagement = () => {
     setListProductDetails((prev) =>
       prev.map((item) =>
         item.productDetailId === record.productDetailId && item[field] !== value
-          ? { ...item, [field]: value } // Update field value
+          ? (() => {
+              const updatedItem = { ...item, [field]: value };
+
+              if (field === "quantity") {
+                const numericValue =
+                  value === "" || value === null || value === undefined
+                    ? 0
+                    : Number(value);
+                updatedItem.quantity = isNaN(numericValue) ? 0 : numericValue;
+                if (updatedItem.quantity <= 0) {
+                  updatedItem.status = 0;
+                }
+              }
+
+              return updatedItem;
+            })() // Update field value
           : item
       )
     );
