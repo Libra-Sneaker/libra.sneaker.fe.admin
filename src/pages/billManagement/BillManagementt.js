@@ -30,7 +30,8 @@ const BillManagement = () => {
     size: 10,
     searchTerm: "",
   });
-  const [status, setStatus] = useState(null);
+  const [status, setStatus] = useState(""); // default chọn "Tất cả"
+  const [billType, setBillType] = useState(""); // default chọn "Tất cả"
 
   const { RangePicker } = DatePicker;
   const [datePaymentStart, setDatePaymentStart] = useState(null);
@@ -74,19 +75,46 @@ const BillManagement = () => {
       },
     },
     {
-      title: "Ngày thanh toán",
-      dataIndex: "datePayment",
-      key: "datePayment",
+      title: "Ngày tạo đơn",
+      dataIndex: "createdDate",
+      key: "createdDate",
       render: (text) => moment(text).format("DD/MM/YYYY"),
+    },
+    {
+      title: "Phân loại",
+      key: "type",
+      dataIndex: "type",
+      render: (text) =>
+        text === "OFFLINE" ? (
+          <Tag color="blue" className={styles.largeTag}>
+            Tại quầy
+          </Tag>
+        ) : text === "ONLINE" ? (
+          <Tag color="yellow" className={styles.largeTag}>
+            Online
+          </Tag>
+        ) : null,
     },
     {
       title: "Trạng thái",
       key: "status",
       dataIndex: "status",
       render: (text) =>
-        text === 1 ? (
+        text === 0 ? (
+          <Tag color="red" className={styles.largeTag}>
+            Chờ xác nhận
+          </Tag>
+        ) : text === 1 ? (
           <Tag color="green" className={styles.largeTag}>
-            Đã hoàn thành
+            hoàn thành
+          </Tag>
+        ) : text === 2 ? (
+          <Tag color="green" className={styles.largeTag}>
+            Đang giao hàng
+          </Tag>
+        ) : text === 3 ? (
+          <Tag color="green" className={styles.largeTag}>
+            Đã giao
           </Tag>
         ) : null,
     },
@@ -105,18 +133,22 @@ const BillManagement = () => {
     },
   ];
 
-  const fetchData = async (page = 1, size = 10) => {
-    console.log(`Fetching page: ${page}, size: ${size}`);
-
+  const fetchData = async (page = 1, size = 10, extraParams = {}) => {
     setLoading(true);
     const params = {
       page: page - 1,
       size: size,
+      searchTerm: searchBill.searchTerm,
+      status:
+        status !== "" && status !== null ? parseInt(status, 10) : undefined,
+      datePaymentStart: datePaymentStart,
+      datePaymentEnd: datePaymentEnd,
+      type: billType || undefined,
+      ...extraParams,
     };
 
     try {
       const response = await BillManagementApi.search(params);
-      console.log("Response data:", response.data);
       setListBill(response.data.content);
       setTotalItems(response.data.totalElements);
     } catch (error) {
@@ -128,6 +160,7 @@ const BillManagement = () => {
 
   useEffect(() => {
     fetchData(currentPage, pageSize);
+    // eslint-disable-next-line
   }, [currentPage, pageSize]);
 
   // Lấy giá trị input
@@ -152,37 +185,8 @@ const BillManagement = () => {
 
   // btn search
   const handleSearch = async () => {
-    console.log(searchBill);
-    // Ép kiểu deleteFlag sang số, nếu deleteFlag là rỗng hoặc null thì để undefined
-    const parsedStatus =
-      status !== "" && status !== null ? parseInt(status, 10) : undefined;
-    console.log("status: " + parsedStatus);
-
-    // Giá trị ngày bắt đầu và kết thúc
-
-    console.log("Start date:");
-    console.log(datePaymentStart);
-
-    console.log("End date:");
-    console.log(datePaymentEnd);
-
-    const params = {
-      page: searchBill.page,
-      size: searchBill.size,
-      searchTerm: searchBill.searchTerm,
-      status: parsedStatus,
-      datePaymentStart: datePaymentStart,
-      datePaymentEnd: datePaymentEnd,
-    };
-
-    console.log(params);
-
-    try {
-      const response = await BillManagementApi.search(params);
-      setListBill(response.data.content);
-    } catch (error) {
-      console.error("Error fetching data: ", error);
-    }
+    setCurrentPage(1);
+    fetchData(1, pageSize);
   };
 
   return (
@@ -199,63 +203,62 @@ const BillManagement = () => {
           }}
           className={styles.SearchContainer}
         >
-          {/* top conrainer */}
-          <div className={styles.TopContainer}>
-            <div>
-              <Input
-                style={{
-                  width: "500px",
-                }}
-                placeholder="Tìm kiếm ..."
-                name="searchTerm" // Đặt name cho input
-                value={searchBill.searchTerm}
-                onChange={handleInputChange}
-              ></Input>
-            </div>
-            <div>
-              {/* <Button
-                style={{
-                  marginRight: "20px",
-                }}
-              >
-                Quét mã QR
-              </Button> */}
-              {/* <Button>Tạo hóa đơn</Button> */}
-            </div>
-          </div>
-
-          {/* bottom container */}
-          <div className={styles.BottomContainer}>
-            <div>
-              <RangePicker
-                defaultValue={null} // Không chọn giá trị mặc định
-                format={dateFormat}
-                onChange={handleRangeChange}
-              />
-            </div>
-            <div className={styles.radioContainer}>
-              <span className={styles.statusLabel}>Trạng thái: </span>
-              <Radio.Group
-                onChange={(e) => setStatus(e.target.value)}
-                value={status}
-              >
-                <Radio value="">Tất cả</Radio>
-                <Radio value="0">Đã hủy</Radio>
-                <Radio value="1">Đã hoàn thành</Radio>
-              </Radio.Group>
-            </div>
-            <div>
-              <Button
-                style={{
-                  marginRight: "20px",
-                }}
-                type="primary"
-                onClick={handleSearch}
-              >
-                Tìm kiếm
-              </Button>
-              {/* <Button>Export Excel</Button> */}
-            </div>
+          {/* Filter row: all in one line */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
+              flexWrap: "wrap",
+            }}
+            className={styles.FilterRow}
+          >
+            <Input
+              style={{ width: 260 }}
+              placeholder="Tìm kiếm ..."
+              name="searchTerm"
+              value={searchBill.searchTerm}
+              onChange={handleInputChange}
+            />
+            <RangePicker
+              style={{ minWidth: 220 }}
+              format={dateFormat}
+              onChange={handleRangeChange}
+              placeholder={["Start date", "End date"]}
+            />
+            <span style={{ marginLeft: 8 }}>Loại hóa đơn: </span>
+            <Select
+              style={{ width: 120 }}
+              value={billType}
+              onChange={setBillType}
+              allowClear
+              placeholder="Tất cả"
+            >
+              <Select.Option value="">Tất cả</Select.Option>
+              <Select.Option value="OFFLINE">Tại quầy</Select.Option>
+              <Select.Option value="ONLINE">Online</Select.Option>
+            </Select>
+            <span className={styles.statusLabel} style={{ marginLeft: 8 }}>
+              Trạng thái:
+            </span>
+            <Radio.Group
+              onChange={(e) => setStatus(e.target.value)}
+              value={status}
+              style={{ marginLeft: 4 }}
+            >
+              <Radio value="">Tất cả</Radio>
+              <Radio value="0">Chờ xác nhận</Radio>
+              <Radio value="1">Đã hoàn thành</Radio>
+              <Radio value="2">Đang giao hàng</Radio>
+              <Radio value="3">Đã giao hàng</Radio>
+            </Radio.Group>
+            <Button
+              style={{ marginLeft: 16 }}
+              type="primary"
+              onClick={handleSearch}
+            >
+              Tìm kiếm
+            </Button>
           </div>
         </div>
 
@@ -273,7 +276,20 @@ const BillManagement = () => {
             columns={columns}
             dataSource={listBill}
             rowKey="id"
-            pagination={false}
+            pagination={{
+              current: currentPage,
+              pageSize: pageSize,
+              total: totalItems,
+              showSizeChanger: true,
+              pageSizeOptions: ["5", "10", "20", "50"],
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} của ${total} hóa đơn`,
+              onChange: (page, size) => {
+                setCurrentPage(page);
+                setPageSize(size);
+                fetchData(page, size);
+              },
+            }}
           />
         </div>
       </div>

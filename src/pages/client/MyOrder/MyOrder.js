@@ -108,6 +108,14 @@ const MyOrderPage = () => {
       render: (val) => getStatusTag(val),
     },
     {
+      title: "Trạng thái thanh toán",
+      dataIndex: "isPaid",
+      key: "isPaid",
+      render: (val) => (
+        <>{val ? "Đã thanh toán" : "Thanh toán khi nhận hàng"}</>
+      ),
+    },
+    {
       title: "Hành động",
       key: "action",
       render: (_, record) => (

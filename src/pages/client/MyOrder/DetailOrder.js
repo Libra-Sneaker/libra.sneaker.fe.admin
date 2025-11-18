@@ -33,10 +33,10 @@ const statusMap = {
 };
 
 const statusSteps = [
-  { status: 0, title: "Chờ xử lý", icon: <ClockCircleOutlined /> },
+  { status: 0, title: "Đã đặt hàng thành công", icon: <ClockCircleOutlined /> },
+  { status: 0, title: "Đang chờ vận chuyển", icon: <ClockCircleOutlined /> },
   { status: 2, title: "Đang giao hàng", icon: <TruckOutlined /> },
-  { status: 1, title: "Đã hoàn thành", icon: <CheckCircleOutlined /> },
-  { status: 4, title: "Đã hủy", icon: <CloseCircleOutlined /> },
+  { status: 3, title: "Đã hoàn thành", icon: <CheckCircleOutlined /> },
 ];
 
 const formatDate = (date) => {
@@ -103,7 +103,7 @@ const DetailOrder = () => {
               <div>
                 {orderDetail.bill.createdDate
                   ? dayjs(orderDetail.bill.createdDate).format(
-                      "DD/MM/YYYY HH:mm:ss"
+                      "DD/MM/YYYY HH:mm"
                     )
                   : ""}
               </div>
@@ -122,20 +122,50 @@ const DetailOrder = () => {
     const currentStatus = orderDetail.bill.status;
     // Nếu bị hủy thì chỉ hiển thị đến trạng thái "Đã hủy"
     const steps =
-      currentStatus === 4 ? statusSteps.slice(0, 5) : statusSteps.slice(0, 4);
-    return steps.map((step) => ({
-      title: step.title,
-      icon: step.icon,
-      status: step.status,
-      description:
-        step.status === currentStatus
-          ? orderDetail.bill.datePayment || orderDetail.bill.createdDate
-            ? dayjs(
-                orderDetail.bill.datePayment || orderDetail.bill.createdDate
-              ).format("DD/MM/YYYY HH:mm:ss")
-            : ""
-          : "",
-    }));
+      currentStatus === 4 ? statusSteps.slice(0, 4) : statusSteps.slice(0, 4);
+
+    return steps.map((step, idx) => {
+      let stepStatus = "wait";
+      if (step.status < currentStatus) stepStatus = "finish";
+      else if (step.status === currentStatus) stepStatus = "process";
+
+      // Icon sáng cho finish/process, mờ cho wait
+      let icon = step.icon;
+      if (stepStatus === "wait") {
+        // Clone icon với màu xám
+        icon = React.cloneElement(step.icon, { style: { color: "#bfbfbf" } });
+      } else if (stepStatus === "finish" || stepStatus === "process") {
+        icon = React.cloneElement(step.icon, { style: { color: "#1677ff" } });
+      }
+
+      // Hiển thị ngày cho các bước đã qua hoặc hiện tại
+      let dateStr = "";
+      if (orderDetail.timeline && orderDetail.timeline.length > 0) {
+        const timelineItem = orderDetail.timeline.find(
+          (t) => t.status === step.status
+        );
+        if (timelineItem && timelineItem.createdDate) {
+          dateStr = dayjs(timelineItem.createdDate).format(
+            "DD/MM/YYYY HH:mm:ss"
+          );
+        }
+      } else if (step.status === 0 && orderDetail.bill.createdDate) {
+        dateStr = dayjs(orderDetail.bill.createdDate).format(
+          "DD/MM/YYYY HH:mm:ss"
+        );
+      } else if (step.status === 3 && orderDetail.bill.datePayment) {
+        dateStr = dayjs(orderDetail.bill.datePayment).format(
+          "DD/MM/YYYY HH:mm:ss"
+        );
+      }
+
+      return {
+        title: step.title,
+        icon,
+        status: stepStatus,
+        description: dateStr,
+      };
+    });
   };
 
   return (
@@ -209,6 +239,13 @@ const DetailOrder = () => {
               {orderDetail.bill?.phonenumber && (
                 <Descriptions.Item label="SĐT">
                   {orderDetail.bill.phonenumber}
+                </Descriptions.Item>
+              )}
+              {orderDetail.bill?.isPaid && (
+                <Descriptions.Item label="Trạng thái thanh toán">
+                  {orderDetail.bill.isPaid
+                    ? "Đã thanh toán"
+                    : "Thanh toán khi nhận hàng"}
                 </Descriptions.Item>
               )}
             </Descriptions>

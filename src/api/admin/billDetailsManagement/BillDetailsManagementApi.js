@@ -25,4 +25,11 @@ export class BillDetailsManagementApi {
     });
   };
 
+  static updateStatusBill = (data) => {
+    return request({
+      method: "POST",
+      url: `${baseUrl}/update-status`,
+      data: data,
+    });
+  };
 };

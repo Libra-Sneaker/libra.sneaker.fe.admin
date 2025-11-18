@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./BillDetailManagement.module.css";
-import { Button, Steps, Table, Tag } from "antd";
+import { Button, Steps, Table, Tag, message } from "antd";
 import { useNavigate, useParams } from "react-router";
 import { BillManagementApi } from "../../../api/admin/billManagement/BillManagementApi";
 import { BillHistoryManagementApi } from "../../../api/admin/billHistoryManagement/BillHistoryManagement";
@@ -9,6 +9,7 @@ import { TransactionManagementApi } from "../../../api/admin/transactionManageme
 import moment from "moment/moment";
 import { BillDetailsManagementApi } from "../../../api/admin/billDetailsManagement/BillDetailsManagementApi";
 import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import ModalUpdateStatusBill from "./ModalUpdateStatusBill";
 
 const BillDetailManagement = () => {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ const BillDetailManagement = () => {
     { title: "Tạo đơn hàng", subTitle: "Left 00:00:08", description: "" },
     { title: "Hoàn thành", subTitle: "Left 00:00:08", description: "" },
   ]);
+  const [showModal, setShowModal] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
 
   const [creatdDateBillHistory, setCreateDateBillHistory] = useState();
   const [discount, getDiscount] = useState(0);
@@ -195,14 +198,38 @@ const BillDetailManagement = () => {
             padding: "5px 10px", // Tăng kích thước padding
           }}
         >
-          {status === 1 ? "Thành công" : "Đã hủy"}
+          {status === 1 ? "Thành công" : "Chờ xác nhận"}
         </Tag>
       ),
     },
     {
-      title: "Nhân viên xác nhận",
+      title:
+        listBill.type === "OFFLINE" ? "Nhân viên xác nhận" : "Nguồn xác nhận",
       dataIndex: "employeeName",
       key: "employeeName",
+      render: (text, record) => {
+        if (listBill.type === "ONLINE") {
+          return (
+            <Tag
+              color="magenta"
+              style={{
+                fontWeight: "bold",
+                fontSize: "13px",
+                padding: "5px 14px",
+                background: "#fff0f6",
+                border: "1px solid #ffadd2",
+                color: "#c41d7f",
+                borderRadius: "8px",
+                letterSpacing: 1,
+              }}
+            >
+              VnPay
+            </Tag>
+          );
+        } else {
+          return record.employeeName;
+        }
+      },
     },
   ];
 
@@ -214,6 +241,61 @@ const BillDetailManagement = () => {
       }
       return total;
     }, 0);
+  };
+
+  // Thêm hàm sinh steps động theo type/status
+  const getBillSteps = () => {
+    if (!listBill?.type) return [];
+    if (listBill.type === "OFFLINE") {
+      return [
+        {
+          title: "Chờ xác nhận",
+          status: 0,
+          description: "Tạo đơn hàng tại quầy",
+        },
+        {
+          title: "Đã hoàn thành",
+          status: 1,
+          description: "Đơn hàng đã thanh toán tại quầy",
+        },
+      ];
+    }
+    if (listBill.type === "ONLINE") {
+      return [
+        {
+          title: "Chờ xác nhận",
+          status: 0,
+          description: "Đơn hàng đặt online, chờ xác nhận",
+        },
+        {
+          title: "Đang giao hàng",
+          status: 2,
+          description: "Đơn hàng đang được giao",
+        },
+        {
+          title: "Đã giao hàng thành công",
+          status: 3,
+          description: "Khách đã nhận hàng",
+        },
+      ];
+    }
+    return [];
+  };
+
+  // Xử lý cập nhật trạng thái
+  const handleUpdateStatus = async (payload) => {
+    setModalLoading(true);
+    try {
+      await BillDetailsManagementApi.updateStatusBill(payload);
+      message.success("Cập nhật trạng thái thành công!");
+      setShowModal(false);
+      getBillHistory();
+      fetchData();
+    } catch (e) {
+      message.error("Cập nhật trạng thái thất bại!");
+    } finally {
+      setModalLoading(false);
+    }
   };
 
   return (
@@ -239,7 +321,6 @@ const BillDetailManagement = () => {
       <div className={styles.Container}>
         <div className={styles.BillHistory}>
           <h3>Lịch sử đơn hàng</h3>
-
           <div
             style={{
               padding: "25px",
@@ -247,7 +328,36 @@ const BillDetailManagement = () => {
               marginRight: "20px",
             }}
           >
-            <Steps current={items.length} items={items} />
+            {/* Steps timeline động theo type */}
+            <Steps
+              current={(() => {
+                const steps = getBillSteps();
+                const idx = steps.findIndex(
+                  (s) => s.status === listBill?.status
+                );
+                return idx === -1 ? 0 : idx;
+              })()}
+              items={getBillSteps().map((step, idx) => ({
+                title: step.title,
+                description: step.description,
+                status:
+                  listBill?.status > step.status
+                    ? "finish"
+                    : listBill?.status === step.status
+                    ? "process"
+                    : "wait",
+              }))}
+            />
+            {/* Nút cập nhật trạng thái */}
+            {listBill?.status !== 3 && listBill?.status !== 1 && (
+              <Button
+                type="primary"
+                style={{ marginTop: 24 }}
+                onClick={() => setShowModal(true)}
+              >
+                Cập nhật trạng thái
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -284,7 +394,7 @@ const BillDetailManagement = () => {
                 }
               >
                 {listBill?.status === 0
-                  ? "Đã hủy"
+                  ? "Chờ xác nhận"
                   : listBill?.status === 1
                   ? "Đã hoàn thành"
                   : "Trạng thái không xác định"}
@@ -300,7 +410,7 @@ const BillDetailManagement = () => {
             <div>
               <label>Loại: </label>
               <span>
-                {listBill?.typeMethod === "0" ? (
+                {listBill?.type === "OFFLINE" ? (
                   <Tag
                     color="gold"
                     style={{
@@ -310,7 +420,7 @@ const BillDetailManagement = () => {
                   >
                     Tại quầy
                   </Tag>
-                ) : listBill?.typeMethod === "1" ? (
+                ) : listBill?.type === "ONLINE" ? (
                   <Tag
                     color="blue"
                     style={{
@@ -527,6 +637,16 @@ const BillDetailManagement = () => {
           </div>
         </div>
       </div>
+      {/* Modal cập nhật trạng thái */}
+      <ModalUpdateStatusBill
+        open={showModal}
+        onCancel={() => setShowModal(false)}
+        onOk={handleUpdateStatus}
+        billId={billId}
+        billCode={listBill?.code}
+        currentStatus={listBill?.status}
+        loading={modalLoading}
+      />
     </div>
   );
 };
