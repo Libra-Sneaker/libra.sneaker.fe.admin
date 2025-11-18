@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Descriptions, Timeline, Image, Tag, Spin, message, Button } from "antd";
+import {
+  Typography,
+  Descriptions,
+  Steps,
+  Image,
+  Tag,
+  Spin,
+  message,
+  Button,
+} from "antd";
 import {
   ShoppingOutlined,
   CheckCircleOutlined,
@@ -23,14 +32,12 @@ const statusMap = {
   4: { color: "red", text: "Đã hủy", icon: <CloseCircleOutlined /> },
 };
 
-const getStatusTag = (status) => {
-  const info = statusMap[status] || statusMap[0];
-  return (
-    <Tag color={info.color} icon={info.icon} style={{ fontSize: 16, padding: "4px 12px" }}>
-      {info.text}
-    </Tag>
-  );
-};
+const statusSteps = [
+  { status: 0, title: "Chờ xử lý", icon: <ClockCircleOutlined /> },
+  { status: 2, title: "Đang giao hàng", icon: <TruckOutlined /> },
+  { status: 1, title: "Đã hoàn thành", icon: <CheckCircleOutlined /> },
+  { status: 4, title: "Đã hủy", icon: <CloseCircleOutlined /> },
+];
 
 const formatDate = (date) => {
   if (!date) return "";
@@ -64,11 +71,84 @@ const DetailOrder = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // Chuẩn bị dữ liệu cho Steps (timeline trạng thái)
+  const getStepsItems = () => {
+    if (orderDetail?.timeline && orderDetail.timeline.length > 0) {
+      // Có timeline, hiển thị theo timeline
+      const sortedTimeline = [...orderDetail.timeline].sort(
+        (a, b) => a.status - b.status
+      );
+      return sortedTimeline.map((item) => {
+        const statusInfo = statusMap[item.status] || {};
+        return {
+          title: statusInfo.text || "Cập nhật",
+          description: (
+            <>
+              <div>{dayjs(item.createdDate).format("DD/MM/YYYY HH:mm:ss")}</div>
+              {item.note && <div>{item.note}</div>}
+            </>
+          ),
+          icon: statusInfo.icon,
+        };
+      });
+    } else if (orderDetail?.bill) {
+      // Không có timeline, hiển thị trạng thái hiện tại
+      const status = orderDetail.bill.status;
+      const statusInfo = statusMap[status] || {};
+      return [
+        {
+          title: statusInfo.text || "Trạng thái đơn hàng",
+          description: (
+            <>
+              <div>
+                {orderDetail.bill.createdDate
+                  ? dayjs(orderDetail.bill.createdDate).format(
+                      "DD/MM/YYYY HH:mm:ss"
+                    )
+                  : ""}
+              </div>
+            </>
+          ),
+          icon: statusInfo.icon,
+        },
+      ];
+    }
+    return [];
+  };
+
+  // Steps tiến trình trạng thái đơn hàng
+  const getOrderProcessSteps = () => {
+    if (!orderDetail?.bill) return [];
+    const currentStatus = orderDetail.bill.status;
+    // Nếu bị hủy thì chỉ hiển thị đến trạng thái "Đã hủy"
+    const steps =
+      currentStatus === 4 ? statusSteps.slice(0, 5) : statusSteps.slice(0, 4);
+    return steps.map((step) => ({
+      title: step.title,
+      icon: step.icon,
+      status: step.status,
+      description:
+        step.status === currentStatus
+          ? orderDetail.bill.datePayment || orderDetail.bill.createdDate
+            ? dayjs(
+                orderDetail.bill.datePayment || orderDetail.bill.createdDate
+              ).format("DD/MM/YYYY HH:mm:ss")
+            : ""
+          : "",
+    }));
+  };
+
   return (
     <div>
       <Header />
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: 24 }}>
-        <Button type="link" onClick={() => navigate("/my-orders")} style={{ marginBottom: 16 }}>
+      <div
+        style={{ maxWidth: 900, margin: "0 auto", padding: 24, marginTop: 70 }}
+      >
+        <Button
+          type="link"
+          onClick={() => navigate("/my-orders")}
+          style={{ marginBottom: 16 }}
+        >
           ← Quay lại danh sách đơn hàng
         </Button>
         {loading ? (
@@ -81,42 +161,31 @@ const DetailOrder = () => {
           </div>
         ) : (
           <>
-            {/* Status on top */}
-            <div style={{ textAlign: "center", marginBottom: 24 }}>
-              {getStatusTag(orderDetail.bill?.status)}
+            {/* Status Steps Timeline */}
+            <div style={{ marginBottom: 32 }}>
+              <Steps
+                direction="horizontal"
+                size="default"
+                current={
+                  orderDetail.bill.status === 4
+                    ? 4
+                    : Math.min(orderDetail.bill.status, 3)
+                }
+                items={getOrderProcessSteps()}
+              />
             </div>
-            {/* Timeline */}
-            {orderDetail.timeline && orderDetail.timeline.length > 0 && (
-              <div style={{ marginBottom: 32 }}>
-                <Title level={5}>Lịch sử đơn hàng</Title>
-                <Timeline>
-                  {orderDetail.timeline.map((item, idx) => (
-                    <Timeline.Item key={idx} color="blue">
-                      <Text strong>
-                        {item.status !== undefined
-                          ? statusMap[item.status]?.text || "Cập nhật"
-                          : "Cập nhật"}
-                      </Text>
-                      <div>
-                        <Text type="secondary">{formatDate(item.createdDate)}</Text>
-                      </div>
-                      {item.note && (
-                        <div>
-                          <Text type="secondary">{item.note}</Text>
-                        </div>
-                      )}
-                    </Timeline.Item>
-                  ))}
-                </Timeline>
-              </div>
-            )}
             {/* Order Info */}
-            <Descriptions bordered column={1} size="small" title="Thông tin đơn hàng">
+            <Descriptions
+              bordered
+              column={1}
+              size="small"
+              title="Thông tin đơn hàng"
+            >
               <Descriptions.Item label="Mã đơn hàng">
                 {orderDetail.bill?.billCode || orderDetail.bill?.id}
               </Descriptions.Item>
               <Descriptions.Item label="Trạng thái">
-                {getStatusTag(orderDetail.bill?.status)}
+                {statusMap[orderDetail.bill?.status]?.text || "Không xác định"}
               </Descriptions.Item>
               <Descriptions.Item label="Tổng tiền">
                 {formatCurrency(orderDetail.bill?.totalAmount)}
@@ -188,7 +257,8 @@ const DetailOrder = () => {
                       </div>
                       <div style={{ flex: 1 }}>
                         <Text strong>
-                          Mã sản phẩm: {pd?.productCode || detail.productDetailId}
+                          Mã sản phẩm:{" "}
+                          {pd?.productCode || detail.productDetailId}
                         </Text>
                         <div>
                           <Text type="secondary">
@@ -214,19 +284,16 @@ const DetailOrder = () => {
                               </span>
                             )}
                         </div>
-                        {detail.discountAmount && detail.discountAmount > 0 && (
-                          <div>
-                            <Text type="secondary" style={{ color: "#52c41a" }}>
-                              Giảm giá: {formatCurrency(detail.discountAmount)}
-                            </Text>
-                          </div>
-                        )}
                         <div>
                           <Text>Số lượng: {detail.quantity}</Text>
                         </div>
                         <div>
                           <Text strong>
-                            Thành tiền: {formatCurrency((detail.finalPrice ?? detail.price) * (detail.quantity || 0))}
+                            Thành tiền:{" "}
+                            {formatCurrency(
+                              (detail.finalPrice ?? detail.price) *
+                                (detail.quantity || 0)
+                            )}
                           </Text>
                         </div>
                       </div>

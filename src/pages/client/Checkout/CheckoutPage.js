@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Header from "../HomePage/Header";
 import Footer from "../HomePage/Footer";
 import { CartApi } from "../../../api/client/cart/CartApi";
+import { ClientVnPayApi } from "../../../api/client/vnpay/ClientVnPayApi";
+import { ClientPaymentApi } from "../../../api/client/payment/ClientPaymentApi";
 import styles from "./CheckoutPage.module.css";
 
 const { Text, Title } = Typography;
@@ -50,7 +52,34 @@ const CheckoutPage = () => {
 
     setLoading(true);
     try {
-      // TODO: Call checkout API
+      // Chuẩn hóa dữ liệu sản phẩm cho backend
+      const itemList = items.map(it => ({
+        productDetailId: it.productDetailId,
+        quantity: it.qty,
+        price: it.price
+      }));
+      // Gọi API tạo đơn hàng, nhận billId và amount
+      const paymentPayload = {
+        ...values,
+        paymentMethod,
+        amount: total,
+        shippingFee,
+        discount,
+        items: itemList
+      };
+      const paymentRes = await ClientPaymentApi.createPayment(paymentPayload);
+      const { billId, amount } = paymentRes.data || {};
+
+      if (paymentMethod === "now") {
+        // Gọi tiếp API VNPay
+        const vnpayRes = await ClientVnPayApi.createPayment({ billId, amount });
+        message.success("Chuyển hướng đến VNPay!");
+        if (vnpayRes.data && vnpayRes.data.payUrl) {
+          window.location.href = vnpayRes.data.payUrl;
+        }
+        setLoading(false);
+        return;
+      }
       message.success("Đặt hàng thành công!");
       setTimeout(() => {
         navigate("/");

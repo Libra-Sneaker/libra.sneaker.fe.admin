@@ -36,6 +36,7 @@ import CouponDetailManagement from "../pages/promotionManagement/CouponDetail/Co
 import ProfilePage from "../pages/client/ProfilePage/ProfilePage";
 import MyOrderPage from "../pages/client/MyOrder/MyOrder";
 import DetailOrder from "../pages/client/MyOrder/DetailOrder";
+import PaymentSuccess from "../pages/client/Checkout/PaymentSuccess";
 
 const generalRoutes = [
   { path: "*", element: <NotFound /> },
@@ -57,6 +58,7 @@ const publicRoutes = [
   { path: "/profile", element: <ProfilePage /> }, // Trang cá nhân
   { path: "/my-orders", element: <MyOrderPage /> }, // Trang đơn hàng của tôi
   { path: "/my-orders/detail/:id", element: <DetailOrder /> }, // Trang đơn hàng của tôi
+  { path: "/payment/success", element: <PaymentSuccess /> }, 
   // { path: "/login", element: <Login /> }, // Trang đăng nhập (cần tạo component Login)
 ];
 
