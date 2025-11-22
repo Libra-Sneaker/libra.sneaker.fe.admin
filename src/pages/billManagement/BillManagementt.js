@@ -101,20 +101,24 @@ const BillManagement = () => {
       dataIndex: "status",
       render: (text) =>
         text === 0 ? (
-          <Tag color="red" className={styles.largeTag}>
+          <Tag color="blue" className={styles.largeTag}>
             Chờ xác nhận
           </Tag>
         ) : text === 1 ? (
-          <Tag color="green" className={styles.largeTag}>
-            hoàn thành
+          <Tag color="brown" className={styles.largeTag}>
+            Đã hoàn thành
           </Tag>
         ) : text === 2 ? (
-          <Tag color="green" className={styles.largeTag}>
+          <Tag color="yellow" className={styles.largeTag}>
             Đang giao hàng
           </Tag>
         ) : text === 3 ? (
           <Tag color="green" className={styles.largeTag}>
             Đã giao
+          </Tag>
+        ) : text === 4 ? (
+          <Tag color="red" className={styles.largeTag}>
+            Đã hủy
           </Tag>
         ) : null,
     },

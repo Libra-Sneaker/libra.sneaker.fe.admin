@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./BillDetailManagement.module.css";
-import { Button, Steps, Table, Tag, message } from "antd";
+import { Button, Steps, Table, Tag, message, Modal, Input } from "antd";
 import { useNavigate, useParams } from "react-router";
 import { BillManagementApi } from "../../../api/admin/billManagement/BillManagementApi";
 import { BillHistoryManagementApi } from "../../../api/admin/billHistoryManagement/BillHistoryManagement";
@@ -23,12 +23,15 @@ const BillDetailManagement = () => {
     { title: "Tạo đơn hàng", subTitle: "Left 00:00:08", description: "" },
     { title: "Hoàn thành", subTitle: "Left 00:00:08", description: "" },
   ]);
-  const [showModal, setShowModal] = useState(false);
-  const [modalLoading, setModalLoading] = useState(false);
 
   const [creatdDateBillHistory, setCreateDateBillHistory] = useState();
   const [discount, getDiscount] = useState(0);
   const [shippingFee, getShippingFee] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   const getBillHistory = async () => {
     try {
@@ -246,6 +249,50 @@ const BillDetailManagement = () => {
   // Thêm hàm sinh steps động theo type/status
   const getBillSteps = () => {
     if (!listBill?.type) return [];
+    // Check if ONLINE and has status 4 in history
+    if (listBill.type === "ONLINE") {
+      const hasCancelled = listBillHistory.some((h) => h.status === 4);
+      if (hasCancelled) {
+        // Only show "Chờ xác nhận" and "Đã hủy" with description from billHistory
+        const status0 = listBillHistory.find((h) => h.status === 0);
+        const status4 = listBillHistory.find((h) => h.status === 4);
+        return [
+          {
+            title: "Chờ xác nhận",
+            status: 0,
+            description: status0?.note ?? "",
+          },
+          {
+            title: "Đã hủy",
+            status: 4,
+            description: status4?.note ?? "",
+          },
+        ];
+      } else {
+        // Show all 3 steps, description from billHistory
+        const status0 = listBillHistory.find((h) => h.status === 0);
+        const status2 = listBillHistory.find((h) => h.status === 2);
+        const status3 = listBillHistory.find((h) => h.status === 3);
+        return [
+          {
+            title: "Chờ xác nhận",
+            status: 0,
+            description: status0?.note ?? "",
+          },
+          {
+            title: "Đang giao hàng",
+            status: 2,
+            description: status2?.note ?? "",
+          },
+          {
+            title: "Đã giao hàng thành công",
+            status: 3,
+            description: status3?.note ?? "",
+          },
+        ];
+      }
+    }
+    // OFFLINE logic unchanged
     if (listBill.type === "OFFLINE") {
       return [
         {
@@ -260,41 +307,44 @@ const BillDetailManagement = () => {
         },
       ];
     }
-    if (listBill.type === "ONLINE") {
-      return [
-        {
-          title: "Chờ xác nhận",
-          status: 0,
-          description: "Đơn hàng đặt online, chờ xác nhận",
-        },
-        {
-          title: "Đang giao hàng",
-          status: 2,
-          description: "Đơn hàng đang được giao",
-        },
-        {
-          title: "Đã giao hàng thành công",
-          status: 3,
-          description: "Khách đã nhận hàng",
-        },
-      ];
-    }
     return [];
   };
 
-  // Xử lý cập nhật trạng thái
+  // Dummy handleUpdateStatus, replace with your logic
   const handleUpdateStatus = async (payload) => {
     setModalLoading(true);
     try {
       await BillDetailsManagementApi.updateStatusBill(payload);
       message.success("Cập nhật trạng thái thành công!");
       setShowModal(false);
-      getBillHistory();
+      // Refresh data
       fetchData();
+      getBillHistory();
     } catch (e) {
       message.error("Cập nhật trạng thái thất bại!");
     } finally {
       setModalLoading(false);
+    }
+  };
+
+  // Handle cancel bill (admin)
+  const handleCancelBill = async () => {
+    setCancelLoading(true);
+    try {
+      const res = await BillManagementApi.adminCancelBill(billId, cancelReason);
+      if (res.data.success) {
+        message.success(res.data.message || "Hủy đơn hàng thành công!");
+        setShowCancelModal(false);
+        setCancelReason("");
+        fetchData();
+        getBillHistory();
+      } else {
+        message.error(res.data.message || "Hủy đơn hàng thất bại!");
+      }
+    } catch (e) {
+      message.error("Hủy đơn hàng thất bại!");
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -318,9 +368,52 @@ const BillDetailManagement = () => {
       </div>
 
       {/* BillHistory */}
-      <div className={styles.Container}>
+      <div className={styles.Container} style={{ position: "relative" }}>
         <div className={styles.BillHistory}>
           <h3>Lịch sử đơn hàng</h3>
+          {/* Nút cập nhật trạng thái & hủy đơn hàng ở góc trên bên phải */}
+          <div
+            style={{
+              position: "absolute",
+              top: 16,
+              right: 16,
+              zIndex: 10,
+              display: "flex",
+              gap: 8,
+            }}
+          >
+            {listBill?.status !== 3 &&
+              listBill?.status !== 1 &&
+              listBill?.status !== 4 && (
+                <Button type="primary" onClick={() => setShowModal(true)}>
+                  Cập nhật trạng thái
+                </Button>
+              )}
+            {(listBill?.status === 0 || listBill?.status === 2) && (
+              <Button
+                type="primary"
+                danger
+                onClick={() => setShowCancelModal(true)}
+              >
+                Hủy đơn hàng
+              </Button>
+            )}
+            {/* Modal nhập lý do hủy đơn hàng */}
+            <Modal
+              title="Nhập lý do hủy đơn hàng"
+              visible={showCancelModal}
+              onOk={handleCancelBill}
+              onCancel={() => setShowCancelModal(false)}
+              confirmLoading={cancelLoading}
+            >
+              <Input.TextArea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Nhập lý do hủy..."
+                rows={4}
+              />
+            </Modal>
+          </div>
           <div
             style={{
               padding: "25px",
@@ -332,6 +425,18 @@ const BillDetailManagement = () => {
             <Steps
               current={(() => {
                 const steps = getBillSteps();
+                // For ONLINE with cancelled, highlight up to status 4 if present
+                if (listBill.type === "ONLINE") {
+                  const hasCancelled = listBillHistory.some(
+                    (h) => h.status === 4
+                  );
+                  if (hasCancelled) {
+                    // If status is 4, highlight "Đã hủy"
+                    const idx = steps.findIndex((s) => s.status === 4);
+                    return idx === -1 ? 0 : idx;
+                  }
+                }
+                // Otherwise, highlight up to current status
                 const idx = steps.findIndex(
                   (s) => s.status === listBill?.status
                 );
@@ -348,16 +453,6 @@ const BillDetailManagement = () => {
                     : "wait",
               }))}
             />
-            {/* Nút cập nhật trạng thái */}
-            {listBill?.status !== 3 && listBill?.status !== 1 && (
-              <Button
-                type="primary"
-                style={{ marginTop: 24 }}
-                onClick={() => setShowModal(true)}
-              >
-                Cập nhật trạng thái
-              </Button>
-            )}
           </div>
         </div>
       </div>
@@ -385,19 +480,39 @@ const BillDetailManagement = () => {
                   fontSize: "13px", // Tăng kích thước chữ
                   padding: "5px 10px", // Tăng kích thước padding
                 }}
-                color={
-                  listBill?.status === 0
-                    ? "red"
-                    : listBill?.status === 1
-                    ? "green"
-                    : "default"
-                }
+                color={(() => {
+                  switch (listBill?.status) {
+                    case 0:
+                      return "orange";
+                    case 1:
+                      return "blue";
+                    case 2:
+                      return "cyan";
+                    case 3:
+                      return "green";
+                    case 4:
+                      return "red";
+                    default:
+                      return "default";
+                  }
+                })()}
               >
-                {listBill?.status === 0
-                  ? "Chờ xác nhận"
-                  : listBill?.status === 1
-                  ? "Đã hoàn thành"
-                  : "Trạng thái không xác định"}
+                {(() => {
+                  switch (listBill?.status) {
+                    case 0:
+                      return "Chờ xác nhận";
+                    case 1:
+                      return "Đã hoàn thành";
+                    case 2:
+                      return "Đang giao hàng";
+                    case 3:
+                      return "Đã giao hàng thành công";
+                    case 4:
+                      return "Đã hủy";
+                    default:
+                      return "Trạng thái không xác định";
+                  }
+                })()}
               </Tag>
             </div>
           </div>
@@ -637,6 +752,7 @@ const BillDetailManagement = () => {
           </div>
         </div>
       </div>
+
       {/* Modal cập nhật trạng thái */}
       <ModalUpdateStatusBill
         open={showModal}
@@ -647,6 +763,24 @@ const BillDetailManagement = () => {
         currentStatus={listBill?.status}
         loading={modalLoading}
       />
+
+      {/* Modal nhập lí do hủy đơn */}
+      <Modal
+        open={showCancelModal}
+        title="Nhập lý do hủy đơn hàng"
+        onCancel={() => setShowCancelModal(false)}
+        onOk={handleCancelBill}
+        confirmLoading={cancelLoading}
+        okText="Xác nhận hủy"
+        cancelText="Đóng"
+      >
+        <Input.TextArea
+          rows={4}
+          placeholder="Nhập lý do hủy đơn hàng..."
+          value={cancelReason}
+          onChange={(e) => setCancelReason(e.target.value)}
+        />
+      </Modal>
     </div>
   );
 };

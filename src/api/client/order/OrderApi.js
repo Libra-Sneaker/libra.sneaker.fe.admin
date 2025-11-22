@@ -26,5 +26,14 @@ export class OrderApi {
       data,
     });
   };
+
+  // Hủy đơn hàng thanh toán khi nhận hàng (COD)
+  static cancelCashBill = (data) => {
+    return request({
+      method: "POST",
+      url: `/client/payment/cancel-cash-bill`,
+      data,
+    });
+  };
 }
 

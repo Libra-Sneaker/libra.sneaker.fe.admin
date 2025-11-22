@@ -53,5 +53,12 @@ export class BillManagementApi {
       url: `${baseUrl}/update`,
       data: billData, // Gửi toàn bộ dữ liệu trong body
     });
+  }; // API hủy đơn hàng cho admin
+  static adminCancelBill = (billId, note) => {
+    return request({
+      method: "POST",
+      url: `${baseUrl}/adminCancelBill`,
+      data: { billId, note },
+    });
   };
 }
